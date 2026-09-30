@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://cj7uyun7dqbbo"]
+
+[ext_resource type="PackedScene" uid="uid://c40wdmbtyshu3" path="res://Scenes/level.tscn" id="1_dph3j"]
+[ext_resource type="PackedScene" uid="uid://cpxgx3dkcvxgv" path="res://Scenes/player.tscn" id="2_yui7w"]
+
+[node name="DungeonCrawl" type="Node2D" unique_id=1840468161]
+
+[node name="Level" parent="." unique_id=699413508 instance=ExtResource("1_dph3j")]
+
+[node name="Player" parent="Level" unique_id=1302075005 instance=ExtResource("2_yui7w")]
+position = Vector2(-48, 353)
