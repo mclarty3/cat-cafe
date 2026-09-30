@@ -19,6 +19,7 @@ Every `[DECIDED]` and `[REJECTED]` item across the design notes. Add new decisio
 | 2026-09-30 | **Only rare cats** can have more than one personality | [[Cats]] |
 | 2026-09-30 | **Keepsakes:** strength based on bond at adoption, in their own limited slots | [[Cats]] |
 | 2026-09-30 | Regulars' story beats are **optional in the moment, never missable** | [[Customers & Regulars]] |
+| 2026-09-30 | Cafe view is **isometric / 3D-feeling**, not literal overhead | [[Atmosphere, Art & Audio]] |
 
 # From the seed brainstorm
 

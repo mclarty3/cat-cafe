@@ -16,7 +16,7 @@ The big unresolved questions. Each area note also has its own finer-grained **Op
 | 8 | ~~How do cats work in the dungeon (loadout vs. companion)?~~ **Loadout** (2026-09-30). What equipping actually does is still open. | [[Cats]] |
 | 9 | Should there be customer-cat matchmaking? | [[Cafe Gameplay]] |
 | 10 | What is the player's moveset and weapon, and how does combat work? Structure leaning: principal weapon + run secondaries + cat traits. Weapon leaning: the relative's brooch, which becomes a straight sword in the dream (to be tuned in prototyping). Secondary weapons are open. | [[Combat, Movement & Bosses]] |
-| 11 | What are the art style and cafe perspective? | [[Atmosphere, Art & Audio]] |
+| 11 | What is the art style? *(Cafe perspective: **isometric / 3D-feeling**, 2026-09-30.)* | [[Atmosphere, Art & Audio]] |
 | 12 | How does the economy and ingredient system work? | [[Economy & Ingredients]] |
 | 13 | How long is the game, and how does it end? Proposed ending: freeing the relative's lost cat, with a post-game after. | [[Core Loop & Pacing]] |
 | 14 | What is the story and frame narrative (inheritance and missing cat, or something else)? | [[Setting & Lore]] |
