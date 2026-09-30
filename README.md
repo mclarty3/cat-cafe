@@ -3,9 +3,22 @@
 Day: run a cozy cat cafe. Night: dive into a dream dungeon to rescue cats and gather ingredients.
 Design notes live in [`docs/`](docs/) (start with `docs/- Overview.md`).
 
-## Prototype: dream dungeon vertical slice
-
 Godot **4.4**, GDScript, placeholder shapes only (no art yet). Open `project.godot` and press **F5**.
+The title screen switches between the two prototype slices, and **Esc** returns to it.
+
+- [DUNGEON_SLICE.md](DUNGEON_SLICE.md): status and next steps for the dream dungeon.
+- [CAFE_SLICE.md](CAFE_SLICE.md): status and next steps for the cafe day, including its code map.
+
+### Cafe controls
+
+| Action | Keyboard | Gamepad |
+|---|---|---|
+| Move | WASD / arrows | Left stick / D-pad |
+| Interact / minigame | E / Space / J | A |
+| Menu navigation | Arrows + Enter/Space/E, or mouse | D-pad + A |
+| Back / cancel | Esc | |
+
+## Prototype: dream dungeon vertical slice
 
 The slice is four hand-built rooms: start → combat → spikes → sunbeam exit. Curling up in the
 sunbeam "wakes you up" and starts a new run. Dying does the same.

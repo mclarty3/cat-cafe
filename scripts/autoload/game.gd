@@ -13,6 +13,12 @@ var transitioning := false
 var _hitstop_id := 0
 
 
+func go_to_title() -> void:
+	Engine.time_scale = 1.0
+	transitioning = false
+	get_tree().change_scene_to_file("res://scenes/title.tscn")
+
+
 func request_room_change(room_path: String, door_id: StringName) -> void:
 	if transitioning:
 		return

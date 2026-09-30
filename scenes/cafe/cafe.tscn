@@ -1,0 +1,156 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/cafe/cafe.gd" id="1_cafe"]
+[ext_resource type="Script" path="res://scripts/world/block.gd" id="2_block"]
+[ext_resource type="Script" path="res://scripts/cafe/espresso_machine.gd" id="3_espresso"]
+[ext_resource type="Script" path="res://scripts/cafe/pastry_case.gd" id="4_pastry"]
+[ext_resource type="Script" path="res://scripts/cafe/trash_bin.gd" id="5_trash"]
+[ext_resource type="Script" path="res://scripts/cafe/table.gd" id="6_table"]
+[ext_resource type="Script" path="res://scripts/cafe/seat.gd" id="7_seat"]
+[ext_resource type="Script" path="res://scripts/cafe/cafe_cat.gd" id="8_cat"]
+[ext_resource type="PackedScene" path="res://scenes/cafe/barista.tscn" id="9_barista"]
+[ext_resource type="Script" path="res://scripts/cafe/ui/cafe_hud.gd" id="10_hud"]
+
+[node name="Cafe" type="Node2D"]
+script = ExtResource("1_cafe")
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="Top" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 0)
+script = ExtResource("2_block")
+size = Vector2(640, 16)
+color = Color(0.24, 0.17, 0.14, 1)
+
+[node name="Left" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 0)
+script = ExtResource("2_block")
+size = Vector2(16, 360)
+color = Color(0.24, 0.17, 0.14, 1)
+
+[node name="Right" type="StaticBody2D" parent="Walls"]
+position = Vector2(624, 0)
+script = ExtResource("2_block")
+size = Vector2(16, 360)
+color = Color(0.24, 0.17, 0.14, 1)
+
+[node name="BottomLeft" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 344)
+script = ExtResource("2_block")
+size = Vector2(288, 16)
+color = Color(0.24, 0.17, 0.14, 1)
+
+[node name="BottomRight" type="StaticBody2D" parent="Walls"]
+position = Vector2(352, 344)
+script = ExtResource("2_block")
+size = Vector2(288, 16)
+color = Color(0.24, 0.17, 0.14, 1)
+
+[node name="Threshold" type="StaticBody2D" parent="Walls"]
+position = Vector2(288, 356)
+script = ExtResource("2_block")
+size = Vector2(64, 4)
+color = Color(0.24, 0.17, 0.14, 1)
+
+[node name="Counter" type="StaticBody2D" parent="Walls"]
+position = Vector2(96, 16)
+script = ExtResource("2_block")
+size = Vector2(448, 56)
+color = Color(0.52, 0.36, 0.25, 1)
+
+[node name="Stations" type="Node2D" parent="."]
+
+[node name="EspressoMachine" type="Area2D" parent="Stations"]
+position = Vector2(120, 30)
+script = ExtResource("3_espresso")
+size = Vector2(72, 38)
+title = "Espresso"
+color = Color(0.42, 0.42, 0.48, 1)
+
+[node name="PastryCase" type="Area2D" parent="Stations"]
+position = Vector2(420, 30)
+script = ExtResource("4_pastry")
+size = Vector2(90, 38)
+title = "Pastries"
+color = Color(0.7, 0.55, 0.42, 1)
+
+[node name="TrashBin" type="Area2D" parent="Stations"]
+position = Vector2(580, 84)
+script = ExtResource("5_trash")
+size = Vector2(28, 24)
+title = "Bin"
+color = Color(0.3, 0.3, 0.32, 1)
+
+[node name="Tables" type="Node2D" parent="."]
+
+[node name="Table1" type="StaticBody2D" parent="Tables"]
+position = Vector2(150, 150)
+script = ExtResource("6_table")
+
+[node name="Seat1" type="Node2D" parent="Tables"]
+position = Vector2(184, 150)
+script = ExtResource("7_seat")
+label = "1"
+
+[node name="Table2" type="StaticBody2D" parent="Tables"]
+position = Vector2(490, 150)
+script = ExtResource("6_table")
+
+[node name="Seat2" type="Node2D" parent="Tables"]
+position = Vector2(456, 150)
+script = ExtResource("7_seat")
+label = "2"
+
+[node name="Table3" type="StaticBody2D" parent="Tables"]
+position = Vector2(150, 220)
+script = ExtResource("6_table")
+
+[node name="Seat3" type="Node2D" parent="Tables"]
+position = Vector2(184, 220)
+script = ExtResource("7_seat")
+label = "3"
+
+[node name="Table4" type="StaticBody2D" parent="Tables"]
+position = Vector2(490, 220)
+script = ExtResource("6_table")
+
+[node name="Seat4" type="Node2D" parent="Tables"]
+position = Vector2(456, 220)
+script = ExtResource("7_seat")
+label = "4"
+
+[node name="Table5" type="StaticBody2D" parent="Tables"]
+position = Vector2(150, 290)
+script = ExtResource("6_table")
+
+[node name="Seat5" type="Node2D" parent="Tables"]
+position = Vector2(184, 290)
+script = ExtResource("7_seat")
+label = "5"
+
+[node name="Table6" type="StaticBody2D" parent="Tables"]
+position = Vector2(490, 290)
+script = ExtResource("6_table")
+
+[node name="Seat6" type="Node2D" parent="Tables"]
+position = Vector2(456, 290)
+script = ExtResource("7_seat")
+label = "6"
+
+[node name="Door" type="Marker2D" parent="."]
+position = Vector2(320, 372)
+
+[node name="MugSpot" type="Marker2D" parent="."]
+position = Vector2(300, 60)
+
+[node name="Actors" type="Node2D" parent="."]
+
+[node name="Mochi" type="Area2D" parent="Actors"]
+position = Vector2(560, 240)
+script = ExtResource("8_cat")
+
+[node name="Barista" parent="." instance=ExtResource("9_barista")]
+position = Vector2(320, 110)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("10_hud")

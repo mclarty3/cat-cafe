@@ -22,7 +22,9 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("restart_run") and not Game.transitioning:
+	if event.is_action_pressed("ui_cancel"):
+		Game.go_to_title()
+	elif event.is_action_pressed("restart_run") and not Game.transitioning:
 		_start_run()
 
 
