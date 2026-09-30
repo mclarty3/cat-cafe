@@ -1,0 +1,62 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/block.gd" id="2_block"]
+[ext_resource type="Script" path="res://scripts/world/door.gd" id="3_door"]
+
+[node name="RoomStart" type="Node2D"]
+script = ExtResource("1_room")
+size = Vector2(640, 360)
+
+[node name="Ceiling" type="StaticBody2D" parent="."]
+position = Vector2(0, 0)
+script = ExtResource("2_block")
+size = Vector2(640, 16)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(0, 0)
+script = ExtResource("2_block")
+size = Vector2(16, 320)
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(624, 0)
+script = ExtResource("2_block")
+size = Vector2(16, 256)
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(0, 320)
+script = ExtResource("2_block")
+size = Vector2(640, 40)
+
+[node name="Platform" type="StaticBody2D" parent="."]
+position = Vector2(224, 256)
+script = ExtResource("2_block")
+size = Vector2(96, 16)
+
+[node name="Platform2" type="StaticBody2D" parent="."]
+position = Vector2(368, 208)
+script = ExtResource("2_block")
+size = Vector2(96, 16)
+one_way = true
+
+[node name="PlayerStart" type="Marker2D" parent="."]
+position = Vector2(80, 320)
+
+[node name="Label" type="Label" parent="."]
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 600.0
+offset_bottom = 120.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 8
+text = "DREAM - prototype slice\n\nMove: A/D or arrows     Jump: Space / Z (hold for higher)\nAttack: J / X     Up/Down + Attack to aim (Down-attack in the air to pogo)\nDash: K / Shift / C     Interact: E / Up     Restart run: R"
+
+[node name="DoorRight" type="Area2D" parent="."]
+position = Vector2(624, 256)
+script = ExtResource("3_door")
+door_id = &"right"
+target_room = "res://scenes/rooms/room_combat.tscn"
+target_door = &"left"
+size = Vector2(16, 64)
+spawn_offset = Vector2(-32, 0)

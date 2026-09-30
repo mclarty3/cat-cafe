@@ -1,0 +1,8 @@
+# Godot 4
+.godot/
+/android/
+
+# Mono/.NET (in case C# is ever added)
+.mono/
+data_*/
+mono_crash.*.json

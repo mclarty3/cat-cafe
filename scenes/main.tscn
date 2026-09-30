@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://0142xmee2o8u"]
+
+[ext_resource type="Script" uid="uid://c5847i782jdfs" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="Script" uid="uid://jg50l8irwxdw" path="res://scripts/game_camera.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4_hud"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="RoomHolder" type="Node2D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+
+[node name="Camera" type="Camera2D" parent="Player"]
+position = Vector2(0, -24)
+script = ExtResource("3_camera")
+
+[node name="HUD" parent="." instance=ExtResource("4_hud")]
