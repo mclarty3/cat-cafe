@@ -9,27 +9,40 @@ signal mug_event_finished(caught: bool)
 enum State { IDLE, WALKING, TO_COUNTER, NUDGING }
 
 @export var cat_name := "Mochi"
-@export var color := Color(0.95, 0.75, 0.5)
-@export var wander_area := Rect2(40, 110, 560, 200)
-@export var walk_speed := 35.0
-@export var dash_speed := 140.0
+## Floor area (x, z) the cat wanders in.
+@export var wander_area := Rect2(0.8, 1.4, 5.4, 4.2)
+@export var walk_speed := 0.6
+@export var dash_speed := 2.5
 ## Seconds you have to catch the mug.
 @export var mug_time := 6.0
+## How far the mug slides towards the edge before it falls.
+@export var mug_slide := 0.25
 
 var state := State.IDLE
 
-var _target := Vector2.ZERO
+var _target := Vector3.ZERO
 var _idle_timer := 1.0
 var _mug_timer := 0.0
 var _pet_cooldown := 0.0
+var _gesture_timer := 0.0
+var _cafe: Cafe
+
+@onready var _model: AnimatedModel = $Model
+@onready var _mug: Node3D = $Mug
 
 
 func _ready() -> void:
 	super()
-	circle_shape(self, 10.0)
+	sphere_shape(self, 0.3, Vector3(0, 0.15, 0))
+	if Engine.is_editor_hint():
+		return
+	_mug.hide()
+	_cafe = get_tree().get_first_node_in_group("cafe") as Cafe
+	if _cafe:
+		OverlayAnchor.attach(self, _cafe.overlay, 0.45)
 
 
-func start_mug_event(counter_spot: Vector2) -> void:
+func start_mug_event(counter_spot: Vector3) -> void:
 	state = State.TO_COUNTER
 	_target = counter_spot
 
@@ -38,38 +51,50 @@ func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	_pet_cooldown = maxf(_pet_cooldown - delta, 0.0)
+	_gesture_timer = maxf(_gesture_timer - delta, 0.0)
 	match state:
 		State.IDLE:
+			if _gesture_timer <= 0.0:
+				_model.play("idle")
 			_idle_timer -= delta
 			if _idle_timer <= 0.0:
-				_target = Vector2(
-					randf_range(wander_area.position.x, wander_area.end.x),
+				_target = Vector3(
+					randf_range(wander_area.position.x, wander_area.end.x), 0.0,
 					randf_range(wander_area.position.y, wander_area.end.y))
 				state = State.WALKING
 		State.WALKING:
+			_model.play("walk")
 			if _move_to(_target, walk_speed, delta):
 				state = State.IDLE
 				_idle_timer = randf_range(2.0, 6.0)
 		State.TO_COUNTER:
+			_model.play("run")
 			if _move_to(_target, dash_speed, delta):
 				state = State.NUDGING
 				_mug_timer = mug_time
+				_mug.position = Vector3(0, 0, 0.18)
+				_mug.show()
+				_model.face(Vector3.BACK)
 		State.NUDGING:
+			_model.play("idle")
 			_mug_timer -= delta
+			_mug.position.z = 0.18 + mug_slide * (1.0 - _mug_timer / mug_time)
 			if _mug_timer <= 0.0:
-				FloatText.spawn(get_parent(), global_position + Vector2(10, 0), "CRASH!", Color(1, 0.45, 0.4))
+				_cafe.float_text(global_position + Vector3.UP * 0.5, "CRASH!", Color(1, 0.45, 0.4))
 				_end_mug_event(false)
-	queue_redraw()
 
 
-func _move_to(target: Vector2, move_speed: float, delta: float) -> bool:
+func _move_to(target: Vector3, move_speed: float, delta: float) -> bool:
+	_model.face(target - global_position)
 	global_position = global_position.move_toward(target, move_speed * delta)
-	return global_position.distance_to(target) < 0.5
+	return global_position.distance_to(target) < 0.01
 
 
 func _end_mug_event(caught: bool) -> void:
+	_mug.hide()
 	state = State.WALKING
-	_target = wander_area.get_center()
+	var center := wander_area.get_center()
+	_target = Vector3(center.x, 0.0, center.y)
 	mug_event_finished.emit(caught)
 
 
@@ -85,30 +110,18 @@ func get_prompt(_barista: Barista) -> String:
 
 func interact(_barista: Barista) -> void:
 	if state == State.NUDGING:
-		FloatText.spawn(get_parent(), global_position + Vector2(10, -8), "Nice catch!", Color(0.6, 1, 0.6))
+		_cafe.float_text(global_position + Vector3.UP * 0.5, "Nice catch!", Color(0.6, 1, 0.6))
 		_end_mug_event(true)
 	elif _pet_cooldown <= 0.0:
 		_pet_cooldown = 3.0
-		FloatText.spawn(get_parent(), global_position + Vector2(0, -12), "purr~", Color(1, 0.8, 0.9))
+		state = State.IDLE
+		_idle_timer = 2.0
+		_gesture_timer = 1.2
+		_model.play("gesture-positive")
+		_cafe.float_text(global_position + Vector3.UP * 0.5, "purr~", Color(1, 0.8, 0.9))
 
 
-func _draw() -> void:
-	var facing := -1.0 if _target.x < global_position.x else 1.0
-	# Tail, body, head, ears.
-	draw_line(Vector2(-facing * 6, 0), Vector2(-facing * 11, -6), color.darkened(0.2), 2.0)
-	draw_circle(Vector2.ZERO, 6.0, color)
-	draw_circle(Vector2(facing * 6, -3), 4.0, color)
-	for ear in [-1.0, 1.0]:
-		var base := Vector2(facing * 6 + ear * 2.5, -6)
-		draw_colored_polygon(PackedVector2Array([
-			base + Vector2(-1.5, 0), base + Vector2(1.5, 0), base + Vector2(ear * 0.5, -3.5),
-		]), color.darkened(0.15))
-	draw_text_centered(cat_name, Vector2(0, 14), 7, Color(1, 1, 1, 0.7))
-
+func _draw_overlay(canvas: OverlayAnchor) -> void:
 	if state == State.NUDGING:
-		# The mug, creeping toward the edge.
-		var creep := 1.0 - _mug_timer / mug_time
-		draw_rect(Rect2(10 + creep * 4.0, -4, 6, 7), Color(0.9, 0.9, 0.95))
-		draw_text_centered("!", Vector2(0, -12), 12, Color(1, 0.4, 0.4))
-		draw_rect(Rect2(-12, 18, 24, 3), Color(0, 0, 0, 0.5))
-		draw_rect(Rect2(-12, 18, 24 * (_mug_timer / mug_time), 3), Color(1, 0.5, 0.4))
+		canvas.text_centered("!", Vector2(0, -2), 14, Color(1, 0.4, 0.4), 3)
+		canvas.meter(Rect2(-12, 4, 24, 3), _mug_timer / mug_time, Color(1, 0.5, 0.4))

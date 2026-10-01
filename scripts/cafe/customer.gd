@@ -13,7 +13,6 @@ const BAR_WIDTH := 20.0
 var cafe: Cafe
 var seat: Seat
 var display_name := "Customer"
-var color := Color.WHITE
 ## Empty for walk-ins; a key into CafeData.REGULARS otherwise.
 var regular_id := ""
 var order: Array[String] = []
@@ -23,7 +22,8 @@ var chatted := false
 ## Set by the cafe while chatting, so the regular doesn't leave mid-sentence.
 var in_conversation := false
 
-var _path: Array[Vector2] = []
+var _model: AnimatedModel
+var _path: Array[Vector3] = []
 var _patience := 0.0
 var _patience_max := 1.0
 var _eat_timer := 0.0
@@ -31,22 +31,30 @@ var _eat_timer := 0.0
 
 func _ready() -> void:
 	super()
-	circle_shape(self, 10.0)
+	sphere_shape(self, 0.3, Vector3(0, 0.4, 0))
 
 
-func setup(p_cafe: Cafe, p_seat: Seat, door: Vector2, p_regular_id := "") -> void:
+func setup(p_cafe: Cafe, p_seat: Seat, p_regular_id := "") -> void:
 	cafe = p_cafe
 	seat = p_seat
 	seat.customer = self
 	regular_id = p_regular_id
-	if regular_id.is_empty():
-		color = CafeData.WALK_IN_COLORS.pick_random()
-	else:
+
+	var model_path: String
+	if is_regular():
 		var data: Dictionary = CafeData.REGULARS[regular_id]
 		display_name = data["name"]
-		color = data["color"]
-	global_position = door
-	_path = [Vector2(cafe.aisle_x, door.y - 24.0), Vector2(cafe.aisle_x, seat.global_position.y), seat.global_position]
+		model_path = data["model"]
+	else:
+		model_path = CafeData.WALK_IN_MODELS.pick_random()
+	_model = AnimatedModel.new()
+	_model.model_scale = cafe.character_scale
+	add_child(_model)
+	_model.model = load(model_path)
+
+	global_position = cafe.door_outside()
+	_path = cafe.path_to_seat(seat)
+	OverlayAnchor.attach(self, cafe.overlay, 1.0)
 
 
 func is_regular() -> bool:
@@ -78,22 +86,31 @@ func _process(delta: float) -> void:
 				_eat_timer -= delta
 			if _eat_timer <= 0.0:
 				_pay_and_leave()
-	queue_redraw()
 
 
 func _follow_path(delta: float) -> void:
 	if _path.is_empty():
 		return
+	var to_next := _path[0] - global_position
+	_model.face(to_next)
+	_model.play("walk")
 	global_position = global_position.move_toward(_path[0], cafe.customer_walk_speed * delta)
-	if global_position.distance_to(_path[0]) < 0.5:
+	if global_position.distance_to(_path[0]) < 0.01:
 		_path.remove_at(0)
 		if _path.is_empty():
-			if state == State.ARRIVING:
-				state = State.WAITING_TO_ORDER
-				_set_patience(cafe.order_patience)
-			else:
-				left_cafe.emit(self)
-				queue_free()
+			_arrive()
+
+
+func _arrive() -> void:
+	if state == State.ARRIVING:
+		state = State.WAITING_TO_ORDER
+		_set_patience(cafe.order_patience)
+		global_position = seat.global_position + Vector3.UP * cafe.sit_height
+		_model.face_yaw(seat.facing_yaw(), true)
+		_model.play("sit")
+	else:
+		left_cafe.emit(self)
+		queue_free()
 
 
 func _set_patience(seconds: float) -> void:
@@ -141,7 +158,7 @@ func patience_ratio() -> float:
 
 func _pay_and_leave() -> void:
 	var paid := cafe.pay(self)
-	FloatText.spawn(get_parent(), global_position + Vector2(0, -20), "+$%d" % paid, Color(1, 0.9, 0.5))
+	cafe.float_text(global_position + Vector3.UP * 1.1, "+$%d" % paid, Color(1, 0.9, 0.5))
 	if is_regular() and not chatted:
 		cafe.day.missed_chats.append(CafeData.REGULARS[regular_id]["skipped"])
 	_leave()
@@ -149,7 +166,7 @@ func _pay_and_leave() -> void:
 
 func _walk_out() -> void:
 	cafe.on_walk_out(self)
-	FloatText.spawn(get_parent(), global_position + Vector2(0, -20), "Hmph!", Color(1, 0.5, 0.5))
+	cafe.float_text(global_position + Vector3.UP * 1.1, "Hmph!", Color(1, 0.5, 0.5))
 	if is_regular():
 		cafe.day.missed_chats.append(CafeData.REGULARS[regular_id]["skipped"])
 	_leave()
@@ -158,42 +175,28 @@ func _walk_out() -> void:
 func _leave() -> void:
 	state = State.LEAVING
 	seat.customer = null
-	_path = [Vector2(cafe.aisle_x, global_position.y), cafe.door_position()]
+	global_position = seat.global_position
+	_path = cafe.path_from_seat(seat)
 
 
-func _draw() -> void:
-	draw_circle(Vector2.ZERO, 8.0, color)
-	draw_arc(Vector2.ZERO, 8.0, 0.0, TAU, 20, color.darkened(0.4), 1.0)
+func _draw_overlay(canvas: OverlayAnchor) -> void:
 	if is_regular():
-		draw_text_centered(display_name, Vector2(0, 17), 7, Color(1, 1, 1, 0.8))
+		canvas.text_centered(display_name, Vector2(0, 50), 8, Color(1, 1, 1, 0.9), 3)
 
 	match state:
 		State.WAITING_TO_ORDER:
-			_draw_bubble(Rect2(-6, -30, 12, 14))
-			draw_text_centered("!", Vector2(0, -19), 10, Color(0.2, 0.15, 0.1))
-			_draw_patience_bar()
+			canvas.bubble(Rect2(-6, -16, 12, 14))
+			canvas.text_centered("!", Vector2(0, -5), 10, Color(0.2, 0.15, 0.1))
+			canvas.meter(Rect2(-BAR_WIDTH / 2.0, 3, BAR_WIDTH, 3), patience_ratio())
 		State.WAITING_FOR_FOOD:
 			var items := remaining_items()
 			var w := items.size() * 9.0 + 4.0
-			_draw_bubble(Rect2(-w / 2.0, -30, w, 14))
+			canvas.bubble(Rect2(-w / 2.0, -16, w, 14))
 			for i in items.size():
 				var x := (i - (items.size() - 1) / 2.0) * 9.0
-				draw_circle(Vector2(x, -23), 3.5, CafeData.item(items[i])["color"])
-			_draw_patience_bar()
+				canvas.draw_circle(Vector2(x, -9), 3.5, CafeData.item(items[i])["color"])
+			canvas.meter(Rect2(-BAR_WIDTH / 2.0, 3, BAR_WIDTH, 3), patience_ratio())
 		State.EATING:
 			if is_regular() and not chatted:
-				_draw_bubble(Rect2(-9, -30, 18, 14))
-				draw_text_centered("...", Vector2(0, -20), 10, Color(0.2, 0.15, 0.1))
-
-
-func _draw_bubble(rect: Rect2) -> void:
-	draw_rect(rect, Color(1, 0.98, 0.92))
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(-3, rect.end.y), Vector2(3, rect.end.y), Vector2(0, rect.end.y + 4),
-	]), Color(1, 0.98, 0.92))
-
-
-func _draw_patience_bar() -> void:
-	var r := patience_ratio()
-	draw_rect(Rect2(-BAR_WIDTH / 2.0, 11, BAR_WIDTH, 3), Color(0, 0, 0, 0.5))
-	draw_rect(Rect2(-BAR_WIDTH / 2.0, 11, BAR_WIDTH * r, 3), Color(1.0 - r, 0.3 + 0.6 * r, 0.3))
+				canvas.bubble(Rect2(-9, -16, 18, 14))
+				canvas.text_centered("...", Vector2(0, -6), 10, Color(0.2, 0.15, 0.1))

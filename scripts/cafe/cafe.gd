@@ -1,5 +1,5 @@
 class_name Cafe
-extends Node2D
+extends Node3D
 ## Runs one cafe day: morning prep, then service (customers, the regular, the
 ## cat event), then the end-of-day results. Day tuning is exported here.
 
@@ -20,7 +20,13 @@ enum Phase { PREP, SERVICE, RESULTS }
 @export var cat_events_wait_for_free_hands := true
 
 @export_group("Customers")
-@export var customer_walk_speed := 60.0
+@export var customer_walk_speed := 1.4
+## Scale for the Kenney character models (customers; the barista sets its own).
+@export var character_scale := 0.8
+## Height to lift a seated customer so the sit pose lands on the chair.
+@export var sit_height := 0.3
+## Customers walk door -> this x (the aisle) -> their seat's row -> their seat.
+@export var aisle_x := 3.5
 @export var order_patience := 45.0
 @export var food_patience := 70.0
 @export var patience_per_item := 15.0
@@ -39,9 +45,11 @@ enum Phase { PREP, SERVICE, RESULTS }
 
 var day := CafeDay.new()
 var phase := Phase.PREP
-var aisle_x: float:
+## 2D layer for bubbles, bars and floating text that track 3D positions.
+## A getter, because children read it before this node's _ready runs.
+var overlay: CanvasLayer:
 	get:
-		return _door.global_position.x
+		return $Overlay
 
 var _spawned := 0
 var _spawn_timer := 0.0
@@ -51,15 +59,21 @@ var _customers: Array[Customer] = []
 
 @onready var hud: CafeHud = $HUD
 @onready var barista: Barista = $Barista
-@onready var _actors: Node2D = $Actors
-@onready var _door: Marker2D = $Door
-@onready var _mug_spot: Marker2D = $MugSpot
+@onready var _actors: Node3D = $Actors
+@onready var _door: Marker3D = $Markers/Door
+@onready var _door_inside: Marker3D = $Markers/DoorInside
+@onready var _mug_spot: Marker3D = $Markers/MugSpot
 @onready var _cat: CafeCat = $Actors/Mochi
 
 
-func _ready() -> void:
+func _enter_tree() -> void:
+	# Joined before children are ready, so they can find the cafe in their _ready.
 	add_to_group("cafe")
+
+
+func _ready() -> void:
 	barista.cafe = self
+	OverlayAnchor.attach(barista, overlay, 1.0)
 	hud.cafe = self
 	_cat.mug_event_finished.connect(_on_mug_event_finished)
 
@@ -106,8 +120,27 @@ func waiting_customers() -> Array[Customer]:
 	return _customers.filter(func(c: Customer) -> bool: return c.is_waiting())
 
 
-func door_position() -> Vector2:
+func door_outside() -> Vector3:
 	return _door.global_position
+
+
+func path_to_seat(seat: Seat) -> Array[Vector3]:
+	var inside := _door_inside.global_position
+	var target := seat.global_position
+	return [inside, Vector3(aisle_x, 0, inside.z), Vector3(aisle_x, 0, target.z), target]
+
+
+func path_from_seat(seat: Seat) -> Array[Vector3]:
+	var path := path_to_seat(seat)
+	path.reverse()
+	path.remove_at(0)  # Already at the seat.
+	path.append(door_outside())
+	return path
+
+
+func float_text(world_position: Vector3, text: String, color := Color.WHITE) -> void:
+	var camera := get_viewport().get_camera_3d()
+	FloatText.spawn(overlay, camera.unproject_position(world_position), text, color)
 
 
 func _try_spawn() -> bool:
@@ -116,7 +149,7 @@ func _try_spawn() -> bool:
 		return false
 	var customer := Customer.new()
 	_actors.add_child(customer)
-	customer.setup(self, free.pick_random(), door_position(), regular_id if _spawned == regular_index else "")
+	customer.setup(self, free.pick_random(), regular_id if _spawned == regular_index else "")
 	customer.left_cafe.connect(_on_customer_left)
 	_customers.append(customer)
 	_spawned += 1
@@ -233,11 +266,3 @@ func _end_day() -> void:
 	else:
 		Game.go_to_title()
 
-
-func _draw() -> void:
-	# Wooden floor.
-	draw_rect(Rect2(0, 0, 640, 360), Color(0.36, 0.25, 0.19))
-	for y in range(16, 360, 24):
-		draw_line(Vector2(0, y), Vector2(640, y), Color(0.3, 0.2, 0.15), 1.0)
-	# Rug by the door.
-	draw_rect(Rect2(288, 318, 64, 26), Color(0.55, 0.3, 0.28))

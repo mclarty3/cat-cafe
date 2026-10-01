@@ -54,7 +54,7 @@ const PREP_ACTIONS := [
 const REGULARS := {
 	"theo": {
 		"name": "Theo",
-		"color": Color(0.55, 0.75, 0.62),
+		"model": "res://assets/kenney/characters/character-male-c.glb",
 		"favourite": ["honey_latte", "latte"],
 		"opening": "Sorry, I've been staring at the same paragraph for an hour. Thesis stuff.",
 		"choices": [
@@ -71,9 +71,19 @@ const REGULARS := {
 	},
 }
 
-const WALK_IN_COLORS := [
-	Color(0.85, 0.55, 0.55), Color(0.55, 0.65, 0.9), Color(0.9, 0.8, 0.5),
-	Color(0.75, 0.6, 0.85), Color(0.6, 0.8, 0.8), Color(0.9, 0.7, 0.8),
+const BARISTA_MODEL := "res://assets/kenney/characters/character-female-b.glb"
+
+const WALK_IN_MODELS := [
+	"res://assets/kenney/characters/character-female-a.glb",
+	"res://assets/kenney/characters/character-female-c.glb",
+	"res://assets/kenney/characters/character-female-d.glb",
+	"res://assets/kenney/characters/character-female-e.glb",
+	"res://assets/kenney/characters/character-female-f.glb",
+	"res://assets/kenney/characters/character-male-a.glb",
+	"res://assets/kenney/characters/character-male-b.glb",
+	"res://assets/kenney/characters/character-male-d.glb",
+	"res://assets/kenney/characters/character-male-e.glb",
+	"res://assets/kenney/characters/character-male-f.glb",
 ]
 
 

@@ -1,26 +1,36 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/cafe/barista.gd" id="1_barista"]
+[ext_resource type="Script" path="res://scripts/cafe/animated_model.gd" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/kenney/characters/character-female-b.glb" id="3_char"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
-radius = 7.0
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.2
+height = 0.8
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_reach"]
-radius = 22.0
+[sub_resource type="SphereShape3D" id="SphereShape3D_reach"]
+radius = 0.6
 
-[node name="Barista" type="CharacterBody2D"]
+[node name="Barista" type="CharacterBody3D"]
 collision_layer = 2
 collision_mask = 1
 motion_mode = 1
 script = ExtResource("1_barista")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_body")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("CapsuleShape3D_body")
 
-[node name="Reach" type="Area2D" parent="."]
+[node name="Reach" type="Area3D" parent="."]
 collision_layer = 0
 collision_mask = 32
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Reach"]
-shape = SubResource("CircleShape2D_reach")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Reach"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("SphereShape3D_reach")
+
+[node name="Model" type="Node3D" parent="."]
+script = ExtResource("2_model")
+model = ExtResource("3_char")
+model_scale = 0.8
