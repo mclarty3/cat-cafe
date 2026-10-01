@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/world/block.gd" id="2_block"]
+[ext_resource type="Script" path="res://scripts/world/sunbeam.gd" id="3_sunbeam"]
+[ext_resource type="Script" path="res://scripts/world/door.gd" id="4_door"]
+
+[node name="RoomSunbeam" type="Node2D"]
+script = ExtResource("1_room")
+size = Vector2(640, 360)
+background = Color(0.13, 0.11, 0.17, 1)
+
+[node name="Ceiling" type="StaticBody2D" parent="."]
+position = Vector2(0, 0)
+script = ExtResource("2_block")
+size = Vector2(640, 16)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(0, 0)
+script = ExtResource("2_block")
+size = Vector2(16, 160)
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(624, 0)
+script = ExtResource("2_block")
+size = Vector2(16, 320)
+
+[node name="LedgeLeft" type="StaticBody2D" parent="."]
+position = Vector2(0, 224)
+script = ExtResource("2_block")
+size = Vector2(112, 136)
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(0, 320)
+script = ExtResource("2_block")
+size = Vector2(640, 40)
+
+[node name="Sunbeam" type="Area2D" parent="."]
+position = Vector2(400, 64)
+script = ExtResource("3_sunbeam")
+size = Vector2(128, 256)
+
+[node name="Label" type="Label" parent="."]
+offset_left = 180.0
+offset_top = 40.0
+offset_right = 580.0
+offset_bottom = 60.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 8
+text = "A warm sunbeam. Curl up here to wake and keep what you found."
+
+[node name="DoorLeft" type="Area2D" parent="."]
+position = Vector2(0, 160)
+script = ExtResource("4_door")
+door_id = &"left"
+target_room = "res://scenes/rooms/room_spikes.tscn"
+target_door = &"right"
+size = Vector2(16, 64)
+spawn_offset = Vector2(32, 0)
