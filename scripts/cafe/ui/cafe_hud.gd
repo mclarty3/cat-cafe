@@ -14,7 +14,7 @@ var results_panel: ResultsPanel
 var _status: Label
 var _stock: Label
 var _tickets: Label
-var _tray: Label
+var _hands: Label
 var _prompt: Label
 var _toast: Label
 var _toast_tween: Tween
@@ -25,7 +25,7 @@ func _ready() -> void:
 	_stock = _add_label(Control.PRESET_TOP_RIGHT)
 	_stock.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_tickets = _add_label(Control.PRESET_CENTER_LEFT)
-	_tray = _add_label(Control.PRESET_BOTTOM_LEFT)
+	_hands = _add_label(Control.PRESET_BOTTOM_LEFT)
 	_prompt = _add_label(Control.PRESET_CENTER_BOTTOM)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt.modulate = Color(1, 0.95, 0.75)
@@ -97,13 +97,19 @@ func _process(_delta: float) -> void:
 		stock.append("%s %d" % [CafeData.STOCK_NAMES[key], day.stock[key]])
 	_stock.text = "\n".join(stock)
 
+	# The ticket rail: every open order, with what's already on the pass ticked.
 	var tickets := []
-	for customer in cafe.waiting_customers():
-		if customer.state == Customer.State.WAITING_FOR_FOOD:
-			var names := customer.remaining_items().map(func(id: String) -> String: return CafeData.item_name(id))
-			tickets.append("Seat %s: %s" % [customer.seat.label, ", ".join(names)])
-	_tickets.text = "Orders\n" + "\n".join(tickets) if not tickets.is_empty() else ""
+	for ticket in cafe.tickets:
+		var missing := ticket.remaining()
+		var lines := []
+		for id in ticket.items:
+			var done := not id in missing
+			missing.erase(id)
+			lines.append(("  [x] " if done else "  [ ] ") + CafeData.item_name(id))
+		var who := ticket.customer.display_name if ticket.customer.is_regular() else ""
+		tickets.append("#%d %s\n%s" % [ticket.number, who, "\n".join(lines)])
+	_tickets.text = "Tickets\n" + "\n".join(tickets) if not tickets.is_empty() else ""
 
-	var tray := cafe.barista.tray.map(func(it: Dictionary) -> String:
+	var hands := cafe.barista.hands.map(func(it: Dictionary) -> String:
 		return "%s (%s)" % [CafeData.item_name(it["id"]), CafeData.QUALITY_NAMES[it["quality"]]])
-	_tray.text = "Tray: " + (", ".join(tray) if not tray.is_empty() else "empty")
+	_hands.text = "Carrying: " + (", ".join(hands) if not hands.is_empty() else "nothing")

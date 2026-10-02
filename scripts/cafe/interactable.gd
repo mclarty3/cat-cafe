@@ -24,6 +24,11 @@ func focus_point() -> Vector3:
 	return global_position
 
 
+## Where the "this is what Interact will use" arrow floats.
+func marker_point() -> Vector3:
+	return focus_point() + Vector3.UP * 1.1
+
+
 static func sphere_shape(parent: CollisionObject3D, radius: float, offset := Vector3.ZERO) -> void:
 	var shape_node := CollisionShape3D.new()
 	var sphere := SphereShape3D.new()

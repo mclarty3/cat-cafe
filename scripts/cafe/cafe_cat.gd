@@ -2,15 +2,16 @@
 class_name CafeCat
 extends Interactable
 ## A resident cat. Wanders the floor and can be petted. The cafe can send it
-## to the counter to start the "nudging a mug off the edge" event.
+## onto a table to start the "nudging a mug off the edge" event, which you have
+## to leave the counter to deal with.
 
 signal mug_event_finished(caught: bool)
 
-enum State { IDLE, WALKING, TO_COUNTER, NUDGING }
+enum State { IDLE, WALKING, TO_MUG, NUDGING }
 
 @export var cat_name := "Mochi"
 ## Floor area (x, z) the cat wanders in.
-@export var wander_area := Rect2(0.8, 1.4, 5.4, 4.2)
+@export var wander_area := Rect2(1.6, 2.4, 5.0, 3.2)
 @export var walk_speed := 0.6
 @export var dash_speed := 2.5
 ## Seconds you have to catch the mug.
@@ -42,9 +43,9 @@ func _ready() -> void:
 		OverlayAnchor.attach(self, _cafe.overlay, 0.45)
 
 
-func start_mug_event(counter_spot: Vector3) -> void:
-	state = State.TO_COUNTER
-	_target = counter_spot
+func start_mug_event(table_top: Vector3) -> void:
+	state = State.TO_MUG
+	_target = table_top
 
 
 func _process(delta: float) -> void:
@@ -67,7 +68,7 @@ func _process(delta: float) -> void:
 			if _move_to(_target, walk_speed, delta):
 				state = State.IDLE
 				_idle_timer = randf_range(2.0, 6.0)
-		State.TO_COUNTER:
+		State.TO_MUG:
 			_model.play("run")
 			if _move_to(_target, dash_speed, delta):
 				state = State.NUDGING
@@ -96,6 +97,10 @@ func _end_mug_event(caught: bool) -> void:
 	var center := wander_area.get_center()
 	_target = Vector3(center.x, 0.0, center.y)
 	mug_event_finished.emit(caught)
+
+
+func marker_point() -> Vector3:
+	return global_position + Vector3.UP * 0.7
 
 
 func get_prompt(_barista: Barista) -> String:

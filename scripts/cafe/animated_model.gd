@@ -15,7 +15,7 @@ const LOOPING := ["idle", "walk", "sprint", "run", "sit", "holding-both", "eat"]
 	set(value):
 		model_scale = value
 		_rebuild()
-@export var turn_speed := 12.0
+@export var turn_speed := 14.0
 
 var _instance: Node3D
 var _player: AnimationPlayer
@@ -55,6 +55,11 @@ func play(anim: String, blend := 0.15) -> void:
 		return
 	_current = anim
 	_player.play(anim, blend)
+
+
+func set_playback_speed(scale: float) -> void:
+	if _player:
+		_player.speed_scale = scale
 
 
 func face(direction: Vector3) -> void:

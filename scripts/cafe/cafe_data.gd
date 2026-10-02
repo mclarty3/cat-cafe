@@ -13,22 +13,27 @@ const ITEMS := {
 	"espresso": {
 		"name": "Espresso", "kind": "drink", "price": 3,
 		"steps": ["pull"], "color": Color(0.36, 0.23, 0.16),
+		"model": "res://assets/kenney/food/cup-saucer.glb", "model_scale": 0.3,
 	},
 	"latte": {
 		"name": "Latte", "kind": "drink", "price": 4,
 		"steps": ["pull", "steam"], "color": Color(0.78, 0.62, 0.48),
+		"model": "res://assets/kenney/food/cup-coffee.glb", "model_scale": 0.5,
 	},
 	"honey_latte": {
 		"name": "Dream-honey Latte", "kind": "drink", "price": 7,
 		"steps": ["pull", "steam"], "uses": "honey_syrup", "color": Color(0.91, 0.72, 0.29),
+		"model": "res://assets/kenney/food/cup-coffee.glb", "model_scale": 0.5,
 	},
 	"croissant": {
 		"name": "Croissant", "kind": "pastry", "price": 3,
 		"uses": "croissant", "color": Color(0.88, 0.64, 0.35),
+		"model": "res://assets/kenney/food/croissant.glb", "model_scale": 0.3,
 	},
 	"moon_muffin": {
 		"name": "Moonflour Muffin", "kind": "pastry", "price": 5,
 		"uses": "moon_muffin", "color": Color(0.62, 0.66, 1.0),
+		"model": "res://assets/kenney/food/muffin.glb", "model_scale": 0.35,
 	},
 }
 
@@ -56,6 +61,7 @@ const REGULARS := {
 		"name": "Theo",
 		"model": "res://assets/kenney/characters/character-male-c.glb",
 		"favourite": ["honey_latte", "latte"],
+		"greeting": "Hey. The usual, if there's any of that honey left?",
 		"opening": "Sorry, I've been staring at the same paragraph for an hour. Thesis stuff.",
 		"choices": [
 			{

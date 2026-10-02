@@ -10,7 +10,7 @@ func get_prompt(barista: Barista) -> String:
 
 func interact(barista: Barista) -> void:
 	if not barista.has_room():
-		cafe.toast("Your hands are full. Deliver or toss something first.")
+		cafe.toast("Your hands are full. Take it to the pass first.")
 		return
 	var pastries := CafeData.ids_of_kind("pastry")
 	var options: Array[Dictionary] = []

@@ -1,37 +1,41 @@
-[gd_scene load_steps=40 format=3]
+[gd_scene load_steps=46 format=3]
 
 [ext_resource type="Script" path="res://scripts/cafe/cafe.gd" id="1_cafe"]
-[ext_resource type="Script" path="res://scripts/cafe/iso_camera.gd" id="2_iso_camera"]
+[ext_resource type="Script" path="res://scripts/cafe/cafe_camera.gd" id="2_cafe_camera"]
 [ext_resource type="Script" path="res://scripts/cafe/prop_3d.gd" id="3_prop_3d"]
 [ext_resource type="PackedScene" path="res://assets/kenney/furniture/wall.glb" id="4_wall"]
 [ext_resource type="PackedScene" path="res://assets/kenney/furniture/wallWindow.glb" id="5_wallWindow"]
 [ext_resource type="PackedScene" path="res://assets/kenney/furniture/wallDoorway.glb" id="6_wallDoorway"]
 [ext_resource type="PackedScene" path="res://assets/kenney/furniture/kitchenCabinet.glb" id="7_kitchenCabinet"]
-[ext_resource type="Script" path="res://scripts/cafe/espresso_machine.gd" id="8_espresso_machine"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/kitchenCoffeeMachine.glb" id="9_kitchenCoffeeMachine"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/cup-saucer.glb" id="10_cup-saucer"]
-[ext_resource type="Script" path="res://scripts/cafe/pastry_case.gd" id="11_pastry_case"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/plate.glb" id="12_plate"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/croissant.glb" id="13_croissant"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/muffin.glb" id="14_muffin"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/honey.glb" id="15_honey"]
-[ext_resource type="Script" path="res://scripts/cafe/trash_bin.gd" id="16_trash_bin"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/trashcan.glb" id="17_trashcan"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/tableRound.glb" id="18_tableRound"]
-[ext_resource type="Script" path="res://scripts/cafe/seat.gd" id="19_seat"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/chairCushion.glb" id="20_chairCushion"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/rugRectangle.glb" id="21_rugRectangle"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/rugDoormat.glb" id="22_rugDoormat"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/pottedPlant.glb" id="23_pottedPlant"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/bookcaseOpenLow.glb" id="24_bookcaseOpenLow"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/plantSmall1.glb" id="25_plantSmall1"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/lampRoundFloor.glb" id="26_lampRoundFloor"]
-[ext_resource type="Script" path="res://scripts/cafe/cafe_cat.gd" id="27_cafe_cat"]
-[ext_resource type="Script" path="res://scripts/cafe/animated_model.gd" id="28_animated_model"]
-[ext_resource type="PackedScene" path="res://assets/kenney/pets/animal-cat.glb" id="29_animal-cat"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/mug.glb" id="30_mug"]
-[ext_resource type="PackedScene" path="res://scenes/cafe/barista.tscn" id="31_barista"]
-[ext_resource type="Script" path="res://scripts/cafe/ui/cafe_hud.gd" id="32_cafe_hud"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/plantSmall2.glb" id="8_plantSmall2"]
+[ext_resource type="PackedScene" path="res://assets/kenney/food/honey.glb" id="9_honey"]
+[ext_resource type="PackedScene" path="res://assets/kenney/food/mug.glb" id="10_mug"]
+[ext_resource type="Script" path="res://scripts/cafe/register.gd" id="11_register"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/computerScreen.glb" id="12_computerScreen"]
+[ext_resource type="Script" path="res://scripts/cafe/espresso_machine.gd" id="13_espresso_machine"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/kitchenCoffeeMachine.glb" id="14_kitchenCoffeeMachine"]
+[ext_resource type="PackedScene" path="res://assets/kenney/food/cup-saucer.glb" id="15_cup-saucer"]
+[ext_resource type="Script" path="res://scripts/cafe/pastry_case.gd" id="16_pastry_case"]
+[ext_resource type="PackedScene" path="res://assets/kenney/food/plate.glb" id="17_plate"]
+[ext_resource type="PackedScene" path="res://assets/kenney/food/croissant.glb" id="18_croissant"]
+[ext_resource type="PackedScene" path="res://assets/kenney/food/muffin.glb" id="19_muffin"]
+[ext_resource type="Script" path="res://scripts/cafe/pass.gd" id="20_pass"]
+[ext_resource type="Script" path="res://scripts/cafe/trash_bin.gd" id="21_trash_bin"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/trashcan.glb" id="22_trashcan"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/tableRound.glb" id="23_tableRound"]
+[ext_resource type="Script" path="res://scripts/cafe/seat.gd" id="24_seat"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/chairCushion.glb" id="25_chairCushion"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/rugRectangle.glb" id="26_rugRectangle"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/rugDoormat.glb" id="27_rugDoormat"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/bookcaseOpenLow.glb" id="28_bookcaseOpenLow"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/plantSmall1.glb" id="29_plantSmall1"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/lampRoundFloor.glb" id="30_lampRoundFloor"]
+[ext_resource type="PackedScene" path="res://assets/kenney/furniture/pottedPlant.glb" id="31_pottedPlant"]
+[ext_resource type="Script" path="res://scripts/cafe/cafe_cat.gd" id="32_cafe_cat"]
+[ext_resource type="Script" path="res://scripts/cafe/animated_model.gd" id="33_animated_model"]
+[ext_resource type="PackedScene" path="res://assets/kenney/pets/animal-cat.glb" id="34_animal-cat"]
+[ext_resource type="PackedScene" path="res://scenes/cafe/barista.tscn" id="35_barista"]
+[ext_resource type="Script" path="res://scripts/cafe/ui/cafe_hud.gd" id="36_cafe_hud"]
 
 [sub_resource type="Environment" id="Environment_cafe"]
 background_mode = 1
@@ -42,6 +46,16 @@ ambient_light_energy = 0.35
 tonemap_mode = 2
 tonemap_white = 1.6
 
+[sub_resource type="NavigationMesh" id="NavigationMesh_cafe"]
+geometry_parsed_geometry_type = 1
+geometry_source_geometry_mode = 1
+geometry_source_group_name = &"nav_source"
+cell_size = 0.1
+cell_height = 0.1
+agent_height = 1.0
+agent_radius = 0.2
+agent_max_climb = 0.1
+
 [sub_resource type="StandardMaterial3D" id="Material_floor"]
 albedo_color = Color(0.36, 0.24, 0.18, 1)
 roughness = 0.85
@@ -49,6 +63,9 @@ roughness = 0.85
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 material = SubResource("Material_floor")
 size = Vector3(7, 0.05, 6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_navfloor"]
+size = Vector3(7, 0.1, 6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bound0"]
 size = Vector3(7.4, 2, 0.2)
@@ -77,15 +94,25 @@ directional_shadow_max_distance = 80.0
 shadow_blur = 1.5
 
 [node name="Camera" type="Camera3D" parent="."]
-script = ExtResource("2_iso_camera")
-target = Vector3(3.5, 0.3, 3)
-view_height = 6.6
+fov = 40.0
+script = ExtResource("2_cafe_camera")
 
-[node name="Room" type="Node3D" parent="."]
+[node name="Navigation" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_cafe")
+
+[node name="Room" type="Node3D" parent="." groups=["nav_source"]]
 
 [node name="Floor" type="MeshInstance3D" parent="Room"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, -0.025, 3)
 mesh = SubResource("BoxMesh_floor")
+
+[node name="NavFloor" type="StaticBody3D" parent="Room"]
+collision_layer = 64
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape3D" parent="Room/NavFloor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, -0.06, 3)
+shape = SubResource("BoxShape3D_navfloor")
 
 [node name="Walls" type="Node3D" parent="Room"]
 
@@ -104,7 +131,7 @@ center = false
 [node name="Back2" type="Node3D" parent="Room/Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("4_wall")
+model = ExtResource("5_wallWindow")
 center = false
 
 [node name="Back3" type="Node3D" parent="Room/Walls"]
@@ -116,19 +143,19 @@ center = false
 [node name="Back4" type="Node3D" parent="Room/Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("4_wall")
+model = ExtResource("5_wallWindow")
 center = false
 
 [node name="Back5" type="Node3D" parent="Room/Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("5_wallWindow")
+model = ExtResource("4_wall")
 center = false
 
 [node name="Back6" type="Node3D" parent="Room/Walls"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("5_wallWindow")
+model = ExtResource("4_wall")
 center = false
 
 [node name="Left0" type="Node3D" parent="Room/Walls"]
@@ -146,13 +173,13 @@ center = false
 [node name="Left2" type="Node3D" parent="Room/Walls"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 3)
 script = ExtResource("3_prop_3d")
-model = ExtResource("5_wallWindow")
+model = ExtResource("4_wall")
 center = false
 
 [node name="Left3" type="Node3D" parent="Room/Walls"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 4)
 script = ExtResource("3_prop_3d")
-model = ExtResource("4_wall")
+model = ExtResource("5_wallWindow")
 center = false
 
 [node name="Left4" type="Node3D" parent="Room/Walls"]
@@ -165,6 +192,42 @@ center = false
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 6)
 script = ExtResource("3_prop_3d")
 model = ExtResource("6_wallDoorway")
+center = false
+
+[node name="Right0" type="Node3D" parent="Room/Walls"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7, 0, 0)
+script = ExtResource("3_prop_3d")
+model = ExtResource("4_wall")
+center = false
+
+[node name="Right1" type="Node3D" parent="Room/Walls"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7, 0, 1)
+script = ExtResource("3_prop_3d")
+model = ExtResource("4_wall")
+center = false
+
+[node name="Right2" type="Node3D" parent="Room/Walls"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7, 0, 2)
+script = ExtResource("3_prop_3d")
+model = ExtResource("5_wallWindow")
+center = false
+
+[node name="Right3" type="Node3D" parent="Room/Walls"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7, 0, 3)
+script = ExtResource("3_prop_3d")
+model = ExtResource("4_wall")
+center = false
+
+[node name="Right4" type="Node3D" parent="Room/Walls"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7, 0, 4)
+script = ExtResource("3_prop_3d")
+model = ExtResource("5_wallWindow")
+center = false
+
+[node name="Right5" type="Node3D" parent="Room/Walls"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7, 0, 5)
+script = ExtResource("3_prop_3d")
+model = ExtResource("4_wall")
 center = false
 
 [node name="Bounds" type="StaticBody3D" parent="Room"]
@@ -186,298 +249,460 @@ shape = SubResource("BoxShape3D_bound2")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, 6.1)
 shape = SubResource("BoxShape3D_bound3")
 
-[node name="Counter" type="Node3D" parent="."]
+[node name="Counter" type="Node3D" parent="." groups=["nav_source"]]
 
-[node name="Cabinet0" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0.5)
+[node name="Back0" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet1" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.43, 0, 0.5)
+[node name="Back1" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.43, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet2" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.86, 0, 0.5)
+[node name="Back2" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.86, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet3" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.29, 0, 0.5)
+[node name="Back3" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.29, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet4" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.72, 0, 0.5)
+[node name="Back4" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.72, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet5" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.15, 0, 0.5)
+[node name="Back5" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.15, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet6" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.58, 0, 0.5)
+[node name="Back6" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.58, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet7" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.01, 0, 0.5)
+[node name="Back7" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.01, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet8" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.44, 0, 0.5)
+[node name="Back8" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.44, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Cabinet9" type="Node3D" parent="Counter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.87, 0, 0.5)
+[node name="Back9" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.87, 0, 0.5)
 script = ExtResource("3_prop_3d")
 model = ExtResource("7_kitchenCabinet")
 center = false
 collision = 1
 
-[node name="Stations" type="Node3D" parent="."]
+[node name="Back10" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3, 0, 0.5)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Back11" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.73, 0, 0.5)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Back12" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.16, 0, 0.5)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Back13" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.59, 0, 0.5)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front0" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front1" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.43, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front2" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.86, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front3" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.29, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front4" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.72, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front5" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.15, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front6" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.58, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front7" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.01, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front8" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.44, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front9" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.87, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front10" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front11" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.73, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Front12" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.16, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="FrontEnd" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.57, 0, 1.7)
+script = ExtResource("3_prop_3d")
+model = ExtResource("7_kitchenCabinet")
+center = false
+collision = 1
+
+[node name="Plant" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.78, 0.45, 1.47)
+script = ExtResource("3_prop_3d")
+model = ExtResource("8_plantSmall2")
+model_scale = 1.6
+
+[node name="Honey" type="Node3D" parent="Counter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0.45, 0.25)
+script = ExtResource("3_prop_3d")
+model = ExtResource("9_honey")
+model_scale = 0.35
+
+[node name="Mugs" type="Node3D" parent="Counter"]
+transform = Transform3D(0.766, 0, 0.6428, 0, 1, 0, -0.6428, 0, 0.766, 2.75, 0.45, 0.25)
+script = ExtResource("3_prop_3d")
+model = ExtResource("10_mug")
+model_scale = 0.35
+
+[node name="Stations" type="Node3D" parent="." groups=["nav_source"]]
+
+[node name="Register" type="Area3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 1.25)
+script = ExtResource("11_register")
+size = Vector3(0.9, 1, 0.6)
+
+[node name="Till" type="Node3D" parent="Stations/Register"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.45, 0.2)
+script = ExtResource("3_prop_3d")
+model = ExtResource("12_computerScreen")
+model_scale = 1.6
+
+[node name="Sign" type="Label3D" parent="Stations/Register"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0.3)
+billboard = 1
+pixel_size = 0.004
+font_size = 40
+outline_size = 12
+modulate = Color(1, 0.92, 0.75, 1)
+text = "Order here"
 
 [node name="EspressoMachine" type="Area3D" parent="Stations"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0.6)
-script = ExtResource("8_espresso_machine")
-size = Vector3(0.9, 1, 0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0.6)
+script = ExtResource("13_espresso_machine")
+size = Vector3(0.9, 1, 0.5)
 
 [node name="Machine" type="Node3D" parent="Stations/EspressoMachine"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -0.32)
 script = ExtResource("3_prop_3d")
-model = ExtResource("9_kitchenCoffeeMachine")
+model = ExtResource("14_kitchenCoffeeMachine")
 model_scale = 1.6
 
 [node name="Cup" type="Node3D" parent="Stations/EspressoMachine"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.45, -0.25)
 script = ExtResource("3_prop_3d")
-model = ExtResource("10_cup-saucer")
+model = ExtResource("15_cup-saucer")
 model_scale = 0.35
 
 [node name="PastryCase" type="Area3D" parent="Stations"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0, 0.6)
-script = ExtResource("11_pastry_case")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 1.25)
+script = ExtResource("16_pastry_case")
 size = Vector3(1, 1, 0.6)
 
 [node name="Plate" type="Node3D" parent="Stations/PastryCase"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.45, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.45, 0.2)
 script = ExtResource("3_prop_3d")
-model = ExtResource("12_plate")
+model = ExtResource("17_plate")
 model_scale = 0.45
 
 [node name="Croissant" type="Node3D" parent="Stations/PastryCase"]
-transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, -0.2, 0.49, -0.3)
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, -0.2, 0.49, 0.2)
 script = ExtResource("3_prop_3d")
-model = ExtResource("13_croissant")
+model = ExtResource("18_croissant")
 model_scale = 0.4
 
 [node name="Plate2" type="Node3D" parent="Stations/PastryCase"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.45, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.45, 0.2)
 script = ExtResource("3_prop_3d")
-model = ExtResource("12_plate")
+model = ExtResource("17_plate")
 model_scale = 0.45
 
 [node name="Muffin" type="Node3D" parent="Stations/PastryCase"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.49, -0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.49, 0.2)
 script = ExtResource("3_prop_3d")
-model = ExtResource("14_muffin")
+model = ExtResource("19_muffin")
 model_scale = 0.45
 
-[node name="Honey" type="Node3D" parent="Stations/PastryCase"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 0.45, -0.35)
-script = ExtResource("3_prop_3d")
-model = ExtResource("15_honey")
-model_scale = 0.35
+[node name="Pass" type="Area3D" parent="Stations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9, 0, 1.25)
+script = ExtResource("20_pass")
+size = Vector3(1, 1, 0.6)
+
+[node name="Sign" type="Label3D" parent="Stations/Pass"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0.3)
+billboard = 1
+pixel_size = 0.004
+font_size = 40
+outline_size = 12
+modulate = Color(1, 0.92, 0.75, 1)
+text = "Pickup"
 
 [node name="TrashBin" type="Area3D" parent="Stations"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.4, 0, 0.45)
-script = ExtResource("16_trash_bin")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 0, 0.45)
+script = ExtResource("21_trash_bin")
 size = Vector3(0.7, 1, 0.7)
 
 [node name="Can" type="Node3D" parent="Stations/TrashBin"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("17_trashcan")
+model = ExtResource("22_trashcan")
 model_scale = 1.3
 collision = 2
 
-[node name="Tables" type="Node3D" parent="."]
+[node name="Tables" type="Node3D" parent="." groups=["nav_source"]]
 
 [node name="Table1" type="Node3D" parent="Tables"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0, 2.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, 3.5)
 script = ExtResource("3_prop_3d")
-model = ExtResource("18_tableRound")
+model = ExtResource("23_tableRound")
 model_scale = 1.4
 collision = 2
 
+[node name="MugSpot" type="Marker3D" parent="Tables/Table1" groups=["mug_spots"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0.15)
+
 [node name="Seat1" type="Marker3D" parent="Tables"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 2.45, 0, 2.2)
-script = ExtResource("19_seat")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, 2.88)
+script = ExtResource("24_seat")
 label = "1"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("20_chairCushion")
+model = ExtResource("25_chairCushion")
 model_scale = 1.5
 
 [node name="Table2" type="Node3D" parent="Tables"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 0, 2.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.4, 0, 3.5)
 script = ExtResource("3_prop_3d")
-model = ExtResource("18_tableRound")
+model = ExtResource("23_tableRound")
 model_scale = 1.4
 collision = 2
 
+[node name="MugSpot" type="Marker3D" parent="Tables/Table2" groups=["mug_spots"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0.15)
+
 [node name="Seat2" type="Marker3D" parent="Tables"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.55, 0, 2.2)
-script = ExtResource("19_seat")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.4, 0, 2.88)
+script = ExtResource("24_seat")
 label = "2"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("20_chairCushion")
+model = ExtResource("25_chairCushion")
 model_scale = 1.5
 
 [node name="Table3" type="Node3D" parent="Tables"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0, 3.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.2, 0, 3.3)
 script = ExtResource("3_prop_3d")
-model = ExtResource("18_tableRound")
+model = ExtResource("23_tableRound")
 model_scale = 1.4
 collision = 2
 
+[node name="MugSpot" type="Marker3D" parent="Tables/Table3" groups=["mug_spots"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0.15)
+
 [node name="Seat3" type="Marker3D" parent="Tables"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 2.45, 0, 3.5)
-script = ExtResource("19_seat")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.2, 0, 2.68)
+script = ExtResource("24_seat")
 label = "3"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat3"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("20_chairCushion")
+model = ExtResource("25_chairCushion")
 model_scale = 1.5
 
 [node name="Table4" type="Node3D" parent="Tables"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 0, 3.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 5)
 script = ExtResource("3_prop_3d")
-model = ExtResource("18_tableRound")
+model = ExtResource("23_tableRound")
 model_scale = 1.4
 collision = 2
 
+[node name="MugSpot" type="Marker3D" parent="Tables/Table4" groups=["mug_spots"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0.15)
+
 [node name="Seat4" type="Marker3D" parent="Tables"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.55, 0, 3.5)
-script = ExtResource("19_seat")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 4.38)
+script = ExtResource("24_seat")
 label = "4"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat4"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("20_chairCushion")
+model = ExtResource("25_chairCushion")
 model_scale = 1.5
 
 [node name="Table5" type="Node3D" parent="Tables"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0, 4.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4, 0, 5)
 script = ExtResource("3_prop_3d")
-model = ExtResource("18_tableRound")
+model = ExtResource("23_tableRound")
 model_scale = 1.4
 collision = 2
 
+[node name="MugSpot" type="Marker3D" parent="Tables/Table5" groups=["mug_spots"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0.15)
+
 [node name="Seat5" type="Marker3D" parent="Tables"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 2.45, 0, 4.8)
-script = ExtResource("19_seat")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4, 0, 4.38)
+script = ExtResource("24_seat")
 label = "5"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("20_chairCushion")
+model = ExtResource("25_chairCushion")
 model_scale = 1.5
 
-[node name="Table6" type="Node3D" parent="Tables"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 0, 4.8)
-script = ExtResource("3_prop_3d")
-model = ExtResource("18_tableRound")
-model_scale = 1.4
-collision = 2
-
-[node name="Seat6" type="Marker3D" parent="Tables"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.55, 0, 4.8)
-script = ExtResource("19_seat")
-label = "6"
-
-[node name="Chair" type="Node3D" parent="Tables/Seat6"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-script = ExtResource("3_prop_3d")
-model = ExtResource("20_chairCushion")
-model_scale = 1.5
-
-[node name="Decor" type="Node3D" parent="."]
+[node name="Decor" type="Node3D" parent="." groups=["nav_source"]]
 
 [node name="Rug" type="Node3D" parent="Decor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0.005, 3.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3, 0.005, 4.3)
 script = ExtResource("3_prop_3d")
-model = ExtResource("21_rugRectangle")
-model_scale = 2
+model = ExtResource("26_rugRectangle")
+model_scale = 2.2
 
 [node name="Doormat" type="Node3D" parent="Decor"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.35, 0.005, 5.5)
 script = ExtResource("3_prop_3d")
-model = ExtResource("22_rugDoormat")
+model = ExtResource("27_rugDoormat")
 model_scale = 1.4
 
-[node name="PlantCorner" type="Node3D" parent="Decor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0, 0.4)
-script = ExtResource("3_prop_3d")
-model = ExtResource("23_pottedPlant")
-model_scale = 1.3
-collision = 2
-
 [node name="Bookcase" type="Node3D" parent="Decor"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.2, 0, 3.5)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.2, 0, 3.4)
 script = ExtResource("3_prop_3d")
-model = ExtResource("24_bookcaseOpenLow")
+model = ExtResource("28_bookcaseOpenLow")
 model_scale = 1.4
 collision = 1
 
 [node name="PlantShelf" type="Node3D" parent="Decor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.56, 3.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.56, 3.2)
 script = ExtResource("3_prop_3d")
-model = ExtResource("25_plantSmall1")
+model = ExtResource("29_plantSmall1")
 model_scale = 1.6
 
 [node name="Lamp" type="Node3D" parent="Decor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.6, 0, 1.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.7, 0, 4.3)
 script = ExtResource("3_prop_3d")
-model = ExtResource("26_lampRoundFloor")
+model = ExtResource("30_lampRoundFloor")
 collision = 2
 
 [node name="PlantRight" type="Node3D" parent="Decor"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.6, 0, 5.6)
 script = ExtResource("3_prop_3d")
-model = ExtResource("23_pottedPlant")
+model = ExtResource("31_pottedPlant")
 model_scale = 1.3
 collision = 2
 
@@ -486,21 +711,46 @@ collision = 2
 [node name="Door" type="Marker3D" parent="Markers"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0, 5.5)
 
-[node name="DoorInside" type="Marker3D" parent="Markers"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 5.5)
+[node name="Queue" type="Node3D" parent="Markers"]
 
-[node name="MugSpot" type="Marker3D" parent="Markers"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.45, 0.25)
+[node name="Spot0" type="Marker3D" parent="Markers/Queue"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 2.15)
+
+[node name="Spot1" type="Marker3D" parent="Markers/Queue"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 2.75)
+
+[node name="Spot2" type="Marker3D" parent="Markers/Queue"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 3.35)
+
+[node name="Spot3" type="Marker3D" parent="Markers/Queue"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 3.95)
+
+[node name="Spot4" type="Marker3D" parent="Markers/Queue"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 4.55)
+
+[node name="Pickup" type="Node3D" parent="Markers"]
+
+[node name="Spot0" type="Marker3D" parent="Markers/Pickup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9, 0, 2.15)
+
+[node name="Spot1" type="Marker3D" parent="Markers/Pickup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.45, 0, 2.3)
+
+[node name="Spot2" type="Marker3D" parent="Markers/Pickup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.35, 0, 2.35)
+
+[node name="Spot3" type="Marker3D" parent="Markers/Pickup"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, 2.7)
 
 [node name="Actors" type="Node3D" parent="."]
 
 [node name="Mochi" type="Area3D" parent="Actors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 0, 4.2)
-script = ExtResource("27_cafe_cat")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 4.3)
+script = ExtResource("32_cafe_cat")
 
 [node name="Model" type="Node3D" parent="Actors/Mochi"]
-script = ExtResource("28_animated_model")
-model = ExtResource("29_animal-cat")
+script = ExtResource("33_animated_model")
+model = ExtResource("34_animal-cat")
 model_scale = 0.15
 
 [node name="Mug" type="Node3D" parent="Actors/Mochi"]
@@ -508,15 +758,15 @@ model_scale = 0.15
 [node name="Model" type="Node3D" parent="Actors/Mochi/Mug"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
-model = ExtResource("30_mug")
+model = ExtResource("10_mug")
 model_scale = 0.4
 
-[node name="Barista" parent="." instance=ExtResource("31_barista")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 1.3)
+[node name="Barista" parent="." instance=ExtResource("35_barista")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0.9)
 
 [node name="Overlay" type="CanvasLayer" parent="."]
 layer = 1
 
 [node name="HUD" type="CanvasLayer" parent="."]
 layer = 2
-script = ExtResource("32_cafe_hud")
+script = ExtResource("36_cafe_hud")

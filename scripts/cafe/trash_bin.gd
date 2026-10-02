@@ -1,13 +1,13 @@
 @tool
 class_name TrashBin
 extends Station
-## Empties the tray: for fixing mistakes.
+## Empties your hands: for fixing mistakes.
 
 
 func get_prompt(barista: Barista) -> String:
-	return "Toss tray" if not barista.tray.is_empty() else ""
+	return "Toss what you're holding" if not barista.hands.is_empty() else ""
 
 
 func interact(barista: Barista) -> void:
-	barista.clear_tray()
+	barista.clear_hands()
 	cafe.toast("Tossed.")
