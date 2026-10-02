@@ -112,7 +112,7 @@ func _process(delta: float) -> void:
 
 	match state:
 		State.QUEUED, State.WAITING_PICKUP:
-			_patience -= delta
+			_patience -= delta * cafe.patience_drain()
 			if _patience <= 0.0:
 				_walk_out()
 			elif not is_walking():
@@ -146,6 +146,12 @@ func _arrive() -> void:
 		_:
 			# In line or at pickup: face the counter.
 			_model.face(Vector3.FORWARD)
+
+
+## Gets up from the table and goes (a cat fight that ran on too long, say).
+func leave_early() -> void:
+	cafe.float_text(global_position + Vector3.UP * 1.1, "Too noisy...", Color(1, 0.75, 0.5))
+	_leave()
 
 
 func _walk_out() -> void:

@@ -41,7 +41,8 @@ a regular worth stepping out to talk to, and a cat causing trouble. The art is f
 ## What's built
 
 Open the project and press F5, then choose **Cafe day**. Esc returns to the title. While testing,
-**F9** during service skips straight to closing time (debug builds only).
+**F9** during service skips straight to closing time, and **Shift+F9** starts a cat event right away, each
+kind in turn (debug builds only). Avoid F8 in debug keys: it's Godot's "stop the running game".
 
 ### Day flow
 
@@ -74,7 +75,7 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
      it to go if every table is taken).
    - Customers walk out if they wait too long, either in line or at pickup. They don't get a refund,
      but there's no tip either.
-3. **Closing.** A results screen shows customers served, walkouts, sales, tips, the mug, and chats.
+3. **Closing.** A results screen shows customers served, walkouts, sales, tips, how each cat event went, and chats.
    From there you can start another day or go back to the title.
 
 ### Pieces
@@ -97,25 +98,37 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
   Curious), set up as a mid-game cafe. They're spawned from
   `CATS` in `cafe_data.gd`, so adding one is a single entry:
 
-  | Cat | Personality | Look | Behaviour |
-  |---|---|---|---|
-  | Mochi | Playful | lilac-grey | Wanders and plays; does the mug event |
-  | Biscuit | Lazy | taupe | Long naps, slow ambles |
-  | Pepper | Curious | slate blue | Always on the move |
-  | Inky | Nocturnal | black | Dozes through the day shift |
-  | Clementine | Hunter | orange | Quick, prowling dashes |
-  | Bao | Chatty | cream-white | Meows at everything |
-  | Tofu | Lazy | grey | Sleeps anywhere |
-  | Sprout | Curious | ginger | A kitten, high-pitched and into everything |
+  | Cat | Personality | Look | Behaviour | Mischief |
+  |---|---|---|---|---|
+  | Mochi | Playful | lilac-grey | Wanders and plays | mug, fight |
+  | Biscuit | Lazy | taupe | Long naps, slow ambles | |
+  | Pepper | Curious | slate blue | Always on the move | fight |
+  | Inky | Nocturnal | black | Dozes through the day shift | fight |
+  | Clementine | Hunter | orange | Quick, prowling dashes | croissant thief, fight |
+  | Bao | Chatty | cream-white | Meows at everything | fight |
+  | Tofu | Lazy | grey | Sleeps anywhere | |
+  | Sprout | Curious | ginger | A kitten, high-pitched and into everything | curtains |
 
   The full cat schema (every field, and how each should be generated later) is in *Cat data schema* in
   `docs/Cats.md`.
   They all share one Kenney cat model, tinted per cat. Personality *effects* aren't implemented yet; for
   now the personalities only change how each cat moves.
-- **Mochi (the playful one):** wanders the front of house and can be petted. About 45 seconds in, she jumps on a table
-  (preferring one with someone sitting at it) and starts nudging a mug. You have 6 seconds to get out there
-  and catch it, or it breaks and costs $2. She waits until you're not in a menu, minigame or chat, and a
-  toast warns you when she starts.
+- **Cat events:** two a day, of different kinds, at random times during service (at least 30 seconds
+  apart). Each waits until you're not in a menu, minigame or chat, and the day doesn't close while one is
+  running. Which cats can cause what is each cat's `mischief` list in `CATS`. Each event is a short script
+  in `scripts/cafe/events/`:
+  - **Mug** (Mochi): she hops on a table (preferring one with someone at it) and nudges a mug toward the
+    edge. A toast warns you. Catch it within 6 seconds or it breaks ($2).
+  - **Fight** (two non-Lazy cats): they square off out on the floor and scuffle in a growing, hissing
+    cloud. While it runs, customers waiting in line or at pickup lose patience faster (up to twice as fast).
+    Break it up within 30 seconds, or seated customers nearby leave early. That costs nothing yet (they've
+    paid), except a regular's chat if they're the one who leaves; it's logged for a future daily rating.
+  - **Curtains** (Sprout): she climbs the curtains by a window and clings there, mewing. Lift her down
+    within 20 seconds or that curtain gets torn ($3). The curtains are stand-in panels (`curtain.gd`).
+  - **Croissant thief** (Clementine): she hops up to the pastry case, takes a croissant (stock goes down,
+    with a "gone missing" toast) and runs off to eat it under a table. You can watch it happen. While
+    hiding there's no marker over her; the tells are the croissant in her mouth, the eating pose and a
+    munching sound. Find her within 40 seconds to put it back in stock.
 - **Audio:** lo-fi cafe radio (three tracks in rotation, fading in, and dipping during conversations and
   at closing). Sound effects:
   - footsteps;
@@ -129,6 +142,8 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
     voice pitch, playful and curious cats meow more, lazy and sleepy ones mostly purr, and it never plays
     the same kind twice in a row;
   - clinking the mug faster and faster as it nears the edge (then a catch or a crash);
+  - hissing during a cat fight, a kitten mewing on the curtains (and a rip), and the croissant thief
+    munching (all three synthesized placeholders);
   - UI clicks;
   - the shop-door bell when you open, and the same bell as a two-note chime at closing.
 - **Pathfinding:** customers walk around furniture using a navigation mesh, baked when the scene loads
@@ -139,8 +154,10 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 - **Morning light** (sun and ambient levels before opening, and how long it takes to warm up) is in the
   `Morning` group on the `Cafe` root node.
 - **Day, customer and money numbers** are exported on the `Cafe` root node (`scripts/cafe/cafe.gd`):
-  customers per day, arrival gaps, queue and pickup patience, how long people sit, tip amounts, and
-  when the mug event happens. Character scale and sitting height are there too.
+  customers per day, arrival gaps, queue and pickup patience, how long people sit, and tip amounts.
+  Character scale and sitting height are there too.
+- **Cat events** are the `Cat events` group on the `Cafe` root node: how many a day, the time window and
+  spacing, and each event's timers and effects. The mug and curtain costs are under `Money`.
 - **How much you can carry** is `carry_capacity` on the `Barista`.
 - **Minigame speed and zone sizes** are on `DrinkMinigame` (`scripts/cafe/ui/drink_minigame.gd`).
 - **Menu, prep actions, the starting pantry, and Theo's lines** live in `scripts/cafe/cafe_data.gd`
@@ -187,7 +204,9 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 | `scripts/cafe/focus_marker.gd` | The bobbing arrow over whatever Interact will use |
 | `scripts/cafe/interactable.gd` | Base class for anything you can use: `get_prompt()` / `interact()` |
 | `scripts/cafe/station.gd` + `register.gd`, `espresso_machine.gd`, `pastry_case.gd`, `pass.gd`, `trash_bin.gd` | Counter equipment. The register's computer runs CafeOS before opening |
-| `scripts/cafe/cafe_cat.gd`, `scenes/cafe/cat.tscn` | A cat: wandering (per-cat pace), petting, the mug event on a table. Spawned from `CafeData.CATS` |
+| `scripts/cafe/cafe_cat.gd`, `scenes/cafe/cat.tscn` | A cat: wandering (per-cat pace), petting, and the actions cat events drive it with. Spawned from `CafeData.CATS` |
+| `scripts/cafe/events/*.gd` | Cat events: `CatEvent` (base) and the mug, fight, curtains and croissant thief. Scheduled by `Cafe` |
+| `scripts/cafe/curtain.gd` | Stand-in curtains at a window (the curtain event's target) |
 | `scripts/cafe/seat.gd` | Where customers sit. Point its +Z at the table |
 | `scripts/cafe/prop_3d.gd` | Places any model, centres its footprint, and adds an optional auto-sized box or cylinder collider. Use it for all furniture |
 | `scripts/cafe/animated_model.gd` | Plays a Kenney character or pet animation by name and turns it to face a direction |
@@ -272,7 +291,8 @@ one) into the matching folder, and drop it onto a `Prop3D`.
 - The till is a stand-in model (a computer screen). The sit pose is eyeballed. The latte and honey latte
   share a cup model, so in the barista's hands only the dot overhead tells them apart.
 - One regular, one conversation, and no memory between days. "Another day" starts completely fresh.
-- One cat event, always at the same time.
+- Cat events come from a fixed pool of four, and a cat fight's "customers leave early" has no lasting
+  cost until there's a daily rating. The curtains are plain stand-in panels.
 - No staff, no cafe upgrades, no customer–cat matchmaking.
 - The coffee and purr sounds are synthesized placeholders, and the shop bell is a pitched-up heavy bell.
   Mixing levels were set by ear, without playtesting.
@@ -281,7 +301,7 @@ one) into the matching folder, and drop it onto a `Prop3D`.
 ## Next steps
 
 1. **Play the counter-service version.** Does the counter feel like the right home base? Is leaving it to
-   chat or catch the mug a real choice, or just a chore? Tune the queue and pickup patience, carry
+   chat or deal with a cat event a real choice, or just a chore? Tune the queue and pickup patience, carry
    capacity, and arrival rate.
 2. **Staff** (the docs' relief valve). A hireable helper who runs the register, which frees you to work the
    floor and chat. That's the design notes' "staff takes orders, you chat at tables".
@@ -293,13 +313,12 @@ one) into the matching folder, and drop it onto a `Prop3D`.
    cafe effects from the design notes: Lazy calms impatient people in the queue, Curious finds dropped
    coins, Nocturnal draws superstitious customers, Hunter handles a "mouse in the kitchen" event, and so
    on. This also tests the matchmaking idea.
-6. **More cat events** out front, at random times: a cat fight, a kitten on the curtains, the croissant thief.
-7. **Fill in CafeOS:** carry money between days, then make the Upgrades tab real (a second group head, a
+6. **Fill in CafeOS:** carry money between days, then make the Upgrades tab real (a second group head, a
    bigger pastry case, more seats) and the Furniture tab (rearranging tables and decor before opening). The
    Cats roster becomes the place to manage cats once there are more of them.
-8. **Connect to the dungeon.** Once the dungeon collects ingredients, feed the real haul into the pantry,
+7. **Connect to the dungeon.** Once the dungeon collects ingredients, feed the real haul into the pantry,
    and let the night's outcome change prep (the "fewer prep actions" option in *Day-Night Connection*).
-9. **A cozy pass:** lamps that glow, window light, and calm open and close periods. Then dynamic music
+8. **A cozy pass:** lamps that glow, window light, and calm open and close periods. Then dynamic music
    from the design notes: purring layers as cats settle, the tempo lifting during a rush, and rain on the
    windows.
 

@@ -11,7 +11,10 @@ var tips := 0
 var breakage := 0
 var served := 0
 var walked_out := 0
-var mug_result := ""  # "", "caught" or "broken"
+## Customers who left early, upset by a cat fight (a hook for a future daily rating).
+var left_early := 0
+## A line per cat event, for the results screen.
+var cat_events: Array[String] = []
 var chats: Array[String] = []
 var missed_chats: Array[String] = []
 

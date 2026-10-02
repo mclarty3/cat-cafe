@@ -98,7 +98,9 @@ const PERSONALITIES := {
 ##   tint: multiplies the shared Kenney cat texture (there's only one cat model)
 ##   swatch: the colour shown for the cat in UI (roughly how the tinted model looks)
 ##   walk_speed / idle: how they wander (idle is a min-max pause in seconds)
-##   mischief: this cat does the "nudging a mug off a table" event
+##   mischief: the cat events this cat can cause (ids from the CatEvent scripts):
+##     "mug" (Playful), "fight" (anyone not Lazy), "curtains" (kittens),
+##     "croissant_thief" (Hunter)
 ##   voice: pitch of its meows and purrs, and how often petting gets a meow
 ##          rather than a purr (0 = always purrs, 1 = always meows)
 const CATS := {
@@ -106,8 +108,9 @@ const CATS := {
 		"name": "Mochi", "personality": "Playful",
 		"blurb": "Bats at anything that moves. Including mugs. Especially mugs.",
 		"since": "Found in the cafe when you arrived",
-		"tint": Color(1, 1, 1), "swatch": Color(0.66, 0.6, 0.76), "walk_speed": 0.6, "idle": Vector2(2, 6), "mischief": true,
+		"tint": Color(1, 1, 1), "swatch": Color(0.66, 0.6, 0.76), "walk_speed": 0.6, "idle": Vector2(2, 6),
 		"voice": {"pitch": 1.08, "meowy": 0.6},
+		"mischief": ["mug", "fight"],
 	},
 	"biscuit": {
 		"name": "Biscuit", "personality": "Lazy",
@@ -122,6 +125,7 @@ const CATS := {
 		"since": "Followed you home from the dream's flooded library",
 		"tint": Color(0.75, 0.82, 0.95), "swatch": Color(0.45, 0.5, 0.68), "walk_speed": 0.75, "idle": Vector2(1, 3),
 		"voice": {"pitch": 1.15, "meowy": 0.7},
+		"mischief": ["fight"],
 	},
 	"inky": {
 		"name": "Inky", "personality": "Nocturnal",
@@ -129,6 +133,7 @@ const CATS := {
 		"since": "Befriended under a moonlit stair in the dream",
 		"tint": Color(0.28, 0.27, 0.32), "swatch": Color(0.16, 0.15, 0.2), "walk_speed": 0.4, "idle": Vector2(15, 30),
 		"voice": {"pitch": 0.95, "meowy": 0.25},
+		"mischief": ["fight"],
 	},
 	"clementine": {
 		"name": "Clementine", "personality": "Hunter",
@@ -136,6 +141,7 @@ const CATS := {
 		"since": "Rescued from a possessed pantry",
 		"tint": Color(1.5, 0.95, 0.55), "swatch": Color(0.9, 0.55, 0.3), "walk_speed": 1.0, "idle": Vector2(3, 7),
 		"voice": {"pitch": 1.0, "meowy": 0.45},
+		"mischief": ["croissant_thief", "fight"],
 	},
 	"bao": {
 		"name": "Bao", "personality": "Chatty",
@@ -143,6 +149,7 @@ const CATS := {
 		"since": "Talked its way out of a dream about a crowded train station",
 		"tint": Color(1.7, 1.65, 1.5), "swatch": Color(0.92, 0.88, 0.8), "walk_speed": 0.55, "idle": Vector2(2, 5),
 		"voice": {"pitch": 1.05, "meowy": 0.85},
+		"mischief": ["fight"],
 	},
 	"tofu": {
 		"name": "Tofu", "personality": "Lazy",
@@ -157,6 +164,7 @@ const CATS := {
 		"since": "Found napping in a dream greenhouse",
 		"tint": Color(1.35, 1.0, 0.7), "swatch": Color(0.85, 0.62, 0.42), "walk_speed": 0.85, "idle": Vector2(1, 3),
 		"voice": {"pitch": 1.3, "meowy": 0.75},
+		"mischief": ["curtains"],
 	},
 }
 

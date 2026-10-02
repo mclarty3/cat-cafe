@@ -40,6 +40,9 @@ const SOUNDS := {
 	"mug_tink": {"files": ["glass_001", "glass_002", "glass_003"], "db": -10.0, "jitter": 0.1},
 	"mug_catch": {"files": ["impactPlate_medium_000"], "db": -4.0},
 	"mug_crash": {"files": ["impactGlass_heavy_000", "impactGlass_heavy_001"], "db": -3.0},
+	"cat_hiss": {"files": ["synth/hiss"], "db": -10.0, "jitter": 0.0},
+	"munch": {"files": ["synth/munch"], "db": -14.0},
+	"curtain_rip": {"files": ["synth/curtain_rip"], "db": -8.0},
 	# UI
 	"ui_move": {"files": ["click_002"], "db": -22.0, "pitch": 1.1},
 	"ui_select": {"files": ["select_003"], "db": -20.0, "pitch": 0.85},

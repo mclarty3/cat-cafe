@@ -39,11 +39,7 @@ func run(day: CafeDay) -> bool:
 		"Walked out: %d" % day.walked_out,
 		"Sales: $%d    Tips: $%d" % [day.earnings, day.tips],
 	]
-	match day.mug_result:
-		"caught":
-			lines.append("The mug a cat went for: caught it!")
-		"broken":
-			lines.append("The mug a cat went for: broken (-$%d)" % day.breakage)
+	lines.append_array(day.cat_events)
 	lines.append("Total: $%d" % day.coins())
 	for chat in day.chats:
 		lines.append("Chatted with %s" % chat)

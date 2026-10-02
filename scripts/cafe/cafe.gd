@@ -5,7 +5,18 @@ extends Node3D
 ## while you carry their order to the pass, then sit for a while. Day tuning is
 ## exported here.
 
+## Emitted every frame with its length (cat events step along on it).
+signal ticked(delta: float)
+
 enum Phase { PREP, SERVICE, RESULTS }
+
+## The cat events a day can draw from (see the "Cat events" settings).
+const CAT_EVENTS: Array[GDScript] = [
+	preload("res://scripts/cafe/events/mug_event.gd"),
+	preload("res://scripts/cafe/events/fight_event.gd"),
+	preload("res://scripts/cafe/events/curtain_event.gd"),
+	preload("res://scripts/cafe/events/thief_event.gd"),
+]
 
 @export_group("Day")
 @export var customers_per_day := 5
@@ -15,11 +26,31 @@ enum Phase { PREP, SERVICE, RESULTS }
 ## Which arrival (0-based) is the regular.
 @export var regular_index := 2
 @export var regular_id := "theo"
-## Seconds into service when the mischievous cat goes for a mug on a table.
-@export var mug_event_time := 45.0
-## If on, the cat waits until you aren't in a menu/minigame/chat before going for
-## the mug, so the event is a choice rather than bad luck.
+
+@export_group("Cat events")
+## How many happen during a day's service (each a different kind).
+@export var cat_events_per_day := 2
+## When they can start, in seconds after opening (earliest, latest).
+@export var cat_event_window := Vector2(20.0, 110.0)
+## At least this long between two starting.
+@export var cat_event_min_gap := 30.0
+## If on, an event waits until you aren't in a menu/minigame/chat, so it's a
+## choice rather than bad luck.
 @export var cat_events_wait_for_free_hands := true
+## Mug: seconds to catch it, and how far it slides toward the edge before falling.
+@export var mug_time := 6.0
+@export var mug_slide := 0.25
+## Fight: seconds to reach full intensity, and until it upsets the room.
+@export var fight_escalate_time := 20.0
+@export var fight_time_limit := 30.0
+## At full intensity, waiting customers lose patience this much faster (1 = twice as fast).
+@export var fight_patience_drain := 1.0
+## When a fight runs out its time, seated customers this close leave early.
+@export var fight_upset_radius := 2.5
+## Curtains: seconds to lift the kitten down before she tears them.
+@export var curtain_time := 20.0
+## Croissant thief: seconds before the stolen croissant is eaten.
+@export var thief_time := 40.0
 
 @export_group("Customers")
 @export var customer_walk_speed := 1.4
@@ -61,6 +92,7 @@ enum Phase { PREP, SERVICE, RESULTS }
 ## Bonus tip if the customer still had at least this much patience left.
 @export_range(0.0, 1.0) var patience_tip_threshold := 0.5
 @export var mug_cost := 2
+@export var curtain_cost := 3
 
 ## Walkers stop sidestepping this close to the end of their route.
 const ARRIVE_RADIUS := 0.4
@@ -80,7 +112,15 @@ var overlay: CanvasLayer:
 var _spawned := 0
 var _spawn_timer := 0.0
 var _service_time := 0.0
-var _mug_event_started := false
+## 0..1 while a cat fight runs: waiting customers lose patience faster.
+var fight_intensity := 0.0
+## Service times (seconds) when the day's cat events start, soonest first.
+var _event_times: Array[float] = []
+## Mischief ids already used today (one of each kind a day).
+var _events_done: Array[String] = []
+var _active_event: CatEvent
+## Shift+F9 (debug builds) starts these in turn.
+var _debug_event := 0
 var _next_ticket := 1
 var _customers: Array[Customer] = []
 ## Customers in line, front first.
@@ -97,8 +137,6 @@ var _queue: Array[Customer] = []
 @onready var _pass: Pass = $Stations/Pass
 @onready var _navigation: NavigationRegion3D = $Navigation
 @onready var _room: Node3D = $Room
-## The cat who does the mug event (the one marked `mischief` in CafeData.CATS).
-var _cat: CafeCat
 var _cats: Array[CafeCat] = []
 ## The cats' navigation map (see _bake_cat_navigation).
 var cat_map: RID
@@ -148,9 +186,6 @@ func _spawn_cats() -> void:
 		_actors.add_child(cat)
 		cat.configure(id, CafeData.CATS[id])
 		_cats.append(cat)
-		if CafeData.CATS[id].get("mischief", false):
-			_cat = cat
-			cat.mug_event_finished.connect(_on_mug_event_finished)
 
 
 ## The bake also makes walkable islands on top of tables, chairs and the
@@ -278,17 +313,31 @@ func _open_cafe() -> void:
 	Audio.play("door_open")
 	Audio.play("day_open")
 	toast("The cafe is open!")
+	_schedule_cat_events()
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and not barista.busy:
 		Game.go_to_title()
-	# Debug shortcut: F9 skips straight to closing time (results screen and closing chime).
-	elif OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo 			and event.keycode == KEY_F9 and phase == Phase.SERVICE and not barista.busy:
-		_end_day()
+	# Debug shortcuts (debug builds, during service). Godot's editor already uses F8
+	# (stop) and the other F-keys near it, so both live on F9.
+	elif OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo \
+			and event.keycode == KEY_F9 and phase == Phase.SERVICE:
+		if event.shift_pressed:
+			# Shift+F9: start a cat event now, each kind in turn.
+			if _active_event == null:
+				for i in CAT_EVENTS.size():
+					var kind: GDScript = CAT_EVENTS[(_debug_event + i) % CAT_EVENTS.size()]
+					if _start_cat_event(kind):
+						_debug_event = (_debug_event + i + 1) % CAT_EVENTS.size()
+						break
+		elif not barista.busy:
+			# F9: skip straight to closing time (results screen and closing chime).
+			_end_day()
 
 
 func _process(delta: float) -> void:
+	ticked.emit(delta)
 	if phase != Phase.SERVICE:
 		return
 	_service_time += delta
@@ -299,15 +348,10 @@ func _process(delta: float) -> void:
 			# Line is full: try again shortly.
 			_spawn_timer = randf_range(spawn_interval.x, spawn_interval.y) if _try_spawn() else 1.0
 
-	if not _mug_event_started and _service_time >= mug_event_time \
-			and not (cat_events_wait_for_free_hands and barista.busy):
-		_mug_event_started = true
-		_cat.start_mug_event(_pick_mug_spot())
-		toast("%s is eyeing a mug on a table..." % _cat.cat_name)
-
-	var mug_settled := _mug_event_started and _cat.state != CafeCat.State.TO_MUG \
-		and _cat.state != CafeCat.State.NUDGING
-	if _spawned >= customers_per_day and _customers.is_empty() and mug_settled:
+	_update_cat_events()
+	# Closing time once everyone's gone; any events still to come are skipped,
+	# but one that's running plays out.
+	if _spawned >= customers_per_day and _customers.is_empty() and _active_event == null:
 		_end_day()
 
 
@@ -684,10 +728,110 @@ func toast(text: String) -> void:
 	hud.toast(text)
 
 
-# --- Cat event ----------------------------------------------------------------
+# --- Cat events ---------------------------------------------------------------
+
+## Picks the day's event start times: random within the window, spaced out.
+func _schedule_cat_events() -> void:
+	_event_times.clear()
+	for attempt in 50:
+		var times: Array[float] = []
+		for i in cat_events_per_day:
+			times.append(randf_range(cat_event_window.x, cat_event_window.y))
+		times.sort()
+		var spaced := true
+		for i in range(1, times.size()):
+			spaced = spaced and times[i] - times[i - 1] >= cat_event_min_gap
+		if spaced:
+			_event_times = times
+			return
+	# Couldn't space them randomly: spread them evenly instead.
+	for i in cat_events_per_day:
+		_event_times.append(lerpf(cat_event_window.x, cat_event_window.y, (i + 0.5) / cat_events_per_day))
+
+
+## Starts the next event once its time comes, one at a time, waiting for free
+## hands. Which kind is chosen then, from those that can happen right now.
+func _update_cat_events() -> void:
+	if _event_times.is_empty() or _active_event or _service_time < _event_times[0]:
+		return
+	if cat_events_wait_for_free_hands and barista.busy:
+		return
+	var kinds := CAT_EVENTS.duplicate()
+	kinds.shuffle()
+	for kind: GDScript in kinds:
+		if _start_cat_event(kind):
+			_event_times.pop_front()
+			return
+	# Nothing can happen right now (cats busy, say): try again shortly.
+	_event_times[0] += 5.0
+
+
+## Starts an event of this kind if it can happen now (and hasn't today).
+func _start_cat_event(kind: GDScript) -> bool:
+	var event: CatEvent = kind.new()
+	event.cafe = self
+	if event.mischief_id() in _events_done or not event.prepare():
+		return false
+	_events_done.append(event.mischief_id())
+	_run_cat_event(event)
+	return true
+
+
+func _run_cat_event(event: CatEvent) -> void:
+	_active_event = event
+	for c in event.cats:
+		c.claim(event)
+	var line: String = await event.run()
+	if not line.is_empty():
+		day.cat_events.append(line)
+	_active_event = null
+
+
+## Cats free to get up to `mischief` (an id from their CafeData.CATS list).
+func free_cats(mischief: String) -> Array[CafeCat]:
+	var free: Array[CafeCat] = []
+	for c in _cats:
+		if c.event == null and c.on_floor() and mischief in c.mischief:
+			free.append(c)
+	return free
+
+
+## Adds something an event brings into the room (a scuffle cloud, say).
+func add_actor(node: Node3D) -> void:
+	_actors.add_child(node)
+
+
+## How fast waiting customers lose patience (1 = normal; more during a cat fight).
+func patience_drain() -> float:
+	return 1.0 + fight_intensity * fight_patience_drain
+
+
+## Seated customers this close to `spot` leave early. Returns how many did.
+func upset_seated_customers(spot: Vector3, radius: float) -> int:
+	var count := 0
+	for c in _customers.duplicate():
+		if c.state == Customer.State.SEATED and not c.is_walking() and not c.in_conversation \
+				and _flat_distance(c.global_position, spot) < radius:
+			c.leave_early()
+			count += 1
+	day.left_early += count
+	return count
+
+
+## Where the croissants sit on the pastry case.
+func pastry_case_shelf() -> Vector3:
+	return $Stations/PastryCase/Croissant.global_position
+
+
+func table_positions() -> Array[Vector3]:
+	var positions: Array[Vector3] = []
+	for spot: Node3D in get_tree().get_nodes_in_group("mug_spots"):
+		positions.append(spot.get_parent().global_position)
+	return positions
+
 
 ## A table top to knock a mug off, preferring tables with someone sitting there.
-func _pick_mug_spot() -> Vector3:
+func pick_mug_spot() -> Vector3:
 	var spots := get_tree().get_nodes_in_group("mug_spots")
 	var occupied := spots.filter(func(m: Node3D) -> bool:
 		for seat: Seat in get_tree().get_nodes_in_group("seats"):
@@ -695,13 +839,6 @@ func _pick_mug_spot() -> Vector3:
 				return true
 		return false)
 	return (occupied if not occupied.is_empty() else spots).pick_random().global_position
-
-
-func _on_mug_event_finished(caught: bool) -> void:
-	day.mug_result = "caught" if caught else "broken"
-	Audio.play("mug_catch" if caught else "mug_crash")
-	if not caught:
-		day.breakage += mug_cost
 
 
 func _end_day() -> void:

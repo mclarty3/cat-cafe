@@ -6,6 +6,7 @@ are lost. Either make layout changes here, or retire this script once the
 scene is being edited by hand.
 """
 import math
+import re
 import os
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "scenes", "cafe", "cafe.tscn")
@@ -210,6 +211,13 @@ prop("PlantShelf", "Decor", FURN + "plantSmall1.glb", (0.2, 0.56, 3.2), scale=1.
 prop("Lamp", "Decor", FURN + "lampRoundFloor.glb", (6.7, 0, 4.3), collision=CYL)
 prop("PlantRight", "Decor", FURN + "pottedPlant.glb", (6.6, 0, 5.6), scale=1.3, collision=CYL)
 
+# Curtains at the right wall's windows (stand-in panels, see curtain.gd). Not part of the
+# navigation bake: they hang flat against the wall. The kitten in the curtain event climbs them.
+node("Curtains", "Node3D")
+for z in (2.5, 4.5):
+    node(f"Curtain{int(z)}", "Node3D", "Curtains", [
+        f"transform = {xform((ROOM_W - 0.03, 0, z), yaw=-90)}", f"script = {script(ST + 'curtain.gd')}"])
+
 # --- Markers ------------------------------------------------------------------
 node("Markers", "Node3D")
 node("Door", "Marker3D", "Markers", [f"transform = {xform((-0.6, 0, 5.5))}"])
@@ -234,8 +242,22 @@ node("Barista", None, ".", [f"transform = {xform((3.0, 0, 0.9))}"], instance=sce
 node("Overlay", "CanvasLayer", props=["layer = 1"])
 node("HUD", "CanvasLayer", props=["layer = 2", f"script = {script(ST + 'ui/cafe_hud.gd')}"])
 
-out = [f"[gd_scene load_steps={len(ext) + len(subs) + 1} format=3]", ""]
-out += [f'[ext_resource type="{t}" path="{p}" id="{i}"]' for t, p, i in ext]
+# Keep the uids Godot added when it last saved the scene, so regenerating doesn't churn them.
+uids = {}
+if os.path.exists(OUT):
+    old = open(OUT, encoding="utf-8").read()
+    uids = dict((p, u) for u, p in re.findall(r'\[ext_resource [^\]]*uid="([^"]+)" path="([^"]+)"', old))
+    scene_uid = re.search(r'\[gd_scene [^\]]*uid="([^"]+)"', old)
+    if scene_uid:
+        uids[OUT] = scene_uid.group(1)
+
+
+def uid_attr(key):
+    return f' uid="{uids[key]}"' if key in uids else ""
+
+
+out = [f"[gd_scene load_steps={len(ext) + len(subs) + 1} format=3{uid_attr(OUT)}]", ""]
+out += [f'[ext_resource type="{t}"{uid_attr(p)} path="{p}" id="{i}"]' for t, p, i in ext]
 out += [""] + ["\n".join([s, ""]) for s in subs]
 out += ["\n\n".join(nodes), ""]
 open(OUT, "w", newline="\n").write("\n".join(out))
