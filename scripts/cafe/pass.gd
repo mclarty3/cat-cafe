@@ -38,9 +38,6 @@ func refresh(tickets: Array[Ticket]) -> void:
 	for ticket in tickets:
 		items.append_array(ticket.on_pass)
 	for i in items.size():
-		var model := Prop3D.new()
-		var data := CafeData.item(items[i]["id"])
-		_display.add_child(model)
-		model.model_scale = data.get("model_scale", 0.35)
-		model.model = load(data["model"])
+		var model := ItemModel.create(items[i]["id"])
 		model.position = Vector3((i - (items.size() - 1) / 2.0) * display_spacing, display_height, 0.2)
+		_display.add_child(model)

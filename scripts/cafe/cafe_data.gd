@@ -8,12 +8,14 @@ enum Quality { POOR, GOOD, PERFECT }
 const QUALITY_NAMES := ["Poor", "Good", "Perfect!"]
 
 ## `steps`: drink minigame stages. `uses`: a stock key consumed when the item is
-## made or taken. Items without `uses` are unlimited.
+## made or taken. Items without `uses` are unlimited. `model` is how it looks on
+## the pass and in your hands, optionally standing on a `base` (see ItemModel).
 const ITEMS := {
 	"espresso": {
 		"name": "Espresso", "kind": "drink", "price": 3,
 		"steps": ["pull"], "color": Color(0.36, 0.23, 0.16),
-		"model": "res://assets/kenney/food/cup-saucer.glb", "model_scale": 0.3,
+		"model": "res://assets/kenney/food/cup-coffee.glb", "model_scale": 0.32,
+		"base": "res://assets/kenney/food/cup-saucer.glb", "base_scale": 0.3,
 	},
 	"latte": {
 		"name": "Latte", "kind": "drink", "price": 4,

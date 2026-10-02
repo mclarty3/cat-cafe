@@ -70,7 +70,7 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
      the rail (left side of the screen), and they walk over to a free pickup spot (if all are taken,
      they wait behind and move up when one frees).
    - Make the drinks at the espresso machine and grab pastries from the case, then carry them to the
-     **pass**. Once a ticket is complete, its customer collects it, tips, and goes to sit (or leaves with
+     **pass** (they show in the barista's hands: first item right, second left). Once a ticket is complete, its customer collects it, tips, and goes to sit (or leaves with
      it to go if every table is taken).
    - Customers walk out if they wait too long, either in line or at pickup. They don't get a refund,
      but there's no tip either.
@@ -162,6 +162,17 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
   baked from the furniture's actual models, so anything with about 0.3 m of room underneath (tables) can be
   walked under, and legs block wherever they really are. Swapping a model needs no extra setup. Only
   floor-level polygons are kept in both. Nothing re-bakes after startup yet (the Furniture tab will need to).
+- **Character models:** the code assumes Kenney's mini characters. Swapping in a different rig will need:
+  - Bone names: carrying uses `arm-left` / `arm-right` (`Barista._place_held`, `AnimatedModel.hold_arms`).
+  - One bone per arm: `AnimatedModel.hand_position()` finds the fist as the arm bone's farthest vertices. A rig
+    with upper arm / forearm / hand bones should use its hand bone (or a hand socket node in the model) instead,
+    and hold the whole arm chain while carrying.
+  - Animation names: `idle`, `walk`, `sit`, `holding-both`, `holding-right` (the carry poses).
+  - Hand-tuned numbers: `character_scale` and `sit_height` (Cafe), the grip offsets and `held_scale`
+    (Barista), and the cat navmesh's 0.4 m clearance.
+
+  Plan: when the first non-Kenney character arrives, add a per-character rig profile (animation name map, arm
+  bones, hand bones or sockets) with Kenney's values as the default. Not built yet, since the art style is open.
 
 ### Code map
 
@@ -258,8 +269,8 @@ one) into the matching folder, and drop it onto a `Prop3D`.
   barista can still walk through people and cats, and a walker's last 0.4 m goes straight to its spot.
 - The art styles don't match. The furniture and food are smooth low-poly, while the characters and cat
   are blocky. That's fine for a prototype, but not a look to keep.
-- The till is a stand-in model (a computer screen). The sit pose is eyeballed. Mochi glides onto the
-  table rather than jumping, and the barista doesn't visibly hold what they're carrying.
+- The till is a stand-in model (a computer screen). The sit pose is eyeballed. The latte and honey latte
+  share a cup model, so in the barista's hands only the dot overhead tells them apart.
 - One regular, one conversation, and no memory between days. "Another day" starts completely fresh.
 - One cat event, always at the same time.
 - No staff, no cafe upgrades, no customer–cat matchmaking.
@@ -291,7 +302,6 @@ one) into the matching folder, and drop it onto a `Prop3D`.
 9. **A cozy pass:** lamps that glow, window light, and calm open and close periods. Then dynamic music
    from the design notes: purring layers as cats settle, the tempo lifting during a rush, and rain on the
    windows.
-10. **Show what you're carrying in 3D:** put the actual cup and pastry models in the barista's hands.
 
 ## Open design questions this slice could answer
 

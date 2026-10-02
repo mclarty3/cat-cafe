@@ -13,6 +13,13 @@ extends CharacterBody3D
 @export var walk_anim_speed := 1.25
 ## How many items you can carry at once.
 @export var carry_capacity := 2
+## Where a carried item sits relative to the middle of the fist: this far in
+## front of it (so the fist doesn't hide it) and its base this far below.
+@export var grip_forward := 0.05
+@export var grip_depth := 0.03
+## Carried items are shown this much bigger than on the pass, so they read from
+## the game camera.
+@export var held_scale := 1.3
 
 ## Set while a menu, minigame or conversation has the player's attention.
 ## The world keeps running.
@@ -29,6 +36,9 @@ var cafe: Cafe
 var focus_marker := FocusMarker.new()
 
 var _focus: Interactable
+## The models in your hands, matching `hands`, and the item ids they show.
+var _held: Array[ItemModel] = []
+var _held_ids: Array[String] = []
 var _freed_on_frame := -10
 var _step_timer := 0.0
 
@@ -39,6 +49,7 @@ var _step_timer := 0.0
 func _ready() -> void:
 	focus_marker.top_level = true
 	add_child(focus_marker)
+	_model.posed.connect(_place_held)
 
 
 func _physics_process(delta: float) -> void:
@@ -65,9 +76,10 @@ func _physics_process(delta: float) -> void:
 			_step_timer = 0.3 / maxf(pace, 0.6)
 	else:
 		_step_timer = 0.0
-		_model.play("holding-both" if not hands.is_empty() else "idle")
+		_model.play("idle")
 		_model.set_playback_speed(1.0)
 
+	_update_held()
 	_update_focus()
 	# Skip a couple of frames after a menu closes, so the key that closed it
 	# doesn't also use whatever is in front of you.
@@ -124,6 +136,47 @@ func count_item(id: String) -> int:
 
 func clear_hands() -> void:
 	hands.clear()
+
+
+## Swaps the models in your hands when what you're carrying changes. The first
+## item goes in the right hand, the second in the left, and the arms that hold
+## something stay out front (walking or not).
+func _update_held() -> void:
+	var ids: Array[String] = []
+	for it in hands:
+		ids.append(it["id"])
+	if ids == _held_ids:
+		return
+	_held_ids = ids
+	for item in _held:
+		item.queue_free()
+	_held.clear()
+	for id in ids:
+		var item := ItemModel.create(id, held_scale)
+		item.top_level = true
+		add_child(item)
+		_held.append(item)
+	match ids.size():
+		0:
+			_model.hold_arms("")
+		1:
+			_model.hold_arms("holding-right", ["arm-right"])
+		_:
+			_model.hold_arms("holding-both")
+
+
+## Puts each carried model in its fist, upright and facing where you face.
+## Runs when the model is posed: the held arms are a skeleton modifier, so
+## they're only out front during the skeleton's update (read the pose any other
+## time and the arms are down).
+func _place_held() -> void:
+	for i in _held.size():
+		var fist := _model.hand_position("arm-right" if i % 2 == 0 else "arm-left")
+		# Past two items, stack them up in the hands.
+		var stack := Vector3.UP * 0.12 * (i / 2)
+		var facing := Basis(Vector3.UP, _model.global_rotation.y)
+		_held[i].global_transform = Transform3D(facing,
+			fist + facing.z * grip_forward + Vector3.DOWN * grip_depth + stack)
 
 
 ## What you're carrying floats above your head.
