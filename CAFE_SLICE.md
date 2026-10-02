@@ -86,8 +86,14 @@ the running game".
 
 - **Register:** takes the order of whoever is at the front of the line.
 - **Espresso machine:** choose a drink, then play the minigame.
-  - *Pull:* stop a sweeping marker inside the zone.
-  - *Steam* (lattes): hold to heat, release inside the zone, and don't hit the end (scalded).
+  - Each drink opens with a one-second lead-in (`lead_in`): the gauge shows and the grinder runs, but nothing
+    moves yet and presses are ignored.
+  - *Pull:* stop the pressure gauge's sweeping needle in the green, while the cup fills under the portafilter.
+  - *Steam* (lattes): hold to heat the pitcher (the thermometer climbs and the steam grows), let go in the
+    green, and don't hit the end (scalded: the milk reddens and the gauge shakes).
+  - Each press punches the gauge, flashes the zone in the result's colour, and pops the result word; the
+    click rises in pitch the closer you were. Sparkles scale with quality, and the finished drink is shown
+    at the end, with latte art on a Perfect.
   - The drink's quality is its worst step (Poor / Good / Perfect), which sets the tip.
 - **Pastry case:** take a baked pastry. Stock only comes from morning prep.
 - **Pass:** put down what you're carrying. Items waiting for pickup show on the counter as little models.
@@ -310,8 +316,9 @@ one) into the matching folder, and drop it onto a `Prop3D`.
    capacity, and arrival rate.
 2. **Staff** (the docs' relief valve). A hireable helper who runs the register, which frees you to work the
    floor and chat. That's the design notes' "staff takes orders, you chat at tables".
-3. **Make the minigame feel good:** sound, a visual cup filling, and a little ceremony on a Perfect.
-   It's the most repeated action.
+3. **Keep tuning the minigame feel** (the visuals and feedback are in): make steaming something you can
+   hear (the hiss changing as the milk heats, from the design notes' "listen for the right sound"), a steam
+   puff at the machine and a camera nudge while you work, and possibly a cosmetic Perfect streak.
 4. **Persistence between days:** carry money and Theo's story progress forward, and have
    his next visit pick up the skipped chat. That tests "never missable" for real.
 5. **Make personalities do something.** The five cats are in, but only their movement differs. Add their
