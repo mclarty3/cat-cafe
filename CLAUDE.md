@@ -11,6 +11,26 @@ Design lives in `docs/` (an Obsidian vault). Prototype status and next steps: `C
 - Design decisions are recorded in the docs with status tags (`[DECIDED]` / `[LEANING]` / `[PROPOSED]` / `[OPEN]` / `[REJECTED]`, dated)
   and a row in `docs/Decision Log.md`. Mark Claude-invented ideas as `[PROPOSED] *(Claude suggestion)*`.
 
+## Trello board (task tracking)
+- "The board", "the Trello", or a card name means the **Cat Cafe** board: https://trello.com/b/jHhg7mbG/cat-cafe
+  (ARI `ari:cloud:trello::board/workspace/603d57ea508b3a3261e237c4/6abf0fd0bcc44de040d99029`). Ryan and Darren share it.
+- Access is through Trello's hosted MCP (`mcp__trello__*` tools). If they're missing:
+  `claude mcp add trello --transport http https://mcp.trello.com/v1`, then authenticate via `/mcp`. Find a card the user
+  names with `trelloSearch` (`search_cards`, scoped to the board ARI).
+- Lists: 💡 Ideas → ❓ To Decide → 📋 Backlog → 🎯 Up Next → 🔨 Doing → 🎮 Playtest / Review → ✅ Done. The pinned
+  "📌 How this board works" card in Ideas is the source of truth for conventions.
+- Card kinds (title prefix): **Explore:** (make options to look at), **Decide:** (a joint call, done when logged in
+  `docs/Decision Log.md`), or no prefix for a build card (only for things the docs mark `[DECIDED]` or a slice already has).
+  The project is early: frame unsettled work as Explore/Decide, never "Design the X".
+- Descriptions: *Why* · *Done when* · *Refs* (doc or slice section). **No owner lines**: the code (Ryan) / art (Darren)
+  split is loose, so never assign work by discipline; people add themselves as members.
+- Labels. Area: Cafe, Dream, Cats, Loop & Meta (spans both halves, plus saving/settings/pipeline). Kind: Art, Audio, Design,
+  Bug, Prototype. Look up label IDs with `trelloReadBoard` `list_labels`.
+- MCP limits: it can attach/detach labels but **can't create or rename labels, or assign members**; ask the user to do
+  those in Trello. Very slow writes can time out and silently not apply, so re-check (search) after bulk edits.
+- When finishing work that matches a card, offer to move it (e.g. to Playtest / Review). When a Decide card is settled,
+  the docs change goes through the usual `[DECIDED]` + Decision Log flow.
+
 ## Skills (`.claude/skills/`)
 - `godot-verify`: run a throwaway scripted probe headless (PASS/FAIL) or windowed (screenshots), with a template and a
   helper script (`run_probe.sh`). Use it before reporting changes as working.
