@@ -39,4 +39,15 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
   adorable, but cats need readable silhouettes and poses (sitting, walking, being petted, climbing the
   curtains, fighting, carrying a stolen croissant) and should show their personalities. Explore separately.
 - The dungeon's music direction.
-- UI style.
+- `[LEANING]` (2026-10-02) **UI style: cozy paper and card panels**, matching the cafe look: cream, rounded
+  cards with soft shadows and a friendly rounded font; **icons** for money and stock (coin, croissant, muffin,
+  honey jar); **order tickets as paper slips pinned to a nail**; speech-bubble signs and bubbles over customers.
+  Explored as an AI paintover of a prototype screenshot (reference only). To discuss together before deciding.
+  Things to change from the concept: it's **too big** (the ticket stack hides the queue along the left wall);
+  keep the UI **compact**. Tickets should be **one small slip per order with item icons** that tick off, not
+  text checklists. The "Carrying" line is mostly redundant now that items show in the barista's hands. The
+  interact prompt wants a key icon, and light cards need enough contrast against the pale walls.
+
+  ![UI concept over a service screenshot](images/ui-look-service.jpg)
+
+  *AI-generated concept (image editing over a prototype screenshot), 2026-10-02. Mood reference only.*
