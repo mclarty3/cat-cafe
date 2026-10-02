@@ -16,12 +16,20 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 ## Main story
 - `[PROPOSED]` (2026-09-30) *(Ryan's idea)* **The relative's lost cat is the final boss.** It has been taken over by the nightmare, and the player frees it and brings it home. **The game continues after this** as a post-game.
 
+## Player character
+- `[LEANING]` (2026-10-01) A **cute young woman** who fits the cozy, dreamy style. Loosely inspired by Hat Kid (*A Hat in Time*) but not a copy: older, at roughly **4.5 to 5 heads tall** (stylized and cute, but not a child), with simple, chunky shapes that still read from the pulled-back cafe camera.
+- `[LEANING]` (2026-10-01) **"Pajama Knight":** she enters the dream by falling asleep, so **in the dream she wears her sleepwear**: oversized pajamas or a nightshirt, soft socks or slippers, and a **floppy nightcap** as her signature silhouette piece (the role Hat Kid's hat plays). This gives the dream half an instantly different look from the cafe half.
+- `[LEANING]` (2026-10-01) The **brooch is not on the pajamas**. She wears it by day; in the dream it *is* the sword, so it's in her hand.
+- `[REJECTED]` (2026-10-01) **Cat motifs on the character** (ear-shaped buns, paw-print buttons, tail-like ribbons). There are already plenty of cats.
+- Reference characters from the brainstorm: Kiki (*Kiki's Delivery Service*), Stella (*Spiritfarer*), Sophie (*Howl's Moving Castle*), Claire (*A Short Hike*), Hornet (*Hollow Knight*, for a combat-readable silhouette).
+- Still open: her name and personality, her day outfit, her palette, and any customization.
+
 ## Needs expansion
 - The dream realm's cosmology: what it is, why cats get possessed, and what the "nightmare" force is.
 - The main story arc and ending.
-- Who the player character is.
+- The player character's name, personality, and day outfit.
 - The town or world around the cafe.
 
 ## Not yet discussed
 
-- **Player character:** who they are, customization.
+- **Player character customization.**
