@@ -12,6 +12,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 
 ## Needs expansion
 - `[OPEN]` Art style (pixel art? hand-drawn? The 2D dungeon suggests 2D overall, but this hasn't been discussed).
-- `[DECIDED]` (2026-09-30) The cafe uses a **3D-feeling / isometric-style view** (not a literal overhead view, and not the dungeon's side view). The cafe prototype uses a flat top-down view as a stand-in, which is fine for testing mechanics.
+- `[DECIDED]` (2026-10-01) The cafe is **full 3D with a perspective camera** that looks at the counter from the front of house and softly follows the player. Movement in the 3D part of the game should **feel good**: responsive starts and stops, no sliding.
+- `[REJECTED]` (2026-10-01) A fixed **isometric** camera (decided 2026-09-30, then prototyped). In practice it felt limiting and a bit ugly.
 - The dungeon's music direction.
 - UI style.

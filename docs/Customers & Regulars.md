@@ -5,6 +5,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 - `[DECIDED]` **Regulars have ongoing stories**, revealed through conversations over many visits. This is a key emotional driver (Coffee Talk-style).
 - `[DECIDED]` Conversations are signaled with a **speech bubble** at the table.
 - `[LEANING]` Chatting with a customer is **optional** at that moment and progresses their quest or story.
+- `[DECIDED]` (2026-10-01) **Regulars are chatted with at their table.** A regular greets you briefly at the register, then sits with their order and shows a speech bubble. Talking means stepping out from behind the counter, which leaves the queue unattended (see [[Cafe Gameplay#Service model]]).
 - `[DECIDED]` (2026-09-30) Story beats should be **optional in the moment but never missable**. If you skip a bubble today, the regular brings it up on their next visit, so a hectic day never locks you out of a storyline.
 - `[PROPOSED]` Chatting during a rush means orders pile up. This natural trade-off makes busy days and slow days feel different.
 - `[PROPOSED]` Regulars sometimes show up during a lull (for example, right before closing) so there's usually a relaxed window to talk.
