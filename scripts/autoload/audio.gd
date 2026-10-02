@@ -5,6 +5,7 @@ extends Node
 
 const KENNEY := "res://assets/audio/sfx/kenney/"
 const SYNTH := "res://assets/audio/sfx/synth/"
+const CATS := "res://assets/audio/sfx/cats/"
 
 ## name -> files (one is picked at random), volume in dB, pitch, and random
 ## pitch variation (+/-) so repeated sounds don't feel mechanical.
@@ -31,8 +32,11 @@ const SOUNDS := {
 	"tip": {"files": ["handleCoins2"], "db": -8.0, "pitch": 1.15},
 	"walk_out": {"files": ["back_002"], "db": -6.0, "pitch": 0.8},
 	"door_close": {"files": ["doorClose_1"], "db": -16.0},
-	# Cat
+	# Cat (pitch is also scaled per cat by its voice in CafeData.CATS)
 	"purr": {"files": ["synth/purr"], "db": -8.0, "pitch": 1.1},
+	"cat_meow": {"files": ["cats/meow_short", "cats/meow_food", "cats/meow_soft", "cats/meow_kitten"], "db": -8.0},
+	"cat_mew_purr": {"files": ["cats/mew_purr", "cats/mew_purr_long"], "db": -8.0},
+	"cat_purr": {"files": ["cats/purr_active", "cats/purr_sleepy"], "db": -17.0},
 	"mug_tink": {"files": ["glass_001", "glass_002", "glass_003"], "db": -10.0, "jitter": 0.1},
 	"mug_catch": {"files": ["impactPlate_medium_000"], "db": -4.0},
 	"mug_crash": {"files": ["impactGlass_heavy_000", "impactGlass_heavy_001"], "db": -3.0},
@@ -58,6 +62,8 @@ var _pool: Array[AudioStreamPlayer] = []
 var _next_player := 0
 var _loops := {}
 var _cache := {}
+## Last file played per sound, so variations don't repeat back to back.
+var _last_file := {}
 var _music: AudioStreamPlayer
 var _music_tween: Tween
 var _playlist: Array[String] = []
@@ -83,7 +89,7 @@ func play(sound: String, volume_offset := 0.0, pitch := 1.0) -> void:
 	if def.is_empty():
 		return
 	var player := _take_player()
-	player.stream = _load(def["files"].pick_random())
+	player.stream = _load(_pick_file(sound, def["files"]))
 	player.volume_db = def.get("db", 0.0) + volume_offset
 	var jitter: float = def.get("jitter", 0.05)
 	player.pitch_scale = pitch * def.get("pitch", 1.0) * randf_range(1.0 - jitter, 1.0 + jitter)
@@ -173,6 +179,13 @@ func _def(sound: String) -> Dictionary:
 	return SOUNDS[sound]
 
 
+func _pick_file(sound: String, files: Array) -> String:
+	var choices := files.filter(func(f: String) -> bool: return f != _last_file.get(sound, ""))
+	var file: String = (choices if not choices.is_empty() else files).pick_random()
+	_last_file[sound] = file
+	return file
+
+
 func _take_player() -> AudioStreamPlayer:
 	for player in _pool:
 		if not player.playing:
@@ -184,8 +197,11 @@ func _take_player() -> AudioStreamPlayer:
 
 func _load(file: String) -> AudioStream:
 	if not _cache.has(file):
-		var path := SYNTH + file.trim_prefix("synth/") + ".wav" if file.begins_with("synth/") \
-			else KENNEY + file + ".ogg"
+		var path := KENNEY + file + ".ogg"
+		if file.begins_with("synth/"):
+			path = SYNTH + file.trim_prefix("synth/") + ".wav"
+		elif file.begins_with("cats/"):
+			path = CATS + file.trim_prefix("cats/") + ".ogg"
 		_cache[file] = load(path)
 	return _cache[file]
 

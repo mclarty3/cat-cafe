@@ -53,8 +53,13 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
    - **Kitchen** (the page it opens on): 3 prep actions: bake croissants (+4), bake moonflour muffins (+3, uses 1 moonflour)
      or make dream-honey syrup (+3 honey lattes, uses 1 dream honey). The pantry starts with 2
      moonflour and 1 dream honey, so you can't do everything.
-   - **Cats:** a roster of the cats living in the cafe (just Mochi so far). It's view-only for now.
-     Managing cats arrives with the cat systems, which matters once you have lots of them.
+   - **Cats:** a roster of compact cards, two per row. Each card shows the cat's colour, **name** and
+     **personality**, plus a row of icons grouped under **Cafe** and **Dream** (for example, Curious has a
+     coin and a wall). Cafe icons are **green** for benefits and **red** for drawbacks (Playful's
+     "knocks things over"); Dream icons are always **lilac**. Hovering or selecting an icon shows its description on the info
+     line pinned under the list. The list scrolls. Hovering a card shows the cat's description. The effects
+     come from the design notes and aren't active yet. The roster is view-only for now; managing cats
+     arrives with the cat systems, which matters once you have lots of them.
    - **Furniture** and **Upgrades:** placeholders showing what's planned, greyed out until money
      and the layout carry over between days.
 
@@ -87,7 +92,26 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
   syrup, otherwise a latte). Then he sits down and shows a speech bubble. Walk out from behind the counter
   to chat: a short 2-choice conversation, during which he won't leave. If you skip it, the results say
   he'll bring it up next visit ("optional but never missable").
-- **Mochi (a cat):** wanders the front of house and can be petted. About 45 seconds in, she jumps on a table
+- **Eight resident cats**, covering all six confirmed personalities (with a second Lazy and a second
+  Curious), set up as a mid-game cafe. They're spawned from
+  `CATS` in `cafe_data.gd`, so adding one is a single entry:
+
+  | Cat | Personality | Look | Behaviour |
+  |---|---|---|---|
+  | Mochi | Playful | lilac-grey | Wanders and plays; does the mug event |
+  | Biscuit | Lazy | taupe | Long naps, slow ambles |
+  | Pepper | Curious | slate blue | Always on the move |
+  | Inky | Nocturnal | black | Dozes through the day shift |
+  | Clementine | Hunter | orange | Quick, prowling dashes |
+  | Bao | Chatty | cream-white | Meows at everything |
+  | Tofu | Lazy | grey | Sleeps anywhere |
+  | Sprout | Curious | ginger | A kitten, high-pitched and into everything |
+
+  The full cat schema (every field, and how each should be generated later) is in *Cat data schema* in
+  `docs/Cats.md`.
+  They all share one Kenney cat model, tinted per cat. Personality *effects* aren't implemented yet; for
+  now the personalities only change how each cat moves.
+- **Mochi (the playful one):** wanders the front of house and can be petted. About 45 seconds in, she jumps on a table
   (preferring one with someone sitting at it) and starts nudging a mug. You have 6 seconds to get out there
   and catch it, or it breaks and costs $2. She waits until you're not in a menu, minigame or chat, and a
   toast warns you when she starts.
@@ -100,7 +124,10 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
   - a quality sting on each drink;
   - a plate clink at the pass, an order-up bell and coins for tips;
   - a grumble on walkouts;
-  - Mochi purring, and clinking the mug faster and faster as it nears the edge (then a catch or a crash);
+  - cats meowing or purring when petted: real recordings plus the synthesized purr. Each cat has its own
+    voice pitch, playful and curious cats meow more, lazy and sleepy ones mostly purr, and it never plays
+    the same kind twice in a row;
+  - clinking the mug faster and faster as it nears the edge (then a catch or a crash);
   - UI clicks;
   - the shop-door bell when you open, and the same bell as a two-note chime at closing.
 - **Pathfinding:** customers walk around furniture using a navigation mesh, baked when the scene loads
@@ -143,7 +170,7 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 | `scripts/cafe/focus_marker.gd` | The bobbing arrow over whatever Interact will use |
 | `scripts/cafe/interactable.gd` | Base class for anything you can use: `get_prompt()` / `interact()` |
 | `scripts/cafe/station.gd` + `register.gd`, `espresso_machine.gd`, `pastry_case.gd`, `pass.gd`, `trash_bin.gd` | Counter equipment. The register's computer runs CafeOS before opening |
-| `scripts/cafe/cafe_cat.gd` | Wandering, petting, the mug event on a table |
+| `scripts/cafe/cafe_cat.gd`, `scenes/cafe/cat.tscn` | A cat: wandering (per-cat pace), petting, the mug event on a table. Spawned from `CafeData.CATS` |
 | `scripts/cafe/seat.gd` | Where customers sit. Point its +Z at the table |
 | `scripts/cafe/prop_3d.gd` | Places any model, centres its footprint, and adds an optional auto-sized box or cylinder collider. Use it for all furniture |
 | `scripts/cafe/animated_model.gd` | Plays a Kenney character or pet animation by name and turns it to face a direction |
@@ -204,7 +231,14 @@ appreciated). Only the models in use are in `assets/kenney/`, each folder with i
 |---|---|---|
 | `assets/audio/music/` | "Cat caffe", "A cup of tea", "Bartender" by **TAD**, from [lofi Compilation](https://opengameart.org/content/lofi-compilation) (CC0; the author asks for credit "if you can", see `CREDITS.txt`) | Cafe radio |
 | `assets/audio/sfx/kenney/` | Kenney [Interface Sounds](https://kenney.nl/assets/interface-sounds), [Impact Sounds](https://kenney.nl/assets/impact-sounds), [RPG Audio](https://kenney.nl/assets/rpg-audio) (CC0) | Footsteps, clinks, bells, coins, door, UI |
+| `assets/audio/sfx/cats/` | Meows and purrs by Kerzoven ([Cat Purr & Meow](https://opengameart.org/content/cat-purr-meow)), AntumDeluge ([Kitten Mew](https://opengameart.org/content/kitten-mew)) and IgnasD ([Meow](https://opengameart.org/content/meow)), all CC0; see `CREDITS.txt` | Petting the cats |
 | `assets/audio/sfx/synth/` | Synthesized for this project | Grinder, espresso pour, milk steam, scald, purr (no CC0 recordings were readily available; replace with real ones later) |
+
+### UI icons
+
+`assets/ui/icons/`: from Kenney [Board Game Icons](https://kenney.nl/assets/board-game-icons) and
+[Game Icons](https://kenney.nl/assets/game-icons) (CC0), with their licences. They're white, so the UI
+tints them. Each personality's effect icons are set in `PERSONALITIES` in `cafe_data.gd`.
 
 To add more models, download the pack, copy the `.glb` (plus its `Textures/colormap.png` if the model uses
 one) into the matching folder, and drop it onto a `Prop3D`.
@@ -237,8 +271,10 @@ one) into the matching folder, and drop it onto a `Prop3D`.
    It's the most repeated action.
 4. **Persistence between days:** carry money and Theo's story progress forward, and have
    his next visit pick up the skipped chat. That tests "never missable" for real.
-5. **Cats with personalities** (the Lazy / Playful / Curious roster). Each resident cat changes the day,
-   for example Lazy calms impatient people in the queue. This also tests the matchmaking idea.
+5. **Make personalities do something.** The five cats are in, but only their movement differs. Add their
+   cafe effects from the design notes: Lazy calms impatient people in the queue, Curious finds dropped
+   coins, Nocturnal draws superstitious customers, Hunter handles a "mouse in the kitchen" event, and so
+   on. This also tests the matchmaking idea.
 6. **More cat events** out front, at random times: a cat fight, a kitten on the curtains, the croissant thief.
 7. **Fill in CafeOS:** carry money between days, then make the Upgrades tab real (a second group head, a
    bigger pastry case, more seats) and the Furniture tab (rearranging tables and decor before opening). The

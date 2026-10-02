@@ -15,9 +15,9 @@ enum Phase { PREP, SERVICE, RESULTS }
 ## Which arrival (0-based) is the regular.
 @export var regular_index := 2
 @export var regular_id := "theo"
-## Seconds into service when Mochi goes for a mug on a table.
+## Seconds into service when the mischievous cat goes for a mug on a table.
 @export var mug_event_time := 45.0
-## If on, Mochi waits until you aren't in a menu/minigame/chat before going for
+## If on, the cat waits until you aren't in a menu/minigame/chat before going for
 ## the mug, so the event is a choice rather than bad luck.
 @export var cat_events_wait_for_free_hands := true
 
@@ -81,7 +81,9 @@ var _queue: Array[Customer] = []
 @onready var _pickup_spots: Array[Node] = $Markers/Pickup.get_children()
 @onready var _pass: Pass = $Stations/Pass
 @onready var _navigation: NavigationRegion3D = $Navigation
-@onready var _cat: CafeCat = $Actors/Mochi
+## The cat who does the mug event (the one marked `mischief` in CafeData.CATS).
+var _cat: CafeCat
+var _cats: Array[CafeCat] = []
 @onready var _sun: DirectionalLight3D = $Sun
 @onready var _environment: Environment = $WorldEnvironment.environment
 
@@ -101,7 +103,7 @@ func _ready() -> void:
 	OverlayAnchor.attach(barista.focus_marker, overlay, 0.0)
 	camera.follow_target = barista
 	hud.cafe = self
-	_cat.mug_event_finished.connect(_on_mug_event_finished)
+	_spawn_cats()
 	# Built from the furniture colliders at runtime, so rearranging the room
 	# in the editor just works.
 	_navigation.bake_navigation_mesh(false)
@@ -111,6 +113,21 @@ func _ready() -> void:
 		Audio.stop_all_loops())
 
 	_start_morning()
+
+
+func _spawn_cats() -> void:
+	var scene := load("res://scenes/cafe/cat.tscn") as PackedScene
+	for id in CafeData.CATS:
+		var cat := scene.instantiate() as CafeCat
+		_actors.add_child(cat)
+		cat.configure(id, CafeData.CATS[id])
+		var area := cat.wander_area
+		cat.global_position = Vector3(
+			randf_range(area.position.x, area.end.x), 0.0, randf_range(area.position.y, area.end.y))
+		_cats.append(cat)
+		if CafeData.CATS[id].get("mischief", false):
+			_cat = cat
+			cat.mug_event_finished.connect(_on_mug_event_finished)
 
 
 # --- Morning prep -----------------------------------------------------------------

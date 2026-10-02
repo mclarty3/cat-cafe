@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3]
+[gd_scene load_steps=43 format=3]
 
 [ext_resource type="Script" path="res://scripts/cafe/cafe.gd" id="1_cafe"]
 [ext_resource type="Script" path="res://scripts/cafe/cafe_camera.gd" id="2_cafe_camera"]
@@ -31,11 +31,8 @@
 [ext_resource type="PackedScene" path="res://assets/kenney/furniture/plantSmall1.glb" id="29_plantSmall1"]
 [ext_resource type="PackedScene" path="res://assets/kenney/furniture/lampRoundFloor.glb" id="30_lampRoundFloor"]
 [ext_resource type="PackedScene" path="res://assets/kenney/furniture/pottedPlant.glb" id="31_pottedPlant"]
-[ext_resource type="Script" path="res://scripts/cafe/cafe_cat.gd" id="32_cafe_cat"]
-[ext_resource type="Script" path="res://scripts/cafe/animated_model.gd" id="33_animated_model"]
-[ext_resource type="PackedScene" path="res://assets/kenney/pets/animal-cat.glb" id="34_animal-cat"]
-[ext_resource type="PackedScene" path="res://scenes/cafe/barista.tscn" id="35_barista"]
-[ext_resource type="Script" path="res://scripts/cafe/ui/cafe_hud.gd" id="36_cafe_hud"]
+[ext_resource type="PackedScene" path="res://scenes/cafe/barista.tscn" id="32_barista"]
+[ext_resource type="Script" path="res://scripts/cafe/ui/cafe_hud.gd" id="33_cafe_hud"]
 
 [sub_resource type="Environment" id="Environment_cafe"]
 background_mode = 1
@@ -744,24 +741,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, 2.7)
 
 [node name="Actors" type="Node3D" parent="."]
 
-[node name="Mochi" type="Area3D" parent="Actors"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 4.3)
-script = ExtResource("32_cafe_cat")
-
-[node name="Model" type="Node3D" parent="Actors/Mochi"]
-script = ExtResource("33_animated_model")
-model = ExtResource("34_animal-cat")
-model_scale = 0.15
-
-[node name="Mug" type="Node3D" parent="Actors/Mochi"]
-
-[node name="Model" type="Node3D" parent="Actors/Mochi/Mug"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-script = ExtResource("3_prop_3d")
-model = ExtResource("10_mug")
-model_scale = 0.4
-
-[node name="Barista" parent="." instance=ExtResource("35_barista")]
+[node name="Barista" parent="." instance=ExtResource("32_barista")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0.9)
 
 [node name="Overlay" type="CanvasLayer" parent="."]
@@ -769,4 +749,4 @@ layer = 1
 
 [node name="HUD" type="CanvasLayer" parent="."]
 layer = 2
-script = ExtResource("36_cafe_hud")
+script = ExtResource("33_cafe_hud")

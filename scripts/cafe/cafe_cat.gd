@@ -1,18 +1,21 @@
 @tool
 class_name CafeCat
 extends Interactable
-## A resident cat. Wanders the floor and can be petted. The cafe can send it
-## onto a table to start the "nudging a mug off the edge" event, which you have
-## to leave the counter to deal with.
+## A resident cat. Wanders the floor and can be petted. Spawned and configured
+## from CafeData.CATS by the cafe. A cat with `mischief` can be sent onto a table
+## to start the "nudging a mug off the edge" event, which you have to leave the
+## counter to deal with.
 
 signal mug_event_finished(caught: bool)
 
 enum State { IDLE, WALKING, TO_MUG, NUDGING }
 
-@export var cat_name := "Mochi"
+@export var cat_name := "Cat"
 ## Floor area (x, z) the cat wanders in.
 @export var wander_area := Rect2(1.6, 2.4, 5.0, 3.2)
 @export var walk_speed := 0.6
+## Random pause between wanders, in seconds (min, max).
+@export var idle_time := Vector2(2, 6)
 @export var dash_speed := 2.5
 ## Seconds you have to catch the mug.
 @export var mug_time := 6.0
@@ -20,6 +23,11 @@ enum State { IDLE, WALKING, TO_MUG, NUDGING }
 @export var mug_slide := 0.25
 
 var state := State.IDLE
+var cat_id := ""
+## Pitch of this cat's meows and purrs, and the chance petting gets a meow.
+var voice_pitch := 1.0
+var meowy := 0.5
+var _last_sound := ""
 
 var _target := Vector3.ZERO
 var _idle_timer := 1.0
@@ -42,6 +50,17 @@ func _ready() -> void:
 	_cafe = get_tree().get_first_node_in_group("cafe") as Cafe
 	if _cafe:
 		OverlayAnchor.attach(self, _cafe.overlay, 0.45)
+
+
+func configure(id: String, data: Dictionary) -> void:
+	cat_id = id
+	cat_name = data["name"]
+	walk_speed = data["walk_speed"]
+	idle_time = data["idle"]
+	voice_pitch = data["voice"]["pitch"]
+	meowy = data["voice"]["meowy"]
+	_idle_timer = randf_range(0.5, idle_time.y)
+	_model.tint(data["tint"])
 
 
 func start_mug_event(table_top: Vector3) -> void:
@@ -68,7 +87,7 @@ func _process(delta: float) -> void:
 			_model.play("walk")
 			if _move_to(_target, walk_speed, delta):
 				state = State.IDLE
-				_idle_timer = randf_range(2.0, 6.0)
+				_idle_timer = randf_range(idle_time.x, idle_time.y)
 		State.TO_MUG:
 			_model.play("run")
 			if _move_to(_target, dash_speed, delta):
@@ -89,6 +108,14 @@ func _process(delta: float) -> void:
 			if _mug_timer <= 0.0:
 				_cafe.float_text(global_position + Vector3.UP * 0.5, "CRASH!", Color(1, 0.45, 0.4))
 				_end_mug_event(false)
+
+
+## A meow or a purr when petted, in this cat's voice, never the same kind twice in a row.
+func _vocalise() -> void:
+	var options := ["cat_meow", "cat_mew_purr"] if randf() < meowy else ["cat_purr", "purr"]
+	options.erase(_last_sound)
+	_last_sound = options.pick_random()
+	Audio.play(_last_sound, 0.0, voice_pitch)
 
 
 func _move_to(target: Vector3, move_speed: float, delta: float) -> bool:
@@ -129,7 +156,7 @@ func interact(_barista: Barista) -> void:
 		_idle_timer = 2.0
 		_gesture_timer = 1.2
 		_model.play("gesture-positive")
-		Audio.play("purr")
+		_vocalise()
 		_cafe.float_text(global_position + Vector3.UP * 0.5, "purr~", Color(1, 0.8, 0.9))
 
 

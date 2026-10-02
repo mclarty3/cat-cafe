@@ -41,9 +41,9 @@ func run(day: CafeDay) -> bool:
 	]
 	match day.mug_result:
 		"caught":
-			lines.append("Mochi's mug: caught it!")
+			lines.append("The mug a cat went for: caught it!")
 		"broken":
-			lines.append("Mochi's mug: broken (-$%d)" % day.breakage)
+			lines.append("The mug a cat went for: broken (-$%d)" % day.breakage)
 	lines.append("Total: $%d" % day.coins())
 	for chat in day.chats:
 		lines.append("Chatted with %s" % chat)

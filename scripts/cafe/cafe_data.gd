@@ -56,14 +56,105 @@ const PREP_ACTIONS := [
 	{"name": "Make dream-honey syrup", "gives": {"honey_syrup": 3}, "costs": {"dream_honey": 1}},
 ]
 
-## Resident cats, shown in the computer's Cats roster. Personalities come
-## from the roster in docs/Cats.md.
+## Confirmed personalities and their effects, from the roster in docs/Cats.md.
+## Each effect is an icon (res://assets/ui/icons/<icon>.png) plus its description,
+## shown on the Cats roster cards; mark drawbacks with "negative": true. The
+## effects aren't active in-game yet.
+const PERSONALITIES := {
+	"Lazy": {
+		"cafe": [{"icon": "hourglass", "text": "Calms stressed or impatient customers"}],
+		"dream": [{"icon": "suit_hearts", "text": "Standing still slowly heals you"}],
+	},
+	"Playful": {
+		"cafe": [
+			{"icon": "pawns", "text": "Brings in families"},
+			{"icon": "exploding", "text": "Knocks things over", "negative": true},
+		],
+		"dream": [{"icon": "shield", "text": "Occasionally bats projectiles away"}],
+	},
+	"Curious": {
+		"cafe": [{"icon": "token", "text": "Finds dropped coins and lost items around the cafe"}],
+		"dream": [{"icon": "structure_wall", "text": "Reveals hidden walls and secret rooms"}],
+	},
+	"Nocturnal": {
+		"cafe": [{"icon": "suit_clubs", "text": "A \"lucky black cat\" that draws superstitious customers"}],
+		"dream": [{"icon": "warning", "text": "Sees in the dark and reveals traps"}],
+	},
+	"Hunter": {
+		"cafe": [{"icon": "target", "text": "Handles \"mouse in the kitchen\" events"}],
+		"dream": [{"icon": "sword", "text": "Bonus damage to small enemies"}],
+	},
+	"Chatty": {
+		"cafe": [{"icon": "exclamation", "text": "Announces customers and hurries the staff"}],
+		"dream": [{"icon": "information", "text": "Warns you about enemies off-screen"}],
+	},
+}
+
+## Resident cats. The cafe spawns one of each at the start of the day.
+## Hand-written for the prototype; real cats will be generated. The full set of
+## fields (and how each should be generated) is in "Cat data schema" in docs/Cats.md.
+##   tint: multiplies the shared Kenney cat texture (there's only one cat model)
+##   swatch: the colour shown for the cat in UI (roughly how the tinted model looks)
+##   walk_speed / idle: how they wander (idle is a min-max pause in seconds)
+##   mischief: this cat does the "nudging a mug off a table" event
+##   voice: pitch of its meows and purrs, and how often petting gets a meow
+##          rather than a purr (0 = always purrs, 1 = always meows)
 const CATS := {
 	"mochi": {
-		"name": "Mochi",
-		"personality": "Playful",
+		"name": "Mochi", "personality": "Playful",
 		"blurb": "Bats at anything that moves. Including mugs. Especially mugs.",
 		"since": "Found in the cafe when you arrived",
+		"tint": Color(1, 1, 1), "swatch": Color(0.66, 0.6, 0.76), "walk_speed": 0.6, "idle": Vector2(2, 6), "mischief": true,
+		"voice": {"pitch": 1.08, "meowy": 0.6},
+	},
+	"biscuit": {
+		"name": "Biscuit", "personality": "Lazy",
+		"blurb": "Has never been in a hurry. Treats every lap as a personal invitation.",
+		"since": "Rescued from a dream of endless afternoons",
+		"tint": Color(1.55, 1.4, 1.15), "swatch": Color(0.78, 0.7, 0.6), "walk_speed": 0.3, "idle": Vector2(10, 20),
+		"voice": {"pitch": 0.9, "meowy": 0.2},
+	},
+	"pepper": {
+		"name": "Pepper", "personality": "Curious",
+		"blurb": "Has to know what's in every bag, box and cupboard. Immediately.",
+		"since": "Followed you home from the dream's flooded library",
+		"tint": Color(0.75, 0.82, 0.95), "swatch": Color(0.45, 0.5, 0.68), "walk_speed": 0.75, "idle": Vector2(1, 3),
+		"voice": {"pitch": 1.15, "meowy": 0.7},
+	},
+	"inky": {
+		"name": "Inky", "personality": "Nocturnal",
+		"blurb": "Sleeps through the day shift. Some regulars swear they're lucky.",
+		"since": "Befriended under a moonlit stair in the dream",
+		"tint": Color(0.28, 0.27, 0.32), "swatch": Color(0.16, 0.15, 0.2), "walk_speed": 0.4, "idle": Vector2(15, 30),
+		"voice": {"pitch": 0.95, "meowy": 0.25},
+	},
+	"clementine": {
+		"name": "Clementine", "personality": "Hunter",
+		"blurb": "Stalks crumbs, shoelaces and the occasional real mouse.",
+		"since": "Rescued from a possessed pantry",
+		"tint": Color(1.5, 0.95, 0.55), "swatch": Color(0.9, 0.55, 0.3), "walk_speed": 1.0, "idle": Vector2(3, 7),
+		"voice": {"pitch": 1.0, "meowy": 0.45},
+	},
+	"bao": {
+		"name": "Bao", "personality": "Chatty",
+		"blurb": "Has an opinion about every customer, and shares it loudly.",
+		"since": "Talked its way out of a dream about a crowded train station",
+		"tint": Color(1.7, 1.65, 1.5), "swatch": Color(0.92, 0.88, 0.8), "walk_speed": 0.55, "idle": Vector2(2, 5),
+		"voice": {"pitch": 1.05, "meowy": 0.85},
+	},
+	"tofu": {
+		"name": "Tofu", "personality": "Lazy",
+		"blurb": "Can sleep anywhere. Has slept in the pastry case. Twice.",
+		"since": "Adopted from the shelter down the street",
+		"tint": Color(0.7, 0.7, 0.72), "swatch": Color(0.5, 0.5, 0.52), "walk_speed": 0.3, "idle": Vector2(12, 24),
+		"voice": {"pitch": 0.88, "meowy": 0.15},
+	},
+	"sprout": {
+		"name": "Sprout", "personality": "Curious",
+		"blurb": "A kitten who has just discovered that the world has corners.",
+		"since": "Found napping in a dream greenhouse",
+		"tint": Color(1.35, 1.0, 0.7), "swatch": Color(0.85, 0.62, 0.42), "walk_speed": 0.85, "idle": Vector2(1, 3),
+		"voice": {"pitch": 1.3, "meowy": 0.75},
 	},
 }
 

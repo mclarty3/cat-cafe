@@ -1,0 +1,22 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/cafe/cafe_cat.gd" id="1_cat"]
+[ext_resource type="Script" path="res://scripts/cafe/animated_model.gd" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/kenney/pets/animal-cat.glb" id="3_glb"]
+[ext_resource type="Script" path="res://scripts/cafe/prop_3d.gd" id="4_prop"]
+[ext_resource type="PackedScene" path="res://assets/kenney/food/mug.glb" id="5_mug"]
+
+[node name="Cat" type="Area3D"]
+script = ExtResource("1_cat")
+
+[node name="Model" type="Node3D" parent="."]
+script = ExtResource("2_model")
+model = ExtResource("3_glb")
+model_scale = 0.15
+
+[node name="Mug" type="Node3D" parent="."]
+
+[node name="Model" type="Node3D" parent="Mug"]
+script = ExtResource("4_prop")
+model = ExtResource("5_mug")
+model_scale = 0.4

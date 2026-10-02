@@ -13,12 +13,22 @@ const TABS := ["Kitchen", "Cats", "Furniture", "Upgrades"]
 const ACCENT := Color(1, 0.85, 0.6)
 const DIM := Color(1, 1, 1, 0.55)
 const OPEN_COLOR := Color(0.27, 0.45, 0.3)
+const CARD_COLOR := Color(0.24, 0.18, 0.15)
+## Effect icons: cafe effects are green (benefit) or red (drawback); dream
+## effects are always lilac.
+const GOOD_ICON_COLOR := Color(0.6, 0.88, 0.55)
+const BAD_ICON_COLOR := Color(1, 0.5, 0.45)
+const DREAM_ICON_COLOR := Color(0.75, 0.68, 1)
+const ICON_DIR := "res://assets/ui/icons/"
 
 var _day: CafeDay
 var _tab := "Kitchen"
 var _tab_buttons := {}
 var _content: VBoxContainer
 var _status: Label
+## Line pinned under the page (outside the scrolling area): details for
+## whatever is hovered or focused. Empty on pages that don't use it.
+var _info: RichTextLabel
 
 
 func _ready() -> void:
@@ -76,10 +86,22 @@ func _ready() -> void:
 	sidebar.add_child(close)
 
 	body.add_child(VSeparator.new())
+	var page := VBoxContainer.new()
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(page)
 	var scroll := ScrollContainer.new()
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	body.add_child(scroll)
+	page.add_child(scroll)
+	# Always exactly two lines tall, so changing its text on hover never
+	# shifts the layout (which made the list jump).
+	_info = RichTextLabel.new()
+	_info.bbcode_enabled = true
+	_info.scroll_active = false
+	_info.custom_minimum_size = Vector2(0, 34)
+	_info.add_theme_color_override("default_color", Color(1, 1, 1, 0.75))
+	_info.add_theme_constant_override("line_separation", -1)
+	page.add_child(_info)
 	_content = VBoxContainer.new()
 	_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_content.add_theme_constant_override("separation", 6)
@@ -123,6 +145,7 @@ func _show_tab(tab: String) -> void:
 	for name in _tab_buttons:
 		_tab_buttons[name].button_pressed = name == tab
 	_status.text = "6:45 AM  -  Closed  -  Prep actions left: %d" % _day.prep_actions_left
+	_set_info("")
 	for child in _content.get_children():
 		_content.remove_child(child)
 		child.queue_free()
@@ -170,17 +193,113 @@ func _kitchen_page() -> void:
 			_refresh(i))
 
 
-## The roster of cats living in the cafe. Viewing only for now; managing
-## them comes with the cat systems.
+## The roster of cats living in the cafe, as compact cards: name and
+## personality up front, effects as icons (hover or focus one for details).
+## Viewing only for now; managing cats comes with the cat systems.
 func _cats_page() -> void:
 	_heading("Cats in the cafe  (%d)" % CafeData.CATS.size())
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
+	_content.add_child(grid)
 	for id in CafeData.CATS:
-		var cat: Dictionary = CafeData.CATS[id]
-		_text("%s  -  %s" % [cat["name"], cat["personality"]], ACCENT)
-		_text(cat["blurb"])
-		_text(cat["since"], DIM)
-	_text("Coming later: bond levels, where each cat hangs out, equipping cats for the dream, "
-		+ "residents and adoption.", DIM)
+		grid.add_child(_cat_card(CafeData.CATS[id]))
+	_set_info("[color=#ffffff88]Hover a cat or an icon for details  -  green helps, red is a drawback  -  not active yet[/color]")
+
+
+func _cat_card(cat: Dictionary) -> Control:
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var style := StyleBoxFlat.new()
+	style.bg_color = CARD_COLOR
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(6)
+	card.add_theme_stylebox_override("panel", style)
+	# Name in the accent colour, the description, then the backstory smaller
+	# and dimmer underneath.
+	var about := "[color=#%s]%s[/color]  %s
+[font_size=8][color=#ffffff70][i]%s[/i][/color][/font_size]" % [
+		ACCENT.to_html(false), cat["name"], cat["blurb"], cat["since"]]
+	card.mouse_entered.connect(_set_info.bind(about))
+
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 3)
+	card.add_child(rows)
+
+	# Name and personality, big and up front.
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 6)
+	rows.add_child(top)
+	var swatch := Panel.new()
+	swatch.custom_minimum_size = Vector2(12, 12)
+	swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var dot := StyleBoxFlat.new()
+	dot.bg_color = cat["swatch"]
+	dot.set_corner_radius_all(6)
+	swatch.add_theme_stylebox_override("panel", dot)
+	top.add_child(swatch)
+	var name_label := Label.new()
+	name_label.text = cat["name"]
+	name_label.add_theme_font_size_override("font_size", 13)
+	top.add_child(name_label)
+	var trait_label := Label.new()
+	trait_label.text = cat["personality"]
+	trait_label.modulate = ACCENT
+	trait_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	trait_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	top.add_child(trait_label)
+
+	# Effects as icons, grouped by where they apply.
+	var effects := HBoxContainer.new()
+	effects.add_theme_constant_override("separation", 3)
+	rows.add_child(effects)
+	var personality: Dictionary = CafeData.PERSONALITIES[cat["personality"]]
+	_effect_group(effects, "Cafe", personality["cafe"], cat["name"])
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	effects.add_child(gap)
+	_effect_group(effects, "Dream", personality["dream"], cat["name"])
+	return card
+
+
+func _effect_group(row: HBoxContainer, title: String, effects: Array, cat_name: String) -> void:
+	var label := Label.new()
+	label.text = title
+	label.modulate = DIM
+	label.add_theme_font_size_override("font_size", 8)
+	row.add_child(label)
+	for effect in effects:
+		var color := DREAM_ICON_COLOR
+		if title == "Cafe":
+			color = BAD_ICON_COLOR if effect.get("negative", false) else GOOD_ICON_COLOR
+		var icon := Button.new()
+		icon.icon = load(ICON_DIR + effect["icon"] + ".png")
+		icon.expand_icon = true
+		icon.custom_minimum_size = Vector2(20, 20)
+		var where := "In the cafe" if title == "Cafe" else "In the dream"
+		for state in ["icon_normal_color", "icon_hover_color", "icon_focus_color", "icon_pressed_color"]:
+			icon.add_theme_color_override(state, color if state == "icon_normal_color" else color.lightened(0.35))
+		var plain := StyleBoxEmpty.new()
+		var ring := StyleBoxFlat.new()
+		ring.bg_color = Color(1, 1, 1, 0.08)
+		ring.set_corner_radius_all(4)
+		ring.set_border_width_all(1)
+		ring.border_color = color
+		for state in ["normal", "pressed", "disabled"]:
+			icon.add_theme_stylebox_override(state, plain)
+		icon.add_theme_stylebox_override("hover", ring)
+		icon.add_theme_stylebox_override("focus", ring)
+		var detail := "[color=#%s]%s[/color]  -  %s: %s" % [ACCENT.to_html(false), cat_name, where, effect["text"]]
+		icon.mouse_entered.connect(_set_info.bind(detail))
+		icon.focus_entered.connect(_set_info.bind(detail))
+		icon.focus_entered.connect(Audio.play.bind("ui_move"))
+		row.add_child(icon)
+
+
+func _set_info(text: String) -> void:
+	_info.text = text
+	_info.visible = not text.is_empty()
 
 
 func _ideas_page(title: String, intro: String, ideas: Array) -> void:

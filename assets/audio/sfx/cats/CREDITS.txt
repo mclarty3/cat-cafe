@@ -1,0 +1,5 @@
+Cat sounds, all CC0 (public domain), from OpenGameArt. Loudness-normalised, trimmed, and re-encoded to Ogg.
+- mew_purr, mew_purr_long, meow_food, meow_soft, purr_active, purr_sleepy:
+  "Cat Purr & Meow" by Kerzoven, https://opengameart.org/content/cat-purr-meow
+- meow_kitten: "Kitten Mew" by AntumDeluge, https://opengameart.org/content/kitten-mew
+- meow_short: "Meow" by IgnasD, https://opengameart.org/content/meow

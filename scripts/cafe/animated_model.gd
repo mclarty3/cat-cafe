@@ -57,6 +57,18 @@ func play(anim: String, blend := 0.15) -> void:
 	_player.play(anim, blend)
 
 
+## Multiplies the model's colours (e.g. to vary one shared cat model).
+func tint(color: Color) -> void:
+	if _instance == null:
+		return
+	for mesh: MeshInstance3D in _instance.find_children("*", "MeshInstance3D", true, false):
+		for i in mesh.get_surface_override_material_count():
+			var material := mesh.get_active_material(i).duplicate() as BaseMaterial3D
+			if material:
+				material.albedo_color = color
+				mesh.set_surface_override_material(i, material)
+
+
 func set_playback_speed(scale: float) -> void:
 	if _player:
 		_player.speed_scale = scale
