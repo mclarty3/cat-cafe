@@ -10,6 +10,9 @@ signal mug_event_finished(caught: bool)
 
 enum State { IDLE, WALKING, TO_MUG, NUDGING }
 
+## A wandering cat that can't get anywhere for this long gives up and goes elsewhere.
+const GIVE_UP_TIME := 1.5
+
 @export var cat_name := "Cat"
 ## Floor area (x, z) the cat wanders in.
 @export var wander_area := Rect2(1.6, 2.4, 5.0, 3.2)
@@ -21,6 +24,8 @@ enum State { IDLE, WALKING, TO_MUG, NUDGING }
 @export var mug_time := 6.0
 ## How far the mug slides towards the edge before it falls.
 @export var mug_slide := 0.25
+## Seconds a hop on or off a table takes.
+@export var hop_time := 0.35
 
 var state := State.IDLE
 var cat_id := ""
@@ -29,7 +34,15 @@ var voice_pitch := 1.0
 var meowy := 0.5
 var _last_sound := ""
 
-var _target := Vector3.ZERO
+## Floor route to the current destination (navmesh points).
+var _path: Array[Vector3] = []
+var _velocity := Vector3.ZERO
+## How long we've been walking without getting anywhere.
+var _stalled := 0.0
+## Where the mug sits on the table, and the floor spot we hop up from.
+var _table_top := Vector3.ZERO
+var _table_edge := Vector3.ZERO
+var _hopping := false
 var _idle_timer := 1.0
 var _mug_timer := 0.0
 var _pet_cooldown := 0.0
@@ -65,7 +78,16 @@ func configure(id: String, data: Dictionary) -> void:
 
 func start_mug_event(table_top: Vector3) -> void:
 	state = State.TO_MUG
-	_target = table_top
+	_table_top = table_top
+	# The people's map stops at the table's rim, so that's where we hop up from
+	# (not from underneath).
+	_table_edge = _cafe.floor_point(table_top)
+	_path = _cafe.find_path(global_position, _table_edge, _cafe.cat_map)
+
+
+## On the floor (not up on a table or hopping), so others steer around us.
+func on_floor() -> bool:
+	return not _hopping and state != State.NUDGING
 
 
 func _process(delta: float) -> void:
@@ -73,24 +95,35 @@ func _process(delta: float) -> void:
 		return
 	_pet_cooldown = maxf(_pet_cooldown - delta, 0.0)
 	_gesture_timer = maxf(_gesture_timer - delta, 0.0)
+	if _hopping:
+		return
 	match state:
 		State.IDLE:
 			if _gesture_timer <= 0.0:
 				_model.play("idle")
 			_idle_timer -= delta
+			# Someone's standing on us: get out of the way.
+			if _cafe.crowding(self):
+				_idle_timer = 0.0
 			if _idle_timer <= 0.0:
-				_target = Vector3(
-					randf_range(wander_area.position.x, wander_area.end.x), 0.0,
-					randf_range(wander_area.position.y, wander_area.end.y))
-				state = State.WALKING
+				_wander_to(_cafe.random_floor_point(wander_area, _cafe.cat_map))
 		State.WALKING:
 			_model.play("walk")
-			if _move_to(_target, walk_speed, delta):
+			var was := global_position
+			if _follow_path(walk_speed, delta):
 				state = State.IDLE
 				_idle_timer = randf_range(idle_time.x, idle_time.y)
+			elif _gave_up(was, delta):
+				# Hemmed in (another cat in a narrow gap, say): sit a moment, then
+				# wander somewhere else.
+				_path.clear()
+				state = State.IDLE
+				_idle_timer = randf_range(0.5, 1.5)
 		State.TO_MUG:
 			_model.play("run")
-			if _move_to(_target, dash_speed, delta):
+			if _follow_path(dash_speed, delta):
+				_model.face(_table_top - global_position)
+				await _hop(_table_top)
 				state = State.NUDGING
 				_mug_timer = mug_time
 				_mug.position = Vector3(0, 0, 0.18)
@@ -118,18 +151,55 @@ func _vocalise() -> void:
 	Audio.play(_last_sound, 0.0, voice_pitch)
 
 
-func _move_to(target: Vector3, move_speed: float, delta: float) -> bool:
-	_model.face(target - global_position)
-	global_position = global_position.move_toward(target, move_speed * delta)
-	return global_position.distance_to(target) < 0.01
+## How we're moving right now (zero when standing), for others' avoidance.
+func walk_velocity() -> Vector3:
+	return _velocity if not _path.is_empty() else Vector3.ZERO
+
+
+func _wander_to(target: Vector3) -> void:
+	_path = _cafe.find_path(global_position, target, _cafe.cat_map)
+	state = State.WALKING
+
+
+## Walks the floor route, sidestepping people and other cats. True once arrived.
+func _follow_path(move_speed: float, delta: float) -> bool:
+	if not _path.is_empty():
+		_velocity = _cafe.step_along(self, _path, _velocity, move_speed, delta)
+		_model.face(_velocity)
+	return _path.is_empty()
+
+
+## True once we've crept along at under a fifth of our pace for a while.
+func _gave_up(was: Vector3, delta: float) -> bool:
+	var moved := Vector2(global_position.x - was.x, global_position.z - was.z).length()
+	_stalled = _stalled + delta if moved < walk_speed * delta * 0.2 else 0.0
+	if _stalled < GIVE_UP_TIME:
+		return false
+	_stalled = 0.0
+	return true
+
+
+## A little arcing jump onto or off a table.
+func _hop(to: Vector3) -> void:
+	_hopping = true
+	_model.play("jump")
+	var from := global_position
+	var tween := create_tween()
+	tween.tween_method(func(t: float) -> void:
+		global_position = from.lerp(to, t) + Vector3.UP * sin(t * PI) * 0.3, 0.0, 1.0, hop_time)
+	await tween.finished
+	_hopping = false
 
 
 func _end_mug_event(caught: bool) -> void:
 	_mug.hide()
 	state = State.WALKING
-	var center := wander_area.get_center()
-	_target = Vector3(center.x, 0.0, center.y)
+	_path.clear()
 	mug_event_finished.emit(caught)
+	_model.face(_table_edge - global_position)
+	await _hop(_table_edge)
+	var center := wander_area.get_center()
+	_wander_to(_cafe.floor_point(Vector3(center.x, 0.0, center.y), _cafe.cat_map))
 
 
 func marker_point() -> Vector3:

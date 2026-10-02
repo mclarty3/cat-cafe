@@ -1,38 +1,38 @@
-[gd_scene load_steps=43 format=3]
+[gd_scene load_steps=43 format=3 uid="uid://cetj8mrweq3d5"]
 
-[ext_resource type="Script" path="res://scripts/cafe/cafe.gd" id="1_cafe"]
-[ext_resource type="Script" path="res://scripts/cafe/cafe_camera.gd" id="2_cafe_camera"]
+[ext_resource type="Script" uid="uid://ckxyqbeadnvyy" path="res://scripts/cafe/cafe.gd" id="1_cafe"]
+[ext_resource type="Script" uid="uid://bjvypnqr6o8o2" path="res://scripts/cafe/cafe_camera.gd" id="2_cafe_camera"]
 [ext_resource type="Script" path="res://scripts/cafe/prop_3d.gd" id="3_prop_3d"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/wall.glb" id="4_wall"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/wallWindow.glb" id="5_wallWindow"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/wallDoorway.glb" id="6_wallDoorway"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/kitchenCabinet.glb" id="7_kitchenCabinet"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/plantSmall2.glb" id="8_plantSmall2"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/honey.glb" id="9_honey"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/mug.glb" id="10_mug"]
-[ext_resource type="Script" path="res://scripts/cafe/register.gd" id="11_register"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/computerScreen.glb" id="12_computerScreen"]
-[ext_resource type="Script" path="res://scripts/cafe/espresso_machine.gd" id="13_espresso_machine"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/kitchenCoffeeMachine.glb" id="14_kitchenCoffeeMachine"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/cup-saucer.glb" id="15_cup-saucer"]
-[ext_resource type="Script" path="res://scripts/cafe/pastry_case.gd" id="16_pastry_case"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/plate.glb" id="17_plate"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/croissant.glb" id="18_croissant"]
-[ext_resource type="PackedScene" path="res://assets/kenney/food/muffin.glb" id="19_muffin"]
+[ext_resource type="PackedScene" uid="uid://dg53l7oyeov7a" path="res://assets/kenney/furniture/wall.glb" id="4_wall"]
+[ext_resource type="PackedScene" uid="uid://jt5i18h7go4" path="res://assets/kenney/furniture/wallWindow.glb" id="5_wallWindow"]
+[ext_resource type="PackedScene" uid="uid://jtgnfoc0abmi" path="res://assets/kenney/furniture/wallDoorway.glb" id="6_wallDoorway"]
+[ext_resource type="PackedScene" uid="uid://dx4olb2qdbfgp" path="res://assets/kenney/furniture/kitchenCabinet.glb" id="7_kitchenCabinet"]
+[ext_resource type="PackedScene" uid="uid://dppuevr1il305" path="res://assets/kenney/furniture/plantSmall2.glb" id="8_plantSmall2"]
+[ext_resource type="PackedScene" uid="uid://cdebslv6jfkw4" path="res://assets/kenney/food/honey.glb" id="9_honey"]
+[ext_resource type="PackedScene" uid="uid://dhbhi1gkxnux5" path="res://assets/kenney/food/mug.glb" id="10_mug"]
+[ext_resource type="Script" uid="uid://kx8dvyppejko" path="res://scripts/cafe/register.gd" id="11_register"]
+[ext_resource type="PackedScene" uid="uid://ub3383voyosm" path="res://assets/kenney/furniture/computerScreen.glb" id="12_computerScreen"]
+[ext_resource type="Script" uid="uid://fcjdqhwdyahx" path="res://scripts/cafe/espresso_machine.gd" id="13_espresso_machine"]
+[ext_resource type="PackedScene" uid="uid://k587vn16w76d" path="res://assets/kenney/furniture/kitchenCoffeeMachine.glb" id="14_kitchenCoffeeMachine"]
+[ext_resource type="PackedScene" uid="uid://theoma3w1mqa" path="res://assets/kenney/food/cup-saucer.glb" id="15_cup-saucer"]
+[ext_resource type="Script" uid="uid://hd0kplop1ona" path="res://scripts/cafe/pastry_case.gd" id="16_pastry_case"]
+[ext_resource type="PackedScene" uid="uid://ces4h3edtgu58" path="res://assets/kenney/food/plate.glb" id="17_plate"]
+[ext_resource type="PackedScene" uid="uid://dpll6lu0dejxn" path="res://assets/kenney/food/croissant.glb" id="18_croissant"]
+[ext_resource type="PackedScene" uid="uid://b244rqhbdsw71" path="res://assets/kenney/food/muffin.glb" id="19_muffin"]
 [ext_resource type="Script" path="res://scripts/cafe/pass.gd" id="20_pass"]
-[ext_resource type="Script" path="res://scripts/cafe/trash_bin.gd" id="21_trash_bin"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/trashcan.glb" id="22_trashcan"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/tableRound.glb" id="23_tableRound"]
-[ext_resource type="Script" path="res://scripts/cafe/seat.gd" id="24_seat"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/chairCushion.glb" id="25_chairCushion"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/rugRectangle.glb" id="26_rugRectangle"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/rugDoormat.glb" id="27_rugDoormat"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/bookcaseOpenLow.glb" id="28_bookcaseOpenLow"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/plantSmall1.glb" id="29_plantSmall1"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/lampRoundFloor.glb" id="30_lampRoundFloor"]
-[ext_resource type="PackedScene" path="res://assets/kenney/furniture/pottedPlant.glb" id="31_pottedPlant"]
+[ext_resource type="Script" uid="uid://delsrd3h0vnac" path="res://scripts/cafe/trash_bin.gd" id="21_trash_bin"]
+[ext_resource type="PackedScene" uid="uid://b4e4t0f0xtigr" path="res://assets/kenney/furniture/trashcan.glb" id="22_trashcan"]
+[ext_resource type="PackedScene" uid="uid://bixwhspce6gxi" path="res://assets/kenney/furniture/tableRound.glb" id="23_tableRound"]
+[ext_resource type="Script" uid="uid://b74ujf0wq5daq" path="res://scripts/cafe/seat.gd" id="24_seat"]
+[ext_resource type="PackedScene" uid="uid://eeddojf3i0hm" path="res://assets/kenney/furniture/chairCushion.glb" id="25_chairCushion"]
+[ext_resource type="PackedScene" uid="uid://bmnw85r0pa26c" path="res://assets/kenney/furniture/rugRectangle.glb" id="26_rugRectangle"]
+[ext_resource type="PackedScene" uid="uid://xiwod81pk6ia" path="res://assets/kenney/furniture/rugDoormat.glb" id="27_rugDoormat"]
+[ext_resource type="PackedScene" uid="uid://ba7ofkped6604" path="res://assets/kenney/furniture/bookcaseOpenLow.glb" id="28_bookcaseOpenLow"]
+[ext_resource type="PackedScene" uid="uid://dutq1v7bfgmlp" path="res://assets/kenney/furniture/plantSmall1.glb" id="29_plantSmall1"]
+[ext_resource type="PackedScene" uid="uid://b4vmi1p8qna7e" path="res://assets/kenney/furniture/lampRoundFloor.glb" id="30_lampRoundFloor"]
+[ext_resource type="PackedScene" uid="uid://cxh68v25hkc5g" path="res://assets/kenney/furniture/pottedPlant.glb" id="31_pottedPlant"]
 [ext_resource type="PackedScene" path="res://scenes/cafe/barista.tscn" id="32_barista"]
-[ext_resource type="Script" path="res://scripts/cafe/ui/cafe_hud.gd" id="33_cafe_hud"]
+[ext_resource type="Script" uid="uid://ci1lq1tm2ax65" path="res://scripts/cafe/ui/cafe_hud.gd" id="33_cafe_hud"]
 
 [sub_resource type="Environment" id="Environment_cafe"]
 background_mode = 1
@@ -87,10 +87,11 @@ transform = Transform3D(0.5, 0.6124, -0.6124, 0, 0.7071, 0.7071, 0.866, -0.3536,
 light_color = Color(1, 0.92, 0.8, 1)
 light_energy = 0.6
 shadow_enabled = true
-directional_shadow_max_distance = 80.0
 shadow_blur = 1.5
+directional_shadow_max_distance = 80.0
 
 [node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.669131, 0.743145, 0, -0.743145, 0.669131, 3.5, 7.73145, 9.79131)
 fov = 30.0
 script = ExtResource("2_cafe_camera")
 
@@ -114,7 +115,6 @@ shape = SubResource("BoxShape3D_navfloor")
 [node name="Walls" type="Node3D" parent="Room"]
 
 [node name="Back0" type="Node3D" parent="Room/Walls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
 model = ExtResource("4_wall")
 center = false
@@ -466,6 +466,9 @@ model_scale = 0.35
 
 [node name="Register" type="Area3D" parent="Stations"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 1.25)
+collision_layer = 32
+collision_mask = 0
+monitoring = false
 script = ExtResource("11_register")
 size = Vector3(0.9, 1, 0.6)
 
@@ -477,15 +480,17 @@ model_scale = 1.6
 
 [node name="Sign" type="Label3D" parent="Stations/Register"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0.3)
-billboard = 1
 pixel_size = 0.004
-font_size = 40
-outline_size = 12
+billboard = 1
 modulate = Color(1, 0.92, 0.75, 1)
 text = "Order here"
+font_size = 40
 
 [node name="EspressoMachine" type="Area3D" parent="Stations"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0.6)
+collision_layer = 32
+collision_mask = 0
+monitoring = false
 script = ExtResource("13_espresso_machine")
 size = Vector3(0.9, 1, 0.5)
 
@@ -532,17 +537,19 @@ model_scale = 0.45
 
 [node name="Pass" type="Area3D" parent="Stations"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9, 0, 1.25)
+collision_layer = 32
+collision_mask = 0
+monitoring = false
 script = ExtResource("20_pass")
 size = Vector3(1, 1, 0.6)
 
 [node name="Sign" type="Label3D" parent="Stations/Pass"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0.3)
-billboard = 1
 pixel_size = 0.004
-font_size = 40
-outline_size = 12
+billboard = 1
 modulate = Color(1, 0.92, 0.75, 1)
 text = "Pickup"
+font_size = 40
 
 [node name="TrashBin" type="Area3D" parent="Stations"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5, 0, 0.45)
@@ -550,7 +557,6 @@ script = ExtResource("21_trash_bin")
 size = Vector3(0.7, 1, 0.7)
 
 [node name="Can" type="Node3D" parent="Stations/TrashBin"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
 model = ExtResource("22_trashcan")
 model_scale = 1.3
@@ -571,10 +577,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0.15)
 [node name="Seat1" type="Marker3D" parent="Tables"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, 2.88)
 script = ExtResource("24_seat")
-label = "1"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
 model = ExtResource("25_chairCushion")
 model_scale = 1.5
@@ -595,7 +599,6 @@ script = ExtResource("24_seat")
 label = "2"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
 model = ExtResource("25_chairCushion")
 model_scale = 1.5
@@ -616,7 +619,6 @@ script = ExtResource("24_seat")
 label = "3"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
 model = ExtResource("25_chairCushion")
 model_scale = 1.5
@@ -637,7 +639,6 @@ script = ExtResource("24_seat")
 label = "4"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
 model = ExtResource("25_chairCushion")
 model_scale = 1.5
@@ -658,7 +659,6 @@ script = ExtResource("24_seat")
 label = "5"
 
 [node name="Chair" type="Node3D" parent="Tables/Seat5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("3_prop_3d")
 model = ExtResource("25_chairCushion")
 model_scale = 1.5
@@ -739,13 +739,23 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.35, 0, 2.35)
 [node name="Spot3" type="Marker3D" parent="Markers/Pickup"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0, 2.7)
 
+[node name="PickupOverflow" type="Node3D" parent="Markers"]
+
+[node name="Spot0" type="Marker3D" parent="Markers/PickupOverflow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.75, 0, 2.35)
+
+[node name="Spot1" type="Marker3D" parent="Markers/PickupOverflow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.15, 0, 2.35)
+
+[node name="Spot2" type="Marker3D" parent="Markers/PickupOverflow"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.55, 0, 2.35)
+
 [node name="Actors" type="Node3D" parent="."]
 
 [node name="Barista" parent="." instance=ExtResource("32_barista")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0.9)
 
 [node name="Overlay" type="CanvasLayer" parent="."]
-layer = 1
 
 [node name="HUD" type="CanvasLayer" parent="."]
 layer = 2

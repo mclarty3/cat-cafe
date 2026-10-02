@@ -219,6 +219,11 @@ for i, z in enumerate([2.15, 2.75, 3.35, 3.95, 4.55]):
 node("Pickup", "Node3D", "Markers")
 for i, (x, z) in enumerate([(4.9, 2.15), (5.45, 2.3), (4.35, 2.35), (5.6, 2.7)]):
     node(f"Spot{i}", "Marker3D", "Markers/Pickup", [f"transform = {xform((x, 0, z))}"])
+# Where extra customers wait when every pickup spot is taken, first to last: along the aisle
+# in front of the counter, back toward the register.
+node("PickupOverflow", "Node3D", "Markers")
+for i, x in enumerate([3.75, 3.15, 2.55]):
+    node(f"Spot{i}", "Marker3D", "Markers/PickupOverflow", [f"transform = {xform((x, 0, 2.35))}"])
 
 # --- Actors -------------------------------------------------------------------
 node("Actors", "Node3D")

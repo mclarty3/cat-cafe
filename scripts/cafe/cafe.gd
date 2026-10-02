@@ -23,6 +23,15 @@ enum Phase { PREP, SERVICE, RESULTS }
 
 @export_group("Customers")
 @export var customer_walk_speed := 1.4
+## Walking customers and cats sidestep anyone closer than this.
+@export var avoid_radius := 0.7
+## The same when a cat is involved: they're long and low, so they start turning
+## early to pass side by side.
+@export var cat_avoid_radius := 0.65
+## How hard walkers turn aside (1 = up to 45 degrees when touching).
+@export var avoid_strength := 2.5
+## How quickly walkers turn toward where they want to go (higher = snappier).
+@export var steer_response := 20.0
 ## Scale for the Kenney character models (customers; the barista sets its own).
 @export var character_scale := 0.8
 ## Height to lift a seated customer so the sit pose lands on the chair.
@@ -53,6 +62,11 @@ enum Phase { PREP, SERVICE, RESULTS }
 @export_range(0.0, 1.0) var patience_tip_threshold := 0.5
 @export var mug_cost := 2
 
+## Walkers stop sidestepping this close to the end of their route.
+const ARRIVE_RADIUS := 0.4
+## Walkers may leave the walkable floor this close to an off-floor destination (the door).
+const EXIT_RADIUS := 1.2
+
 var day := CafeDay.new()
 var phase := Phase.PREP
 ## Open orders, oldest first.
@@ -79,11 +93,16 @@ var _queue: Array[Customer] = []
 @onready var _door: Marker3D = $Markers/Door
 @onready var _queue_spots: Array[Node] = $Markers/Queue.get_children()
 @onready var _pickup_spots: Array[Node] = $Markers/Pickup.get_children()
+@onready var _overflow_spots: Array[Node] = $Markers/PickupOverflow.get_children()
 @onready var _pass: Pass = $Stations/Pass
 @onready var _navigation: NavigationRegion3D = $Navigation
+@onready var _room: Node3D = $Room
 ## The cat who does the mug event (the one marked `mischief` in CafeData.CATS).
 var _cat: CafeCat
 var _cats: Array[CafeCat] = []
+## The cats' navigation map (see _bake_cat_navigation).
+var cat_map: RID
+var _cat_region: RID
 @onready var _sun: DirectionalLight3D = $Sun
 @onready var _environment: Environment = $WorldEnvironment.environment
 
@@ -107,8 +126,15 @@ func _ready() -> void:
 	# Built from the furniture colliders at runtime, so rearranging the room
 	# in the editor just works.
 	_navigation.bake_navigation_mesh(false)
+	_keep_floor_only(_navigation.navigation_mesh)
+	NavigationServer3D.region_set_navigation_mesh(_navigation.get_rid(), _navigation.navigation_mesh)
+	_bake_cat_navigation()
+	# The cats' map picks up its bake on the next sync: put them on the floor then.
+	NavigationServer3D.map_changed.connect(_on_map_changed)
 	Audio.play_music(CafeData.PLAYLIST)
 	tree_exiting.connect(func() -> void:
+		NavigationServer3D.free_rid(_cat_region)
+		NavigationServer3D.free_rid(cat_map)
 		Audio.stop_music(0.5)
 		Audio.stop_all_loops())
 
@@ -121,13 +147,93 @@ func _spawn_cats() -> void:
 		var cat := scene.instantiate() as CafeCat
 		_actors.add_child(cat)
 		cat.configure(id, CafeData.CATS[id])
-		var area := cat.wander_area
-		cat.global_position = Vector3(
-			randf_range(area.position.x, area.end.x), 0.0, randf_range(area.position.y, area.end.y))
 		_cats.append(cat)
 		if CafeData.CATS[id].get("mischief", false):
 			_cat = cat
 			cat.mug_event_finished.connect(_on_mug_event_finished)
+
+
+## The bake also makes walkable islands on top of tables, chairs and the
+## counter. Nobody walks up there, and they'd make floor_point() snap people
+## into the furniture, so keep only the floor's polygons.
+func _keep_floor_only(mesh: NavigationMesh) -> void:
+	var vertices := mesh.get_vertices()
+	# The floor is the lowest layer (it bakes a little above y = 0).
+	var floor_y := INF
+	for v in vertices:
+		floor_y = minf(floor_y, v.y)
+	var floor_polygons: Array[PackedInt32Array] = []
+	for i in mesh.get_polygon_count():
+		var polygon := mesh.get_polygon(i)
+		if Array(polygon).all(func(v: int) -> bool: return vertices[v].y < floor_y + 0.2):
+			floor_polygons.append(polygon)
+	mesh.clear_polygons()
+	for polygon in floor_polygons:
+		mesh.add_polygon(polygon)
+
+
+## Cats get their own navigation map, baked from what the furniture actually
+## looks like rather than its colliders: anything with cat-sized room underneath
+## (tables, chairs) can be walked under, and legs and pedestals block wherever
+## they really are. The room's shell (floor and walls) still comes from its
+## colliders, since the walls cut away for the camera have none to see.
+func _bake_cat_navigation() -> void:
+	var mesh := NavigationMesh.new()
+	mesh.cell_size = 0.1
+	mesh.cell_height = 0.1
+	mesh.agent_radius = 0.2
+	mesh.agent_height = 0.3
+	mesh.agent_max_climb = 0.1
+	# Rugs, mats and pedestal feet are just floor (otherwise the rug's edge is a seam).
+	mesh.filter_low_hanging_obstacles = true
+	mesh.geometry_source_geometry_mode = NavigationMesh.SOURCE_GEOMETRY_ROOT_NODE_CHILDREN
+	var source := NavigationMeshSourceGeometryData3D.new()
+	for node in get_tree().get_nodes_in_group("nav_source"):
+		mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS 			if node == _room else NavigationMesh.PARSED_GEOMETRY_MESH_INSTANCES
+		var part := NavigationMeshSourceGeometryData3D.new()
+		NavigationServer3D.parse_source_geometry_data(mesh, part, node)
+		source.merge(part)
+	NavigationServer3D.bake_from_source_geometry_data(mesh, source)
+	_keep_floor_only(mesh)
+
+	cat_map = NavigationServer3D.map_create()
+	NavigationServer3D.map_set_cell_size(cat_map, mesh.cell_size)
+	NavigationServer3D.map_set_cell_height(cat_map, mesh.cell_height)
+	NavigationServer3D.map_set_active(cat_map, true)
+	_cat_region = NavigationServer3D.region_create()
+	NavigationServer3D.region_set_map(_cat_region, cat_map)
+	NavigationServer3D.region_set_navigation_mesh(_cat_region, mesh)
+
+
+func _on_map_changed(map: RID) -> void:
+	if map == cat_map:
+		NavigationServer3D.map_changed.disconnect(_on_map_changed)
+		_place_cats()
+
+
+func _place_cats() -> void:
+	for cat in _cats:
+		cat.global_position = random_floor_point(cat.wander_area, cat_map)
+
+
+## A random walkable point on the floor inside `area` (x, z), off the furniture.
+## `map` is the people's map unless given (cats pass `cat_map`).
+func random_floor_point(area: Rect2, map := RID()) -> Vector3:
+	var point := Vector3(randf_range(area.position.x, area.end.x), 0.0, randf_range(area.position.y, area.end.y))
+	return floor_point(point, map)
+
+
+## The nearest walkable floor point to `point`, looking straight down through
+## it, so a slightly raised patch of floor (a rug) counts as much as the floor
+## around it.
+func floor_point(point: Vector3, map := RID()) -> Vector3:
+	var p := NavigationServer3D.map_get_closest_point_to_segment(_map_or_default(map),
+		Vector3(point.x, 1.0, point.z), Vector3(point.x, -1.0, point.z))
+	return Vector3(p.x, 0.0, p.z)
+
+
+func _map_or_default(map: RID) -> RID:
+	return map if map.is_valid() else get_world_3d().navigation_map
 
 
 # --- Morning prep -----------------------------------------------------------------
@@ -214,9 +320,8 @@ func door_outside() -> Vector3:
 
 
 ## A walkable route around the furniture, ending exactly at `to`.
-func find_path(from: Vector3, to: Vector3) -> Array[Vector3]:
-	var map := get_world_3d().navigation_map
-	var points := NavigationServer3D.map_get_path(map, from, to, true)
+func find_path(from: Vector3, to: Vector3, map := RID()) -> Array[Vector3]:
+	var points := NavigationServer3D.map_get_path(_map_or_default(map), from, to, true)
 	var path: Array[Vector3] = []
 	for p in points:
 		path.append(Vector3(p.x, 0.0, p.z))
@@ -226,6 +331,60 @@ func find_path(from: Vector3, to: Vector3) -> Array[Vector3]:
 	if path.is_empty() or path[-1].distance_to(to) > 0.02:
 		path.append(to)
 	return path
+
+
+## Moves a walking customer or cat one step along `path` (from find_path; points
+## are removed as they're reached), sidestepping whoever is in the way.
+## `velocity` is the walker's current velocity; the new one is returned, and is
+## what the walker should face. It turns toward the wanted direction over a few
+## frames, so sidesteps curve rather than jitter and walkers look where they go.
+func step_along(actor: Node3D, path: Array[Vector3], velocity: Vector3, speed: float, delta: float) -> Vector3:
+	var to_target := path[0] - actor.global_position
+	to_target.y = 0.0
+	var step := speed * delta
+	# Near the end, walk straight on, so we land exactly on our spot or seat.
+	if path.size() == 1 and to_target.length() <= ARRIVE_RADIUS:
+		actor.global_position = actor.global_position.move_toward(path[0], step)
+		if actor.global_position.distance_to(path[0]) < 0.01:
+			path.clear()
+		return to_target.normalized() * speed
+	var map := cat_map if actor is CafeCat else RID()
+	var heading := to_target.normalized()
+	var push := avoidance(actor, heading)
+	var wanted := (heading + push).normalized() * speed
+	velocity = velocity.lerp(wanted, 1.0 - exp(-steer_response * delta))
+	var next := actor.global_position + velocity * delta
+	# Near a destination that's off the walkable floor on purpose (out of the
+	# door, or the hop into a seat), head straight for it. Otherwise a crowd
+	# sidestepping at the doorway gets pinned to the floor's edge, circling the
+	# last corner of the route.
+	var destination := path[-1]
+	if _flat_distance(destination, floor_point(destination, map)) > 0.05 			and _flat_distance(actor.global_position, destination) < EXIT_RADIUS:
+		actor.global_position = next
+		path.assign([destination])
+		return velocity
+	if push == Vector3.ZERO:
+		# On the route, which lies on the floor already. (Clamping here would
+		# snag on the jagged outline of chair legs and the like.)
+		actor.global_position = next
+	else:
+		# A sidestep can head anywhere: stay on the walkable floor, sliding along
+		# the furniture and facing (and keeping) the way we actually went.
+		var from := actor.global_position
+		actor.global_position = floor_point(next, map)
+		velocity = (actor.global_position - from) / delta
+		velocity.y = 0.0
+		# Then re-plan from here. That keeps the room the sidestep made instead
+		# of steering back into whoever we're passing, and the next corner can't
+		# end up behind the furniture.
+		path.assign(find_path(actor.global_position, destination, map))
+	if path.size() > 1 and _flat_distance(actor.global_position, path[0]) <= maxf(step, 0.05):
+		path.remove_at(0)
+	return velocity
+
+
+func _flat_distance(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
 
 
 func float_text(world_position: Vector3, text: String, color := Color.WHITE) -> void:
@@ -283,13 +442,103 @@ func take_order(customer: Customer, register_position: Vector3) -> void:
 		toast("%s: \"%s\"" % [customer.display_name, CafeData.REGULARS[customer.regular_id]["greeting"]])
 
 	_leave_queue(customer)
-	customer.on_ordered(ticket, _free_pickup_spot())
+	customer.on_ordered(ticket)
+	_fill_pickup_spots()
 
 
-func _free_pickup_spot() -> Vector3:
-	var waiting := tickets.size() - 1
-	var spot: Marker3D = _pickup_spots[mini(waiting, _pickup_spots.size() - 1)]
-	return spot.global_position
+## Sends everyone waiting for an order to their own pickup spot, oldest ticket
+## first. If every spot is taken, the rest wait in a line behind the last one
+## and move up as spots free.
+func _fill_pickup_spots() -> void:
+	var waiting := _customers.filter(func(c: Customer) -> bool: return c.state == Customer.State.WAITING_PICKUP)
+	waiting.sort_custom(func(a: Customer, b: Customer) -> bool: return a.ticket.number < b.ticket.number)
+	var taken := waiting.map(func(c: Customer) -> int: return c.pickup_index)
+	var overflow := 0
+	for customer: Customer in waiting:
+		if customer.pickup_index >= 0:
+			continue
+		var free := range(_pickup_spots.size()).filter(func(i: int) -> bool: return i not in taken)
+		if not free.is_empty():
+			customer.pickup_index = free[0]
+			taken.append(free[0])
+			customer.walk_to(_pickup_spots[free[0]].global_position)
+		else:
+			overflow += 1
+			customer.walk_to(_pickup_overflow_point(overflow))
+
+
+## The overflow line is the markers under Markers/PickupOverflow, in order (`rank`
+## starts at 1). If it's longer than that, it carries on past the last marker at
+## the same spacing.
+func _pickup_overflow_point(rank: int) -> Vector3:
+	var spots := _overflow_spots.map(func(m: Marker3D) -> Vector3: return m.global_position)
+	if spots.is_empty():
+		spots = [_pickup_spots[-1].global_position]
+	if rank <= spots.size():
+		return spots[rank - 1]
+	var last: Vector3 = spots[-1]
+	var step: Vector3 = last - spots[-2] if spots.size() > 1 else Vector3.ZERO
+	return floor_point(last + step * (rank - spots.size()))
+
+
+## Frees a pickup spot when its customer stops waiting, and moves the line up.
+## Deferred, so the customer has already moved on (seated or leaving) by then.
+func _release_pickup_spot(customer: Customer) -> void:
+	customer.pickup_index = -1
+	_fill_pickup_spots.call_deferred()
+
+
+## A nudge that steers a walking customer or cat around whoever is close
+## ahead: customers (not ones sitting down), cats on the floor and the barista.
+## Steers to the side rather than backing off, so two meeting head-on pass.
+func avoidance(actor: Node3D, heading: Vector3) -> Vector3:
+	var push := Vector3.ZERO
+	for other in _obstacles(actor):
+		var radius := cat_avoid_radius if actor is CafeCat or other is CafeCat else avoid_radius
+		var away := actor.global_position - other.global_position
+		away.y = 0.0
+		var distance := away.length()
+		# Ignore anyone well behind us (they're the ones who should steer), but keep
+		# steering past someone alongside, or our sides brush as we pass.
+		if distance >= radius or away.dot(heading) > distance * 0.5:
+			continue
+		# Ignore anyone we're already drawing away from, unless we're touching:
+		# otherwise a knot of walkers keeps nudging each other back and forth.
+		var closing := (_walk_velocity(actor) - _walk_velocity(other)).dot(-away / maxf(distance, 0.001))
+		if closing <= 0.0 and distance > radius * 0.5:
+			continue
+		var side := heading.cross(Vector3.UP)
+		if side.dot(away) < -0.01:
+			side = -side
+		push += side * (1.0 - distance / radius) * avoid_strength
+	return push
+
+
+func _walk_velocity(node: Node3D) -> Vector3:
+	if node is Barista:
+		return (node as Barista).velocity
+	return node.walk_velocity()
+
+
+## True when someone is standing on top of this idle cat, so it should move.
+func crowding(cat: CafeCat) -> bool:
+	for other in _obstacles(cat):
+		var away := cat.global_position - other.global_position
+		away.y = 0.0
+		if away.length() < cat_avoid_radius * 0.5:
+			return true
+	return false
+
+
+func _obstacles(actor: Node3D) -> Array[Node3D]:
+	var others: Array[Node3D] = [barista]
+	for c in _customers:
+		if c != actor and (c.state != Customer.State.SEATED or c.is_walking()):
+			others.append(c)
+	for cat in _cats:
+		if cat != actor and cat.on_floor():
+			others.append(cat)
+	return others
 
 
 func _create_order(customer: Customer) -> Array[String]:
@@ -369,6 +618,7 @@ func collect_order(customer: Customer) -> void:
 	tickets.erase(ticket)
 	_pass.refresh(tickets)
 	float_text(_pass.focus_point() + Vector3.UP * 0.8, "#%d up!  +$%d tip" % [ticket.number, tip], Color(1, 0.9, 0.5))
+	_release_pickup_spot(customer)
 	customer.collect(_free_seat())
 
 
@@ -385,6 +635,7 @@ func on_walk_out(customer: Customer) -> void:
 	if customer.ticket:
 		tickets.erase(customer.ticket)
 		_pass.refresh(tickets)
+		_release_pickup_spot(customer)
 
 
 func _on_customer_left(customer: Customer) -> void:

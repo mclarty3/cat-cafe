@@ -19,5 +19,5 @@ flags=(--path "$root")
 [[ "$mode" == "--window" ]] || flags=(--headless "${flags[@]}")
 
 # Drop known-harmless noise, keep everything else (prints, errors).
-timeout 300 "$godot" "${flags[@]}" res://_probe/probe.tscn 2>&1 \
+timeout "${PROBE_TIMEOUT:-300}" "$godot" "${flags[@]}" res://_probe/probe.tscn 2>&1 \
 	| grep -v -E "^\s*$|^Godot Engine|ObjectDB instances leaked|resources still in use|at: (cleanup|clear) \(core/" || true

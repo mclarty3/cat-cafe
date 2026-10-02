@@ -18,12 +18,15 @@ var regular_id := ""
 var state := State.QUEUED
 var ticket: Ticket
 var seat: Seat
+## The pickup spot we hold (index into the cafe's markers), or -1.
+var pickup_index := -1
 var chatted := false
 ## Set by the cafe while chatting, so the regular doesn't leave mid-sentence.
 var in_conversation := false
 
 var _model: AnimatedModel
 var _path: Array[Vector3] = []
+var _velocity := Vector3.ZERO
 var _patience := 0.0
 var _patience_max := 1.0
 var _linger_timer := 0.0
@@ -66,17 +69,22 @@ func can_order() -> bool:
 	return state == State.QUEUED and not is_walking()
 
 
+## How we're moving right now (zero when standing), for others' avoidance.
+func walk_velocity() -> Vector3:
+	return _velocity if not _path.is_empty() else Vector3.ZERO
+
+
 func walk_to(target: Vector3) -> void:
 	_path = cafe.find_path(global_position, target)
 
 
 # --- Called by the cafe -------------------------------------------------------
 
-func on_ordered(p_ticket: Ticket, pickup_spot: Vector3) -> void:
+## The cafe then sends us to a pickup spot.
+func on_ordered(p_ticket: Ticket) -> void:
 	ticket = p_ticket
 	state = State.WAITING_PICKUP
 	_set_patience(cafe.pickup_patience + cafe.patience_per_item * ticket.items.size())
-	walk_to(pickup_spot)
 
 
 ## The order is complete on the pass and we're there to take it.
@@ -119,13 +127,11 @@ func _process(delta: float) -> void:
 
 
 func _follow_path(delta: float) -> void:
-	_model.face(_path[0] - global_position)
+	_velocity = cafe.step_along(self, _path, _velocity, cafe.customer_walk_speed, delta)
+	_model.face(_velocity)
 	_model.play("walk")
-	global_position = global_position.move_toward(_path[0], cafe.customer_walk_speed * delta)
-	if global_position.distance_to(_path[0]) < 0.01:
-		_path.remove_at(0)
-		if _path.is_empty():
-			_arrive()
+	if _path.is_empty():
+		_arrive()
 
 
 func _arrive() -> void:

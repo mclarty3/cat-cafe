@@ -67,7 +67,8 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
    register takes orders instead.
 2. **Service.** 5 customers arrive about 20 seconds apart and queue along the left wall.
    - At the register, press Interact to take the front customer's order. They pay, a ticket goes on
-     the rail (left side of the screen), and they walk over to the pickup spot.
+     the rail (left side of the screen), and they walk over to a free pickup spot (if all are taken,
+     they wait behind and move up when one frees).
    - Make the drinks at the espresso machine and grab pastries from the case, then carry them to the
      **pass**. Once a ticket is complete, its customer collects it, tips, and goes to sit (or leaves with
      it to go if every table is taken).
@@ -154,8 +155,13 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
   volume and pitch, so swapping or rebalancing a sound is a one-line change. Overall music and effects
   levels are the Music and SFX buses (the Audio panel at the bottom of the editor). The playlist is
   `PLAYLIST` in `cafe_data.gd`.
-- **Layout:** the queue line and pickup spots are `Marker3D`s under `Markers/Queue` and `Markers/Pickup`.
-  Add or move them freely.
+- **Layout:** the queue line, pickup spots and pickup overflow line are `Marker3D`s under `Markers/Queue`,
+  `Markers/Pickup` and `Markers/PickupOverflow` (set in `tools/gen_cafe_layout.py`). Add or move them freely.
+- **Navigation:** two navmeshes are baked at startup from everything in the `nav_source` group. People use
+  the scene's `Navigation` region, baked from colliders. Cats get their own map (`Cafe._bake_cat_navigation`)
+  baked from the furniture's actual models, so anything with about 0.3 m of room underneath (tables) can be
+  walked under, and legs block wherever they really are. Swapping a model needs no extra setup. Only
+  floor-level polygons are kept in both. Nothing re-bakes after startup yet (the Furniture tab will need to).
 
 ### Code map
 
@@ -247,8 +253,9 @@ one) into the matching folder, and drop it onto a `Prop3D`.
 
 - The layout is fixed in the scene, with no furniture editing in-game. CafeOS's Furniture and Upgrades
   tabs are placeholders, and the Cats roster is view-only.
-- Customers don't avoid each other or the barista: they can overlap in the queue or at pickup.
-- Pickup spots are handed out by how many tickets are open, so two people can share a spot.
+- Avoidance is simple steering (`avoid_radius`, `cat_avoid_radius`, `avoid_strength` on the Cafe): walking
+  customers and cats sidestep each other and the barista, but anyone standing still doesn't make way, the
+  barista can still walk through people and cats, and a walker's last 0.4 m goes straight to its spot.
 - The art styles don't match. The furniture and food are smooth low-poly, while the characters and cat
   are blocky. That's fine for a prototype, but not a look to keep.
 - The till is a stand-in model (a computer screen). The sit pose is eyeballed. Mochi glides onto the
