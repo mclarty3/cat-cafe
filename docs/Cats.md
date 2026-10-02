@@ -61,6 +61,39 @@ Patterns so far: cafe effects fall into four groups (which customers come, how t
 - `[DECIDED]` (2026-09-30) A rescued boss cat gives a **permanent meta-progression ability** (movement tech and similar) **and** joins the roster as a normal cat you can keep in the cafe and equip in the dungeon.
 - `[LEANING]` (2026-09-30) *(Ryan's idea)* The higher-tier ability comes from **the nightmare energy that was possessing the cat**, which you take in when you defeat it, rather than from the cat itself.
 
+## Cat data schema
+*Added 2026-10-01 from the cafe prototype. The prototype hand-writes 8 cats (`CATS` in `scripts/cafe/cafe_data.gd` on the `ryan` branch), but most cats will eventually be **generated**, so every field below needs a generation rule, not just a value.*
+
+- `[DECIDED]` (2026-10-01) Most cats will be **mostly randomly generated**, and each needs a **unique description** and a **unique-ish voice**. Boss cats are the exception: they're hand-authored story characters.
+
+### Fields
+
+"In prototype" shows what the prototype already has, and under what name.
+
+| Field | What it is | In prototype | Generation notes |
+|---|---|---|---|
+| **id** | Stable unique key, used for saves | `mochi`, `biscuit`... | Generated (e.g. a counter or UUID). Never shown to the player |
+| **name** | Display name | yes | Drawn from name pools (food, plants, small words) with no duplicates among current cats. Possibly renameable by the player `[OPEN]` |
+| **personality** | 1 normally; 2+ only for **rare** cats | one | Weighted draw from the roster. Rarity decides how many (see Personality system) |
+| **rarity** | Common / rare / boss... | no | Rolled per cat, weighted by where it was found. Tiers still `[OPEN]` |
+| **description** | 1–2 sentences of character | `blurb` | **Must be unique.** Build it from a **personality template** + a random **quirk** from a large pool + a touch of **appearance** ("a grey shadow who..."). Track used quirks so no two cats share one |
+| **origin** | Where and how you got them | `since` (free text) | Structured data (biome or room, method: rescued / befriended / adopted-in, and the day), rendered to text. Feeds the backstory and the description |
+| **appearance** | How they look | `tint` + `swatch` (one shared model, recoloured) | Later: base model or breed, coat colour and **pattern** (tabby, calico, tuxedo...), eye colour, size or age (kitten / adult / senior). Palettes per breed keep combinations plausible. `swatch` (the UI colour) should be derived, not hand-set |
+| **voice** | How they sound | `voice.pitch`, `voice.meowy` | Pick a **voice set** (a bank of recorded meows and purrs; we'll need several so cats don't sound alike) + a pitch inside a range set by size or age (kittens higher). `meowy` (meow vs purr when petted) leans on personality (Chatty high, Lazy low) plus random variation |
+| **behaviour** | How they move around the cafe | `walk_speed`, `idle` (nap length) | Derived from personality and age, plus a small random variation |
+| **mischief** | Which events they can cause | `mischief` (yes/no) | Becomes a list of event types, mostly implied by personality (Playful knocks mugs, Hunter chases mice...) |
+| **bond** | The single bond meter (cafe + dream) | no | Starts low (or warming up, for skittish new rescues). Not generated |
+| **status** | In the cafe, resident (favourite), up for adoption, adopted (visits) | no | Starts "in the cafe". Changes through play |
+| **keepsake** | What they leave when adopted | no | Generated at adoption from personality + bond (see Rescue → rehabilitate → adopt out) |
+| **boss ability** | Boss cats only: the permanent ability | no | Hand-authored per boss |
+
+### Generation guidelines
+- `[PROPOSED]` *(Claude suggestion)* Split each cat into **authored pools** (names, quirks, description templates, voice sets, palettes) and **rolled choices** that pick from them. Then the pools can grow without touching code, and uniqueness is just "don't reuse a pick while that cat exists".
+- `[PROPOSED]` *(Claude suggestion)* Make the **personality** drive everything else (description template, behaviour, voice leanings, mischief), so a cat reads as a coherent character rather than a pile of random stats.
+- `[PROPOSED]` *(Claude suggestion)* Use a **seed per cat**, so a cat can be regenerated identically from saves or for debugging.
+- `[OPEN]` How many voice sets are needed for cats to feel distinct, and where they come from (recordings vs processing a few base recordings).
+
+
 ## Needs expansion
 - `[OPEN]` Caps on how many cats the cafe can hold, and how that scales.
 - `[OPEN]` Cat needs and care (feeding, grooming, affection), and how much of that exists at all.
