@@ -44,8 +44,9 @@ Design lives in `docs/` (an Obsidian vault). Prototype status and next steps: `C
   (input via `Input.parse_input_event(InputEventAction)`, or call methods directly), prints PASS/FAIL, then delete `_probe/`.
 - Screenshots: run the probe scene **without** `--headless` (opens a window) and save
   `get_viewport().get_texture().get_image()` after `await RenderingServer.frame_post_draw`. Check visual changes this way.
-- In-game (debug builds, cafe service): F9 skips to closing time, Shift+F9 starts a cat event. Don't bind
-  debug keys to F8 (Godot's "stop running game", which works even with the game focused).
+- In-game (debug builds): F9 opens the cafe debug menu (`ui/debug_panel.gd`; actions are `Cafe.debug_*`): cat
+  events, spawn customer, auto-take/complete orders, stock, game speed, skip to closing, volumes, mute music. Don't bind debug keys
+  to F8 (Godot's "stop running game", which works even with the game focused).
 
 ## Gotchas
 - Shell heredocs with lots of quotes sometimes fail to parse in this environment: write Python/GDScript to a file instead.

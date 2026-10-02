@@ -10,6 +10,8 @@ var minigame: DrinkMinigame
 var dialogue: DialoguePanel
 var computer: ComputerPanel
 var results_panel: ResultsPanel
+## Only in debug builds (null otherwise).
+var debug: DebugPanel
 
 var _status: Label
 var _stock: Label
@@ -58,6 +60,14 @@ func _ready() -> void:
 	bottom.add_child(dialogue)
 	minigame = DrinkMinigame.new()
 	add_child(minigame)
+
+	if OS.is_debug_build():
+		debug = DebugPanel.new()
+		add_child(debug)
+		# Bottom-right: clear of the stock readout and the prompt.
+		debug.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 6)
+		debug.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		debug.grow_vertical = Control.GROW_DIRECTION_BEGIN
 
 
 func _add_label(preset: Control.LayoutPreset) -> Label:

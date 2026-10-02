@@ -119,8 +119,9 @@ var _event_times: Array[float] = []
 ## Mischief ids already used today (one of each kind a day).
 var _events_done: Array[String] = []
 var _active_event: CatEvent
-## Shift+F9 (debug builds) starts these in turn.
-var _debug_event := 0
+## Debug menu toggles: the register takes orders and the pass fills itself.
+var debug_auto_take := false
+var debug_auto_complete := false
 var _next_ticket := 1
 var _customers: Array[Customer] = []
 ## Customers in line, front first.
@@ -160,6 +161,8 @@ func _ready() -> void:
 	OverlayAnchor.attach(barista.focus_marker, overlay, 0.0)
 	camera.follow_target = barista
 	hud.cafe = self
+	if hud.debug:
+		hud.debug.cafe = self
 	_spawn_cats()
 	# Built from the furniture colliders at runtime, so rearranging the room
 	# in the editor just works.
@@ -171,6 +174,7 @@ func _ready() -> void:
 	NavigationServer3D.map_changed.connect(_on_map_changed)
 	Audio.play_music(CafeData.PLAYLIST)
 	tree_exiting.connect(func() -> void:
+		Engine.time_scale = 1.0  # the debug menu's speed setting
 		NavigationServer3D.free_rid(_cat_region)
 		NavigationServer3D.free_rid(cat_map)
 		Audio.stop_music(0.5)
@@ -319,21 +323,15 @@ func _open_cafe() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and not barista.busy:
 		Game.go_to_title()
-	# Debug shortcuts (debug builds, during service). Godot's editor already uses F8
-	# (stop) and the other F-keys near it, so both live on F9.
+	# Debug builds: F9 opens and closes the debug menu. (Godot's editor already
+	# uses F8, to stop the game, and the F-keys near it.)
 	elif OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo \
-			and event.keycode == KEY_F9 and phase == Phase.SERVICE:
-		if event.shift_pressed:
-			# Shift+F9: start a cat event now, each kind in turn.
-			if _active_event == null:
-				for i in CAT_EVENTS.size():
-					var kind: GDScript = CAT_EVENTS[(_debug_event + i) % CAT_EVENTS.size()]
-					if _start_cat_event(kind):
-						_debug_event = (_debug_event + i + 1) % CAT_EVENTS.size()
-						break
+			and event.keycode == KEY_F9 and hud.debug:
+		if hud.debug.visible:
+			hud.debug.close()
 		elif not barista.busy:
-			# F9: skip straight to closing time (results screen and closing chime).
-			_end_day()
+			hud.debug.open()
+		get_viewport().set_input_as_handled()
 
 
 func _process(delta: float) -> void:
@@ -349,6 +347,7 @@ func _process(delta: float) -> void:
 			_spawn_timer = randf_range(spawn_interval.x, spawn_interval.y) if _try_spawn() else 1.0
 
 	_update_cat_events()
+	_update_debug_helpers()
 	# Closing time once everyone's gone; any events still to come are skipped,
 	# but one that's running plays out.
 	if _spawned >= customers_per_day and _customers.is_empty() and _active_event == null:
@@ -766,11 +765,12 @@ func _update_cat_events() -> void:
 	_event_times[0] += 5.0
 
 
-## Starts an event of this kind if it can happen now (and hasn't today).
-func _start_cat_event(kind: GDScript) -> bool:
+## Starts an event of this kind if it can happen now (and hasn't today, unless
+## `repeat` is on).
+func _start_cat_event(kind: GDScript, repeat := false) -> bool:
 	var event: CatEvent = kind.new()
 	event.cafe = self
-	if event.mischief_id() in _events_done or not event.prepare():
+	if (event.mischief_id() in _events_done and not repeat) or not event.prepare():
 		return false
 	_events_done.append(event.mischief_id())
 	_run_cat_event(event)
@@ -839,6 +839,84 @@ func pick_mug_spot() -> Vector3:
 				return true
 		return false)
 	return (occupied if not occupied.is_empty() else spots).pick_random().global_position
+
+
+# --- Debug menu (see ui/debug_panel.gd) --------------------------------------------
+
+func debug_can_start_cat_event(kind: GDScript) -> bool:
+	if phase != Phase.SERVICE or _active_event:
+		return false
+	var event: CatEvent = kind.new()
+	event.cafe = self
+	return event.prepare()
+
+
+## Starts this kind of event now, even if it already happened today.
+func debug_start_cat_event(kind: GDScript) -> void:
+	if debug_can_start_cat_event(kind):
+		_start_cat_event(kind, true)
+
+
+func debug_can_spawn() -> bool:
+	return _spawned < customers_per_day and _queue.size() < _queue_spots.size()
+
+
+## The next customer walks in now (the one after keeps the usual gap).
+func debug_spawn_customer() -> void:
+	if phase == Phase.SERVICE and debug_can_spawn() and _try_spawn():
+		_spawn_timer = randf_range(spawn_interval.x, spawn_interval.y)
+
+
+## Puts everything every open order still needs on the pass (made Good; uses
+## stock where there is some).
+func debug_complete_orders() -> void:
+	for ticket in tickets:
+		for id in ticket.remaining():
+			var uses: String = CafeData.item(id).get("uses", "")
+			if not uses.is_empty() and day.stock.get(uses, 0) > 0:
+				day.stock[uses] -= 1
+			ticket.on_pass.append({"id": id, "quality": CafeData.Quality.GOOD})
+	_pass.refresh(tickets)
+
+
+func debug_add_stock(amount: int) -> void:
+	for key in day.stock:
+		day.stock[key] += amount
+
+
+func debug_end_day() -> void:
+	if phase == Phase.SERVICE:
+		_end_day()
+
+
+## One line for the top of the debug menu.
+func debug_status() -> String:
+	var lines := []
+	match phase:
+		Phase.PREP:
+			lines.append("Morning prep")
+		Phase.RESULTS:
+			lines.append("Closed")
+		Phase.SERVICE:
+			lines.append("%d:%02d" % [int(_service_time) / 60, int(_service_time) % 60])
+	lines[0] += "  ·  Customers %d/%d  ·  Queue %d  ·  Orders %d" % [_spawned, customers_per_day, _queue.size(), tickets.size()]
+	if _active_event:
+		lines.append("Cat event running: %s" % _active_event.mischief_id().capitalize())
+	elif not _event_times.is_empty() and phase == Phase.SERVICE:
+		lines.append("Next cat event in %ds (%d left today)" % [maxi(0, int(_event_times[0] - _service_time)), _event_times.size()])
+	else:
+		lines.append("No more cat events today")
+	return "\n".join(lines)
+
+
+## The debug menu's auto toggles, run every frame of service.
+func _update_debug_helpers() -> void:
+	if debug_auto_take:
+		var customer := front_of_queue()
+		if customer:
+			take_order(customer, $Stations/Register.global_position + Vector3.UP)
+	if debug_auto_complete and tickets.any(func(t: Ticket) -> bool: return not t.is_complete()):
+		debug_complete_orders()
 
 
 func _end_day() -> void:

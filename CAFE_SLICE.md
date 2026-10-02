@@ -41,8 +41,12 @@ a regular worth stepping out to talk to, and a cat causing trouble. The art is f
 ## What's built
 
 Open the project and press F5, then choose **Cafe day**. Esc returns to the title. While testing,
-**F9** during service skips straight to closing time, and **Shift+F9** starts a cat event right away, each
-kind in turn (debug builds only). Avoid F8 in debug keys: it's Godot's "stop the running game".
+**F9** opens the debug menu (debug builds only): start any cat event, spawn the next customer, auto-take
+and auto-complete orders, add stock, change game speed, skip to closing, and set volumes (Master, Music,
+SFX, relative to the mix) or mute the music. Debug builds start with Master at 25% (`START_VOLUMES` in
+`debug_panel.gd`); release builds keep the full mix. The world keeps running while
+it's open, but the barista ignores input; F9 or Esc closes it. Avoid F8 for debug keys: it's Godot's "stop
+the running game".
 
 ### Day flow
 
@@ -207,6 +211,7 @@ kind in turn (debug builds only). Avoid F8 in debug keys: it's Godot's "stop the
 | `scripts/cafe/cafe_cat.gd`, `scenes/cafe/cat.tscn` | A cat: wandering (per-cat pace), petting, and the actions cat events drive it with. Spawned from `CafeData.CATS` |
 | `scripts/cafe/events/*.gd` | Cat events: `CatEvent` (base) and the mug, fight, curtains and croissant thief. Scheduled by `Cafe` |
 | `scripts/cafe/curtain.gd` | Stand-in curtains at a window (the curtain event's target) |
+| `scripts/cafe/ui/debug_panel.gd` | The F9 debug menu (debug builds). Its actions are the `debug_*` functions on `Cafe` |
 | `scripts/cafe/seat.gd` | Where customers sit. Point its +Z at the table |
 | `scripts/cafe/prop_3d.gd` | Places any model, centres its footprint, and adds an optional auto-sized box or cylinder collider. Use it for all furniture |
 | `scripts/cafe/animated_model.gd` | Plays a Kenney character or pet animation by name and turns it to face a direction |
