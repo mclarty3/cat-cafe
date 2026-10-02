@@ -21,3 +21,4 @@ The big unresolved questions. Each area note also has its own finer-grained **Op
 | 13 | How long is the game, and how does it end? Proposed ending: freeing the relative's lost cat, with a post-game after. | [[Core Loop & Pacing]] |
 | 14 | What is the story and frame narrative (inheritance and missing cat, or something else)? | [[Setting & Lore]] |
 | 15 | What engine and scope? *(Engine: leaning Godot.)* | [[Production & Tech]] |
+| 16 | Is there a daily rating, a longer-term cafe reputation, or both? What feeds it (service, walkouts, chats, cat events) and what does it change (customer numbers, regulars, unlocks)? *(The prototype already counts customers a cat fight sends home early, as a hook.)* | [[Core Loop & Pacing]] |
