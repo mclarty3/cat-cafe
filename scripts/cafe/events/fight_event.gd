@@ -26,12 +26,13 @@ func run() -> String:
 	var b := cats[1]
 	# Out in the open, somewhere the barista can reach.
 	var spot := cafe.floor_point(cafe.random_floor_point(a.wander_area, cafe.cat_map))
-	cafe.toast("%s and %s are squaring up..." % [a.cat_name, b.cat_name])
-	a.move_to(spot + Vector3.RIGHT * RADIUS, true)
-	b.move_to(spot - Vector3.RIGHT * RADIUS, true)
+	# They wander over to each other; the fight starts when they meet.
+	a.move_to(spot + Vector3.RIGHT * RADIUS)
+	b.move_to(spot - Vector3.RIGHT * RADIUS)
 	var waited := 0.0
-	while (a.is_moving() or b.is_moving()) and waited < 8.0:
+	while (a.is_moving() or b.is_moving()) and waited < 20.0:
 		waited += await tick()
+	cafe.toast("%s and %s are fighting!" % [a.cat_name, b.cat_name])
 
 	var cloud := _make_cloud()
 	cafe.add_actor(cloud)

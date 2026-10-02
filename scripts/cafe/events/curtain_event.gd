@@ -18,8 +18,9 @@ func run() -> String:
 	var curtain: Curtain = cafe.get_tree().get_nodes_in_group("curtains").pick_random()
 	var side := randi() % 2
 	var base := cafe.floor_point(curtain.base_point(side), cafe.cat_map)
-	cafe.toast("%s is eyeing the curtains..." % c.cat_name)
-	await c.go_to(base, true)
+	# Wander over like any other stroll; the event starts when she climbs.
+	await c.go_to(base)
+	cafe.toast("%s is climbing the curtains!" % c.cat_name)
 
 	# Up she goes, nose to the curtain.
 	var cling := curtain.climb_point(side)

@@ -14,10 +14,11 @@ func run() -> String:
 	# The people's map stops at the table's rim, so that's where we hop up from
 	# (not from underneath).
 	var table_edge := cafe.floor_point(table_top)
-	cafe.toast("%s is eyeing a mug on a table..." % c.cat_name)
-	await c.go_to(table_edge, true)
+	# Wander over like any other stroll; the event starts on the table.
+	await c.go_to(table_edge)
 	c.face(table_top - c.global_position)
 	await c.hop(table_top)
+	cafe.toast("%s is nudging a mug toward the edge!" % c.cat_name)
 
 	c.mug.position = Vector3(0, 0, 0.18)
 	c.mug.show()
