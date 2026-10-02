@@ -23,6 +23,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 - `[OPEN]` How many in-game days is a full playthrough? Is there a calendar, seasons, or a deadline, or is it open-ended?
 - `[OPEN]` Can the player skip a night or a day?
 - `[OPEN]` Are there other time slots (for example, a midday activity like Dave the Diver's second dive)?
+- `[OPEN]` Is there a **daily rating** and/or a longer-term **cafe reputation**? What feeds it (customers served, walkouts, chats, cat events handled or not) and what does it change (how many customers come, which regulars visit, unlocks)? The prototype's cat fight already sends nearby customers home early and counts them, as a hook for this.
 
 ## Not yet discussed
 
