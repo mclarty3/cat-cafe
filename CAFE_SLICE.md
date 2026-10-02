@@ -26,8 +26,10 @@ a regular worth stepping out to talk to, and a cat causing trouble. The art is f
 - **Taking an order is a single press** at the register.
 - **To-go cups, no bussing.** Seated customers just leave when they're done.
 - **Full 3D with a perspective follow camera** (2026-10-01). The camera looks at the counter from the
-  front of house, about 44° down. It follows the barista partway, with a little look-ahead, and eases in
-  while you're at a station or chatting. This replaced a fixed isometric camera, which felt limiting
+  front of house, about 48° down. It's pulled well back with a narrow 30° lens, which keeps the counter
+  large while fitting the whole floor. It follows the barista side to side (40%) but only slightly front to
+  back (15%), so working the counter never pushes the tables off screen. It also looks a little ahead
+  and eases in while you're at a station or chatting. This replaced a fixed isometric camera, which felt limiting
   and flat. The design docs' "isometric" decision needs updating to match.
 - **Movement should feel good.** Quick acceleration and quicker braking (full speed in about 0.15s, a
   stop in about 0.1s, no sliding), turning toward where you're steering, and the walk animation speed
@@ -89,8 +91,8 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 - **Menu, prep actions, the starting pantry, and Theo's lines** live in `scripts/cafe/cafe_data.gd`
   as plain dictionaries.
 - **Camera:** the `Camera` node (`CafeCamera`) has pitch, yaw, distance and FOV; how strongly it follows
-  you, how far it looks ahead, how smoothly it tracks, and the area it stays within; and the focus zoom
-  and pull. The framing updates live in the editor.
+  you side to side and front to back, how far it looks ahead, how smoothly it tracks, and the area it
+  stays within; and the focus zoom and pull. The framing updates live in the editor.
 - **Movement feel:** `speed`, `acceleration`, `deceleration` and `walk_anim_speed` on the `Barista`, and
   `turn_speed` on its `Model`.
 - **Lighting:** the `Sun` (DirectionalLight3D) and `WorldEnvironment` ambient settings.
@@ -147,6 +149,9 @@ hand; the counter-service version hasn't been yet.
   service. That led to the counter-service redesign above.
 - **Round 3** (counter service, isometric): the isometric view felt limiting and a bit ugly. That led to
   full 3D with the perspective follow camera, plus a movement-feel pass.
+- **Round 4** (perspective camera): the zoom felt right, but from behind the counter the bottom row of
+  tables was cut off. Fixed by following mostly side to side, plus a slight zoom-out using a longer
+  distance and narrower lens.
 
 ## Placeholder art
 

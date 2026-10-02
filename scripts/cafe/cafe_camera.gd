@@ -7,12 +7,12 @@ extends Camera3D
 ## interest (a station, a customer) while a menu or chat is open.
 
 ## The room point the camera rests on when not following anyone.
-@export var room_center := Vector3(3.5, 0.3, 2.0):
+@export var room_center := Vector3(3.5, 0.3, 3.1):
 	set(value):
 		room_center = value
 		_snap()
 ## Degrees looking down.
-@export_range(15.0, 85.0) var pitch := 44.0:
+@export_range(15.0, 85.0) var pitch := 48.0:
 	set(value):
 		pitch = value
 		_snap()
@@ -21,8 +21,10 @@ extends Camera3D
 	set(value):
 		yaw = value
 		_snap()
-## Distance from the look-at point.
-@export var distance := 6.8:
+## Distance from the look-at point. Paired with a narrow FOV (set on the node):
+## pulling back with a narrower lens keeps the counter large while shrinking the
+## nearby tables, so the whole floor fits on screen.
+@export var distance := 10.0:
 	set(value):
 		distance = value
 		_snap()
@@ -30,14 +32,17 @@ extends Camera3D
 @export_group("Follow")
 ## The node to follow (the barista). Set by the cafe at runtime.
 var follow_target: Node3D
-## 0 = stay on the room centre, 1 = keep the player centred.
+## Side-to-side follow: 0 = stay on the room centre, 1 = keep the player centred.
 @export_range(0.0, 1.0) var follow_amount := 0.4
+## Front-to-back follow. Kept low so working the counter doesn't push the
+## tables off the bottom of the screen.
+@export_range(0.0, 1.0) var follow_depth := 0.15
 ## How far ahead of the player (in seconds of their velocity) to look.
 @export var look_ahead := 0.25
 ## Higher = snappier tracking.
 @export var smoothing := 4.0
 ## Keeps the look-at point inside the room (x/z min and max).
-@export var bounds := Rect2(2.4, 1.6, 2.2, 1.8)
+@export var bounds := Rect2(2.4, 1.6, 2.2, 2.0)
 
 @export_group("Focus")
 ## While using a station or chatting, move this much closer...
@@ -70,7 +75,9 @@ func _process(delta: float) -> void:
 		var ahead := follow_target.global_position
 		if follow_target is CharacterBody3D:
 			ahead += (follow_target as CharacterBody3D).velocity * look_ahead
-		goal = room_center.lerp(Vector3(ahead.x, room_center.y, ahead.z), follow_amount)
+		goal = Vector3(
+			lerpf(room_center.x, ahead.x, follow_amount), room_center.y,
+			lerpf(room_center.z, ahead.z, follow_depth))
 	var goal_distance := distance
 	if _focus_point != null:
 		var p: Vector3 = _focus_point

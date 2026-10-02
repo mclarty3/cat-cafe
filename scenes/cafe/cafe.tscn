@@ -94,7 +94,7 @@ directional_shadow_max_distance = 80.0
 shadow_blur = 1.5
 
 [node name="Camera" type="Camera3D" parent="."]
-fov = 40.0
+fov = 30.0
 script = ExtResource("2_cafe_camera")
 
 [node name="Navigation" type="NavigationRegion3D" parent="."]
