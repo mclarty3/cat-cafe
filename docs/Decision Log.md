@@ -26,6 +26,7 @@ Every `[DECIDED]` and `[REJECTED]` item across the design notes. Add new decisio
 | 2026-10-01 | Player **carries items to the pass**, no further | [[Cafe Gameplay]] |
 | 2026-10-01 | Taking an order is a **single press**; **to-go cups**, no bussing for now | [[Cafe Gameplay]] |
 | 2026-10-01 | Regulars are **chatted with at their table** | [[Customers & Regulars]] |
+| 2026-10-01 | Cats are **mostly randomly generated**, each with a **unique description** and a **unique-ish voice** (boss cats hand-authored); see the cat data schema | [[Cats]] |
 
 # From the seed brainstorm
 
