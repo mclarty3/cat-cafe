@@ -56,6 +56,29 @@ const PREP_ACTIONS := [
 	{"name": "Make dream-honey syrup", "gives": {"honey_syrup": 3}, "costs": {"dream_honey": 1}},
 ]
 
+## Resident cats, shown in the computer's Cats roster. Personalities come
+## from the roster in docs/Cats.md.
+const CATS := {
+	"mochi": {
+		"name": "Mochi",
+		"personality": "Playful",
+		"blurb": "Bats at anything that moves. Including mugs. Especially mugs.",
+		"since": "Found in the cafe when you arrived",
+	},
+}
+
+## Planned computer features, shown greyed out until they exist.
+const FURNITURE_IDEAS := [
+	{"name": "Rearrange tables", "note": "Move and rotate furniture before opening"},
+	{"name": "Swap the rug", "note": "Decor that changes the mood"},
+	{"name": "Cat tree", "note": "Somewhere for cats to settle near customers"},
+]
+const UPGRADE_IDEAS := [
+	{"name": "Second group head", "price": 120, "note": "Pull two shots at once"},
+	{"name": "Bigger pastry case", "price": 80, "note": "Bake larger batches"},
+	{"name": "Extra table", "price": 60, "note": "More seats, fewer customers taking it to go"},
+]
+
 const REGULARS := {
 	"theo": {
 		"name": "Theo",

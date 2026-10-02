@@ -94,7 +94,7 @@ func _update_focus() -> void:
 	if not busy:
 		var best_distance := INF
 		for area in _reach.get_overlapping_areas():
-			if not area is Interactable:
+			if not area is Interactable or (cafe and not cafe.can_use(area)):
 				continue
 			var text: String = area.get_prompt(self)
 			var offset: Vector3 = area.focus_point() - global_position

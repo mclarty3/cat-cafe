@@ -8,7 +8,7 @@ var cafe: Cafe
 var choice_panel: ChoicePanel
 var minigame: DrinkMinigame
 var dialogue: DialoguePanel
-var prep_panel: PrepPanel
+var computer: ComputerPanel
 var results_panel: ResultsPanel
 
 var _status: Label
@@ -17,6 +17,7 @@ var _tickets: Label
 var _hands: Label
 var _prompt: Label
 var _toast: Label
+var _objective: Label
 var _toast_tween: Tween
 
 
@@ -29,9 +30,13 @@ func _ready() -> void:
 	_prompt = _add_label(Control.PRESET_CENTER_BOTTOM)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt.modulate = Color(1, 0.95, 0.75)
+	_objective = _add_label(Control.PRESET_CENTER_TOP)
+	_objective.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_objective.modulate = Color(1, 0.92, 0.75)
+	_objective.position.y += 18
 	_toast = _add_label(Control.PRESET_CENTER_TOP)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_toast.position.y += 18
+	_toast.position.y += 36
 
 	# Panels live in layout containers so they stay put as their contents change.
 	var centered := CenterContainer.new()
@@ -44,8 +49,8 @@ func _ready() -> void:
 
 	choice_panel = ChoicePanel.new()
 	centered.add_child(choice_panel)
-	prep_panel = PrepPanel.new()
-	centered.add_child(prep_panel)
+	computer = ComputerPanel.new()
+	centered.add_child(computer)
 	results_panel = ResultsPanel.new()
 	centered.add_child(results_panel)
 	dialogue = DialoguePanel.new()
@@ -72,6 +77,11 @@ func _add_label(preset: Control.LayoutPreset) -> Label:
 	return label
 
 
+## A standing goal shown under the status line (empty hides it).
+func set_objective(text: String) -> void:
+	_objective.text = text
+
+
 func set_prompt(text: String) -> void:
 	_prompt.text = "[Interact]  " + text if not text.is_empty() else ""
 
@@ -90,7 +100,10 @@ func _process(_delta: float) -> void:
 	if cafe == null:
 		return
 	var day := cafe.day
-	_status.text = "$%d      Customers %d / %d" % [day.coins(), cafe.customers_arrived(), cafe.customers_per_day]
+	if cafe.phase == Cafe.Phase.PREP:
+		_status.text = "$%d      Closed - morning prep (%d actions left)" % [day.coins(), day.prep_actions_left]
+	else:
+		_status.text = "$%d      Customers %d / %d" % [day.coins(), cafe.customers_arrived(), cafe.customers_per_day]
 
 	var stock := []
 	for key in CafeData.STOCK_NAMES:

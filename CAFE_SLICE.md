@@ -45,9 +45,21 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 
 ### Day flow
 
-1. **Morning prep.** 3 actions: bake croissants (+4), bake moonflour muffins (+3, uses 1 moonflour)
-   or make dream-honey syrup (+3 honey lattes, uses 1 dream honey). The pantry starts with 2
-   moonflour and 1 dream honey, so you can't do everything.
+1. **Morning prep.** The cafe is closed and you can walk around freely. The light is cooler and
+   dimmer, there are no customers, and Mochi is about. The counter stations are off until you open.
+   Everything happens at the **register's computer**, the same till you take orders on later, which
+   runs **CafeOS** before opening. The header always shows the time and prep actions left, and a green **Open the
+   cafe** button sits in the sidebar, so you can open up from any page. The pages are:
+   - **Kitchen** (the page it opens on): 3 prep actions: bake croissants (+4), bake moonflour muffins (+3, uses 1 moonflour)
+     or make dream-honey syrup (+3 honey lattes, uses 1 dream honey). The pantry starts with 2
+     moonflour and 1 dream honey, so you can't do everything.
+   - **Cats:** a roster of the cats living in the cafe (just Mochi so far). It's view-only for now.
+     Managing cats arrives with the cat systems, which matters once you have lots of them.
+   - **Furniture** and **Upgrades:** placeholders showing what's planned, greyed out until money
+     and the layout carry over between days.
+
+   Opening warms the light into daytime, rings the door bell, and starts service. From then on, the
+   register takes orders instead.
 2. **Service.** 5 customers arrive about 20 seconds apart and queue along the left wall.
    - At the register, press Interact to take the front customer's order. They pay, a ticket goes on
      the rail (left side of the screen), and they walk over to the pickup spot.
@@ -96,6 +108,8 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 
 ### Tuning
 
+- **Morning light** (sun and ambient levels before opening, and how long it takes to warm up) is in the
+  `Morning` group on the `Cafe` root node.
 - **Day, customer and money numbers** are exported on the `Cafe` root node (`scripts/cafe/cafe.gd`):
   customers per day, arrival gaps, queue and pickup patience, how long people sit, tip amounts, and
   when the mug event happens. Character scale and sitting height are there too.
@@ -128,7 +142,7 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 | `scripts/cafe/barista.gd` | Movement (feel tuning), what you're carrying, and picking the closest interactable |
 | `scripts/cafe/focus_marker.gd` | The bobbing arrow over whatever Interact will use |
 | `scripts/cafe/interactable.gd` | Base class for anything you can use: `get_prompt()` / `interact()` |
-| `scripts/cafe/station.gd` + `register.gd`, `espresso_machine.gd`, `pastry_case.gd`, `pass.gd`, `trash_bin.gd` | Counter equipment |
+| `scripts/cafe/station.gd` + `register.gd`, `espresso_machine.gd`, `pastry_case.gd`, `pass.gd`, `trash_bin.gd` | Counter equipment. The register's computer runs CafeOS before opening |
 | `scripts/cafe/cafe_cat.gd` | Wandering, petting, the mug event on a table |
 | `scripts/cafe/seat.gd` | Where customers sit. Point its +Z at the table |
 | `scripts/cafe/prop_3d.gd` | Places any model, centres its footprint, and adds an optional auto-sized box or cylinder collider. Use it for all furniture |
@@ -136,7 +150,8 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 | `scripts/cafe/overlay_anchor.gd` | 2D drawing pinned above a 3D node (bubbles, bars, names) |
 | `scripts/cafe/cafe_camera.gd` | The perspective follow camera, plus focus easing |
 | `scripts/autoload/audio.gd` (`Audio`) | Music playlist and named sound effects (one-shots and loops), on the Music and SFX buses |
-| `scripts/cafe/ui/*` | HUD (status, ticket rail, what you're carrying), choice menu, minigame, dialogue, prep, and results panels |
+| `scripts/cafe/ui/computer_panel.gd` | CafeOS: the morning hub (Kitchen, Cats, Furniture, Upgrades, and opening up) |
+| `scripts/cafe/ui/*` | HUD (status, goal line, ticket rail, what you're carrying), choice menu, minigame, dialogue, and results panels |
 
 ### Verified
 
@@ -196,7 +211,8 @@ one) into the matching folder, and drop it onto a `Prop3D`.
 
 ## Known shortcuts
 
-- The layout is fixed in the scene, with no furniture editing in-game. The prep phase is actions only.
+- The layout is fixed in the scene, with no furniture editing in-game. CafeOS's Furniture and Upgrades
+  tabs are placeholders, and the Cats roster is view-only.
 - Customers don't avoid each other or the barista: they can overlap in the queue or at pickup.
 - Pickup spots are handed out by how many tickets are open, so two people can share a spot.
 - The art styles don't match. The furniture and food are smooth low-poly, while the characters and cat
@@ -224,7 +240,9 @@ one) into the matching folder, and drop it onto a `Prop3D`.
 5. **Cats with personalities** (the Lazy / Playful / Curious roster). Each resident cat changes the day,
    for example Lazy calms impatient people in the queue. This also tests the matchmaking idea.
 6. **More cat events** out front, at random times: a cat fight, a kitten on the curtains, the croissant thief.
-7. **Upgrades and money sinks** for spending earnings (a second group head, a bigger pastry case, more seats).
+7. **Fill in CafeOS:** carry money between days, then make the Upgrades tab real (a second group head, a
+   bigger pastry case, more seats) and the Furniture tab (rearranging tables and decor before opening). The
+   Cats roster becomes the place to manage cats once there are more of them.
 8. **Connect to the dungeon.** Once the dungeon collects ingredients, feed the real haul into the pantry,
    and let the night's outcome change prep (the "fewer prep actions" option in *Day-Night Connection*).
 9. **A cozy pass:** lamps that glow, window light, and calm open and close periods. Then dynamic music

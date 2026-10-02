@@ -1,7 +1,7 @@
 class_name Cafe
 extends Node3D
-## Runs one counter-service cafe day: morning prep, then service, then the
-## end-of-day results. Customers queue at the register, wait at the pickup spot
+## Runs one counter-service cafe day: a walkable morning prep (done on the
+## register's computer), then service, then the end-of-day results. Customers queue at the register, wait at the pickup spot
 ## while you carry their order to the pass, then sit for a while. Day tuning is
 ## exported here.
 
@@ -39,6 +39,13 @@ enum Phase { PREP, SERVICE, RESULTS }
 @export_range(0.0, 1.0) var drink_order_chance := 0.85
 @export_range(0.0, 1.0) var pastry_order_chance := 0.6
 
+@export_group("Morning")
+## Light before opening: cooler and dimmer, warming up when you open.
+@export var morning_sun_energy := 0.3
+@export var morning_sun_color := Color(0.8, 0.88, 1.0)
+@export var morning_ambient_energy := 0.22
+@export var open_light_fade := 2.5
+
 @export_group("Money")
 ## Tip per drink by quality: poor, good, perfect.
 @export var tip_per_quality: Array[int] = [0, 1, 3]
@@ -75,6 +82,12 @@ var _queue: Array[Customer] = []
 @onready var _pass: Pass = $Stations/Pass
 @onready var _navigation: NavigationRegion3D = $Navigation
 @onready var _cat: CafeCat = $Actors/Mochi
+@onready var _sun: DirectionalLight3D = $Sun
+@onready var _environment: Environment = $WorldEnvironment.environment
+
+var _day_sun_energy := 0.0
+var _day_sun_color := Color.WHITE
+var _day_ambient_energy := 0.0
 
 
 func _enter_tree() -> void:
@@ -97,18 +110,55 @@ func _ready() -> void:
 		Audio.stop_music(0.5)
 		Audio.stop_all_loops())
 
+	_start_morning()
+
+
+# --- Morning prep -----------------------------------------------------------------
+
+func _start_morning() -> void:
+	phase = Phase.PREP
+	_day_sun_energy = _sun.light_energy
+	_day_sun_color = _sun.light_color
+	_day_ambient_energy = _environment.ambient_light_energy
+	_sun.light_energy = morning_sun_energy
+	_sun.light_color = morning_sun_color
+	_environment.ambient_light_energy = morning_ambient_energy
+	hud.set_objective("Morning prep: use the computer at the register, then open up.")
+
+
+## Which interactables work right now: the register (its computer runs CafeOS
+## before opening) and the cat any time, the other stations during service.
+func can_use(interactable: Interactable) -> bool:
+	if interactable is CafeCat or interactable is Register:
+		return true
+	return phase == Phase.SERVICE
+
+
+func open_computer() -> void:
 	barista.busy = true
-	await hud.prep_panel.run(day)
+	camera.focus(barista.global_position)
+	var open_cafe := await hud.computer.run(day)
+	camera.unfocus()
 	barista.busy = false
+	if open_cafe:
+		_open_cafe()
+
+
+func _open_cafe() -> void:
 	phase = Phase.SERVICE
 	_spawn_timer = first_customer_delay
+	hud.set_objective("")
+	var tween := create_tween().set_parallel().set_trans(Tween.TRANS_SINE)
+	tween.tween_property(_sun, "light_energy", _day_sun_energy, open_light_fade)
+	tween.tween_property(_sun, "light_color", _day_sun_color, open_light_fade)
+	tween.tween_property(_environment, "ambient_light_energy", _day_ambient_energy, open_light_fade)
 	Audio.play("door_open")
 	Audio.play("day_open")
 	toast("The cafe is open!")
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel") and (not barista.busy or phase == Phase.PREP):
+	if event.is_action_pressed("ui_cancel") and not barista.busy:
 		Game.go_to_title()
 	# Debug shortcut: F9 skips straight to closing time (results screen and closing chime).
 	elif OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo 			and event.keycode == KEY_F9 and phase == Phase.SERVICE and not barista.busy:
