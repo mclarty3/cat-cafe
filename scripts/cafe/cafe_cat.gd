@@ -26,6 +26,7 @@ var _idle_timer := 1.0
 var _mug_timer := 0.0
 var _pet_cooldown := 0.0
 var _gesture_timer := 0.0
+var _tink_timer := 0.0
 var _cafe: Cafe
 
 @onready var _model: AnimatedModel = $Model
@@ -79,6 +80,11 @@ func _process(delta: float) -> void:
 		State.NUDGING:
 			_model.play("idle")
 			_mug_timer -= delta
+			_tink_timer -= delta
+			if _tink_timer <= 0.0:
+				Audio.play("mug_tink")
+				# Nudges come faster as the mug nears the edge.
+				_tink_timer = lerpf(1.2, 0.35, 1.0 - _mug_timer / mug_time)
 			_mug.position.z = 0.18 + mug_slide * (1.0 - _mug_timer / mug_time)
 			if _mug_timer <= 0.0:
 				_cafe.float_text(global_position + Vector3.UP * 0.5, "CRASH!", Color(1, 0.45, 0.4))
@@ -123,6 +129,7 @@ func interact(_barista: Barista) -> void:
 		_idle_timer = 2.0
 		_gesture_timer = 1.2
 		_model.play("gesture-positive")
+		Audio.play("purr")
 		_cafe.float_text(global_position + Vector3.UP * 0.5, "purr~", Color(1, 0.8, 0.9))
 
 

@@ -77,6 +77,13 @@ const REGULARS := {
 	},
 }
 
+## Cafe radio: plays in order and wraps around. Lo-fi by TAD (CC0).
+const PLAYLIST: Array[String] = [
+	"res://assets/audio/music/cat_caffe.ogg",
+	"res://assets/audio/music/a_cup_of_tea.ogg",
+	"res://assets/audio/music/bartender.ogg",
+]
+
 const BARISTA_MODEL := "res://assets/kenney/characters/character-female-b.glb"
 
 const WALK_IN_MODELS := [

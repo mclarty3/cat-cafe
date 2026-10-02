@@ -37,6 +37,7 @@ func run(day: CafeDay) -> void:
 		var button := Button.new()
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.pressed.connect(_do_action.bind(i))
+		button.focus_entered.connect(Audio.play.bind("ui_move"))
 		_actions.add_child(button)
 	_refresh()
 	show()
@@ -47,6 +48,7 @@ func run(day: CafeDay) -> void:
 
 func _do_action(index: int) -> void:
 	_day.do_prep(CafeData.PREP_ACTIONS[index])
+	Audio.play("prep")
 	_refresh()
 	if _day.prep_actions_left == 0:
 		_open_button.grab_focus()

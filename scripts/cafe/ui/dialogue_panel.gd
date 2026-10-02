@@ -39,10 +39,13 @@ func ask(speaker: String, line: String, choices: Array) -> int:
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 		button.pressed.connect(_picked.emit.bind(i))
+		button.pressed.connect(Audio.play.bind("ui_select"))
+		button.focus_entered.connect(Audio.play.bind("ui_move"))
 		_choices.add_child(button)
 		if first == null:
 			first = button
 	first.grab_focus.call_deferred()
+	Audio.play("dialogue")
 	show()
 	var result: int = await _picked
 	hide()

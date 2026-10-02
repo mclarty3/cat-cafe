@@ -40,7 +40,8 @@ a regular worth stepping out to talk to, and a cat causing trouble. The art is f
 
 ## What's built
 
-Open the project and press F5, then choose **Cafe day**. Esc returns to the title.
+Open the project and press F5, then choose **Cafe day**. Esc returns to the title. While testing,
+**F9** during service skips straight to closing time (debug builds only).
 
 ### Day flow
 
@@ -78,6 +79,18 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
   (preferring one with someone sitting at it) and starts nudging a mug. You have 6 seconds to get out there
   and catch it, or it breaks and costs $2. She waits until you're not in a menu, minigame or chat, and a
   toast warns you when she starts.
+- **Audio:** lo-fi cafe radio (three tracks in rotation, fading in, and dipping during conversations and
+  at closing). Sound effects:
+  - footsteps;
+  - the door and shop bell when a customer arrives;
+  - the till when an order is taken;
+  - the grinder, an espresso pour while you pull the shot, and a steam hiss while you hold the wand;
+  - a quality sting on each drink;
+  - a plate clink at the pass, an order-up bell and coins for tips;
+  - a grumble on walkouts;
+  - Mochi purring, and clinking the mug faster and faster as it nears the edge (then a catch or a crash);
+  - UI clicks;
+  - the shop-door bell when you open, and the same bell as a two-note chime at closing.
 - **Pathfinding:** customers walk around furniture using a navigation mesh, baked when the scene loads
   from the furniture colliders. Rearranging the room in the editor needs no extra setup.
 
@@ -96,6 +109,10 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 - **Movement feel:** `speed`, `acceleration`, `deceleration` and `walk_anim_speed` on the `Barista`, and
   `turn_speed` on its `Model`.
 - **Lighting:** the `Sun` (DirectionalLight3D) and `WorldEnvironment` ambient settings.
+- **Audio:** every sound is listed by name in `SOUNDS` in `scripts/autoload/audio.gd`, with its files,
+  volume and pitch, so swapping or rebalancing a sound is a one-line change. Overall music and effects
+  levels are the Music and SFX buses (the Audio panel at the bottom of the editor). The playlist is
+  `PLAYLIST` in `cafe_data.gd`.
 - **Layout:** the queue line and pickup spots are `Marker3D`s under `Markers/Queue` and `Markers/Pickup`.
   Add or move them freely.
 
@@ -118,6 +135,7 @@ Open the project and press F5, then choose **Cafe day**. Esc returns to the titl
 | `scripts/cafe/animated_model.gd` | Plays a Kenney character or pet animation by name and turns it to face a direction |
 | `scripts/cafe/overlay_anchor.gd` | 2D drawing pinned above a 3D node (bubbles, bars, names) |
 | `scripts/cafe/cafe_camera.gd` | The perspective follow camera, plus focus easing |
+| `scripts/autoload/audio.gd` (`Audio`) | Music playlist and named sound effects (one-shots and loops), on the Music and SFX buses |
 | `scripts/cafe/ui/*` | HUD (status, ticket rail, what you're carrying), choice menu, minigame, dialogue, prep, and results panels |
 
 ### Verified
@@ -165,7 +183,15 @@ appreciated). Only the models in use are in `assets/kenney/`, each folder with i
 | `characters/` | [Mini Characters](https://kenney.nl/assets/mini-characters) | Barista and customers, animated (idle, walk, sit, holding-both, and more) |
 | `pets/` | [Cube Pets](https://kenney.nl/assets/cube-pets) | Mochi (idle, walk, run, gestures) |
 
-To add more, download the pack, copy the `.glb` (plus its `Textures/colormap.png` if the model uses
+### Audio
+
+| Folder | Source | Used for |
+|---|---|---|
+| `assets/audio/music/` | "Cat caffe", "A cup of tea", "Bartender" by **TAD**, from [lofi Compilation](https://opengameart.org/content/lofi-compilation) (CC0; the author asks for credit "if you can", see `CREDITS.txt`) | Cafe radio |
+| `assets/audio/sfx/kenney/` | Kenney [Interface Sounds](https://kenney.nl/assets/interface-sounds), [Impact Sounds](https://kenney.nl/assets/impact-sounds), [RPG Audio](https://kenney.nl/assets/rpg-audio) (CC0) | Footsteps, clinks, bells, coins, door, UI |
+| `assets/audio/sfx/synth/` | Synthesized for this project | Grinder, espresso pour, milk steam, scald, purr (no CC0 recordings were readily available; replace with real ones later) |
+
+To add more models, download the pack, copy the `.glb` (plus its `Textures/colormap.png` if the model uses
 one) into the matching folder, and drop it onto a `Prop3D`.
 
 ## Known shortcuts
@@ -180,7 +206,9 @@ one) into the matching folder, and drop it onto a `Prop3D`.
 - One regular, one conversation, and no memory between days. "Another day" starts completely fresh.
 - One cat event, always at the same time.
 - No staff, no cafe upgrades, no customer–cat matchmaking.
-- No audio, and no clock or time of day.
+- The coffee and purr sounds are synthesized placeholders, and the shop bell is a pitched-up heavy bell.
+  Mixing levels were set by ear, without playtesting.
+- No clock or time of day.
 
 ## Next steps
 
@@ -199,7 +227,9 @@ one) into the matching folder, and drop it onto a `Prop3D`.
 7. **Upgrades and money sinks** for spending earnings (a second group head, a bigger pastry case, more seats).
 8. **Connect to the dungeon.** Once the dungeon collects ingredients, feed the real haul into the pantry,
    and let the night's outcome change prep (the "fewer prep actions" option in *Day-Night Connection*).
-9. **A cozy pass:** lamps that glow, window light, calm open and close periods, and placeholder cafe jazz.
+9. **A cozy pass:** lamps that glow, window light, and calm open and close periods. Then dynamic music
+   from the design notes: purring layers as cats settle, the tempo lifting during a rush, and rain on the
+   windows.
 10. **Show what you're carrying in 3D:** put the actual cup and pastry models in the barista's hands.
 
 ## Open design questions this slice could answer

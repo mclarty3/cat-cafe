@@ -30,6 +30,7 @@ var focus_marker := FocusMarker.new()
 
 var _focus: Interactable
 var _freed_on_frame := -10
+var _step_timer := 0.0
 
 @onready var _reach: Area3D = $Reach
 @onready var _model: AnimatedModel = $Model
@@ -58,7 +59,12 @@ func _physics_process(delta: float) -> void:
 		_model.face(direction if direction != Vector3.ZERO else velocity)
 		_model.play("walk")
 		_model.set_playback_speed(lerpf(0.6, walk_anim_speed, pace))
+		_step_timer -= delta
+		if _step_timer <= 0.0:
+			Audio.play("footstep", lerpf(-6.0, 0.0, pace))
+			_step_timer = 0.3 / maxf(pace, 0.6)
 	else:
+		_step_timer = 0.0
 		_model.play("holding-both" if not hands.is_empty() else "idle")
 		_model.set_playback_speed(1.0)
 

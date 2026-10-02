@@ -43,6 +43,7 @@ func play(item_id: String) -> int:
 		worst = mini(worst, quality)
 	_step = ""
 	_result_text = CafeData.QUALITY_NAMES[worst]
+	Audio.play(["drink_poor", "drink_good", "drink_perfect"][worst])
 	queue_redraw()
 	await get_tree().create_timer(0.6).timeout
 	hide()
@@ -57,6 +58,9 @@ func _run_step(step: String) -> int:
 	_finished = false
 	_result_text = ""
 	_zone_center = randf_range(0.55, 0.85) if step == "pull" else randf_range(0.6, 0.8)
+	if step == "pull":
+		Audio.play("grinder")
+		Audio.start_loop("espresso_pour")
 	return await _step_done
 
 
@@ -73,6 +77,7 @@ func _process(delta: float) -> void:
 		"steam":
 			if can_input and Input.is_action_just_pressed("cafe_interact"):
 				_holding = true
+				Audio.start_loop("steam")
 			if _holding:
 				_value += steam_rate * delta
 				if _value >= 1.0:
@@ -94,6 +99,9 @@ func _score(value: float) -> int:
 
 func _finish(quality: int, text := "") -> void:
 	_finished = true
+	Audio.stop_loop("espresso_pour")
+	Audio.stop_loop("steam")
+	Audio.play("scald" if not text.is_empty() else "step_stop")
 	_result_text = text if not text.is_empty() else CafeData.QUALITY_NAMES[quality]
 	get_tree().create_timer(0.45).timeout.connect(_step_done.emit.bind(quality))
 

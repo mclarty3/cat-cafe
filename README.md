@@ -9,8 +9,9 @@ The title screen switches between the two prototype slices, and **Esc** returns 
 - [DUNGEON_SLICE.md](DUNGEON_SLICE.md): status and next steps for the dream dungeon.
 - [CAFE_SLICE.md](CAFE_SLICE.md): status and next steps for the cafe day, including its code map.
 
-The cafe uses free CC0 placeholder models from [Kenney](https://kenney.nl) (in `assets/kenney/`). The
-dungeon is still plain shapes.
+The cafe uses free CC0 placeholder models and sounds from [Kenney](https://kenney.nl) (in `assets/kenney/`
+and `assets/audio/sfx/kenney/`), and lo-fi music by **TAD** ([lofi Compilation](https://opengameart.org/content/lofi-compilation), CC0).
+The dungeon is still plain shapes, with no sound.
 
 ### Cafe controls
 

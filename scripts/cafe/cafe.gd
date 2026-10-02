@@ -92,18 +92,27 @@ func _ready() -> void:
 	# Built from the furniture colliders at runtime, so rearranging the room
 	# in the editor just works.
 	_navigation.bake_navigation_mesh(false)
+	Audio.play_music(CafeData.PLAYLIST)
+	tree_exiting.connect(func() -> void:
+		Audio.stop_music(0.5)
+		Audio.stop_all_loops())
 
 	barista.busy = true
 	await hud.prep_panel.run(day)
 	barista.busy = false
 	phase = Phase.SERVICE
 	_spawn_timer = first_customer_delay
+	Audio.play("door_open")
+	Audio.play("day_open")
 	toast("The cafe is open!")
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and (not barista.busy or phase == Phase.PREP):
 		Game.go_to_title()
+	# Debug shortcut: F9 skips straight to closing time (results screen and closing chime).
+	elif OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo 			and event.keycode == KEY_F9 and phase == Phase.SERVICE and not barista.busy:
+		_end_day()
 
 
 func _process(delta: float) -> void:
@@ -168,6 +177,8 @@ func _try_spawn() -> bool:
 	_customers.append(customer)
 	_queue.append(customer)
 	customer.walk_to(_queue_spots[_queue.size() - 1].global_position)
+	Audio.play("door_open")
+	Audio.play("door_bell")
 	_spawned += 1
 	return true
 
@@ -199,6 +210,7 @@ func take_order(customer: Customer, register_position: Vector3) -> void:
 	for id in ticket.items:
 		price += CafeData.item(id)["price"]
 	day.earnings += price
+	Audio.play("register")
 	float_text(register_position, "+$%d" % price, Color(1, 0.9, 0.5))
 	if customer.is_regular():
 		toast("%s: \"%s\"" % [customer.display_name, CafeData.REGULARS[customer.regular_id]["greeting"]])
@@ -267,6 +279,8 @@ func place_on_pass(barista_: Barista) -> bool:
 			barista_.hands.erase(it)
 			ticket.on_pass.append(it)
 			placed = true
+	if placed:
+		Audio.play("place")
 	_pass.refresh(tickets)
 	return placed
 
@@ -282,6 +296,9 @@ func collect_order(customer: Customer) -> void:
 		tip += 1
 	day.tips += tip
 	day.served += 1
+	Audio.play("order_up")
+	if tip > 0:
+		Audio.play("tip")
 	tickets.erase(ticket)
 	_pass.refresh(tickets)
 	float_text(_pass.focus_point() + Vector3.UP * 0.8, "#%d up!  +$%d tip" % [ticket.number, tip], Color(1, 0.9, 0.5))
@@ -295,6 +312,7 @@ func _free_seat() -> Seat:
 
 func on_walk_out(customer: Customer) -> void:
 	day.walked_out += 1
+	Audio.play("walk_out")
 	if customer in _queue:
 		_leave_queue(customer)
 	if customer.ticket:
@@ -334,9 +352,11 @@ func start_chat(customer: Customer) -> void:
 	barista.busy = true
 	customer.in_conversation = true
 	camera.focus(customer.global_position)
+	Audio.duck_music(6.0)
 	var pick := await hud.dialogue.ask(data["name"], data["opening"], texts)
 	await hud.dialogue.say(data["name"], data["choices"][pick]["reply"])
 	camera.unfocus()
+	Audio.duck_music(0.0)
 	customer.in_conversation = false
 	barista.busy = false
 	day.chats.append("%s: \"%s\"" % [data["name"], texts[pick]])
@@ -361,6 +381,7 @@ func _pick_mug_spot() -> Vector3:
 
 func _on_mug_event_finished(caught: bool) -> void:
 	day.mug_result = "caught" if caught else "broken"
+	Audio.play("mug_catch" if caught else "mug_crash")
 	if not caught:
 		day.breakage += mug_cost
 
@@ -368,6 +389,10 @@ func _on_mug_event_finished(caught: bool) -> void:
 func _end_day() -> void:
 	phase = Phase.RESULTS
 	barista.busy = true
+	Audio.duck_music(8.0)
+	Audio.play("day_close")
+	# Second note of the closing chime, a fourth lower.
+	get_tree().create_timer(0.45).timeout.connect(Audio.play.bind("day_close", -1.0, 0.75))
 	if await hud.results_panel.run(day):
 		get_tree().reload_current_scene()
 	else:

@@ -10,4 +10,5 @@ func get_prompt(barista: Barista) -> String:
 
 func interact(barista: Barista) -> void:
 	barista.clear_hands()
+	Audio.play("trash")
 	cafe.toast("Tossed.")

@@ -23,3 +23,4 @@ func interact(barista: Barista) -> void:
 	var id := pastries[choice]
 	cafe.day.stock[CafeData.item(id)["uses"]] -= 1
 	barista.add_item(id, CafeData.Quality.GOOD)
+	Audio.play("pastry")

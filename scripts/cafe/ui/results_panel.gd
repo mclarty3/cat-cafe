@@ -25,6 +25,7 @@ func _ready() -> void:
 	_next_button = Button.new()
 	_next_button.text = "Another day"
 	_next_button.pressed.connect(_picked.emit.bind(true))
+	_next_button.pressed.connect(Audio.play.bind("ui_select"))
 	buttons.add_child(_next_button)
 	var title := Button.new()
 	title.text = "Back to title"

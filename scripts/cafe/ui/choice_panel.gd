@@ -32,6 +32,7 @@ func choose(title: String, options: Array[Dictionary]) -> int:
 			first = button
 	var cancel := _add_button("Never mind", -1)
 	(first if first else cancel).grab_focus.call_deferred()
+	Audio.play("ui_open")
 	show()
 	var result: int = await _chosen
 	hide()
@@ -45,6 +46,8 @@ func _add_button(text: String, index: int) -> Button:
 	# Fire on press, so the key that opened the menu can't also pick from it on release.
 	button.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	button.pressed.connect(_chosen.emit.bind(index))
+	button.pressed.connect(Audio.play.bind("ui_select" if index >= 0 else "ui_back"))
+	button.focus_entered.connect(Audio.play.bind("ui_move"))
 	_list.add_child(button)
 	return button
 
@@ -54,6 +57,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
+		Audio.play("ui_back")
 		_chosen.emit(-1)
 	elif event.is_action_pressed("cafe_interact"):
 		# Let the Interact key (E/J) confirm too, not just Enter/Space.
