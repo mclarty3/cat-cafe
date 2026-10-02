@@ -19,7 +19,13 @@ Every `[DECIDED]` and `[REJECTED]` item across the design notes. Add new decisio
 | 2026-09-30 | **Only rare cats** can have more than one personality | [[Cats]] |
 | 2026-09-30 | **Keepsakes:** strength based on bond at adoption, in their own limited slots | [[Cats]] |
 | 2026-09-30 | Regulars' story beats are **optional in the moment, never missable** | [[Customers & Regulars]] |
-| 2026-09-30 | Cafe view is **isometric / 3D-feeling**, not literal overhead | [[Atmosphere, Art & Audio]] |
+| 2026-09-30 | Cafe view is **isometric / 3D-feeling**, not literal overhead *(superseded 2026-10-01)* | [[Atmosphere, Art & Audio]] |
+| 2026-10-01 | Cafe is **full 3D with a perspective follow camera**; isometric rejected | [[Atmosphere, Art & Audio]] |
+| 2026-10-01 | **Counter service**, not table service; the player can leave the counter | [[Cafe Gameplay]] |
+| 2026-10-01 | Price paid **at the register**, tip **at pickup** | [[Cafe Gameplay]] |
+| 2026-10-01 | Player **carries items to the pass**, no further | [[Cafe Gameplay]] |
+| 2026-10-01 | Taking an order is a **single press**; **to-go cups**, no bussing for now | [[Cafe Gameplay]] |
+| 2026-10-01 | Regulars are **chatted with at their table** | [[Customers & Regulars]] |
 
 # From the seed brainstorm
 
