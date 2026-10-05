@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dw1w1ym5cpuek"]
 
-[ext_resource type="Script" path="res://scripts/title.gd" id="1_title"]
+[ext_resource type="Script" uid="uid://cnxu1vvrp3aqq" path="res://scripts/title.gd" id="1_title"]
 
-[node name="Title" type="Control"]
+[node name="Title" type="Control" unique_id=1139568352]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_title")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1915279484]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.1, 0.08, 0.14, 1)
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="." unique_id=1183305402]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,33 +28,33 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Menu" type="VBoxContainer" parent="Center"]
+[node name="Menu" type="VBoxContainer" parent="Center" unique_id=349589200]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Heading" type="Label" parent="Center/Menu"]
+[node name="Heading" type="Label" parent="Center/Menu" unique_id=1459526628]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Cat Cafe"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Center/Menu"]
-layout_mode = 2
+[node name="Subtitle" type="Label" parent="Center/Menu" unique_id=1416525711]
 modulate = Color(1, 1, 1, 0.6)
+layout_mode = 2
 text = "prototype slices  -  Esc returns here"
 horizontal_alignment = 1
 
-[node name="CafeButton" type="Button" parent="Center/Menu"]
+[node name="CafeButton" type="Button" parent="Center/Menu" unique_id=717064872]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Cafe day"
 
-[node name="DungeonButton" type="Button" parent="Center/Menu"]
+[node name="DungeonButton" type="Button" parent="Center/Menu" unique_id=146835953]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Dream dungeon"
 
-[node name="QuitButton" type="Button" parent="Center/Menu"]
+[node name="QuitButton" type="Button" parent="Center/Menu" unique_id=334570407]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Quit"
