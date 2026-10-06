@@ -123,6 +123,9 @@ func _physics_process(delta: float) -> void:
 		animated_sprite_2d.play("run")
 	else:
 		animated_sprite_2d.play("idle")
+	
+	if velocity.y > 0:
+		animated_sprite_2d.play("fall")
 		
 	if is_on_floor():
 		_coyote_timer = coyote_time
@@ -179,7 +182,6 @@ func _read_actions() -> void:
 		_try_dash()
 	if Input.is_action_just_pressed("attack"):
 		_attack_buffer_timer = attack_buffer_time
-
 
 func _apply_horizontal(input_x: float, delta: float) -> void:
 	if frozen or _recoil_timer > 0.0 or _hurt_timer > 0.0:
