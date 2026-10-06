@@ -58,6 +58,7 @@ enum AttackDir { SIDE, UP, DOWN }
 @export var invuln_time := 1.0
 @export var hurt_stun_time := 0.25
 @export var hurt_knockback := Vector2(180, -220)
+@onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 
 var health := 0
 var facing := 1
@@ -114,6 +115,15 @@ func place_at(pos: Vector2) -> void:
 func _physics_process(delta: float) -> void:
 	_tick_timers(delta)
 
+	if velocity.x > 0: 
+		animated_sprite_2d.flip_h = false
+		animated_sprite_2d.play("run")
+	elif velocity.x < 0:
+		animated_sprite_2d.flip_h = true
+		animated_sprite_2d.play("run")
+	else:
+		animated_sprite_2d.play("idle")
+		
 	if is_on_floor():
 		_coyote_timer = coyote_time
 		_air_dashes_left = air_dashes
