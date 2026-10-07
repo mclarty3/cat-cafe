@@ -23,7 +23,10 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 ## Morning prep phase
 - `[DECIDED]` A **prep phase before opening** where dungeon ingredients go into **baked goods** and **coffee drinks**.
 - `[DECIDED]` The prep phase is also when you **modify the cafe**: rearrange furniture, buy upgrades, manage cats.
-- `[PROPOSED]` Treat prep as a limited number of **actions** (bake a batch, make a syrup, rearrange, groom a cat). This gives the night-to-day effect something concrete to modify (see section 9).
+- `[DECIDED]` (2026-10-07) **No finite prep actions.** Prep is no longer a fixed budget of actions (bake a batch, make a syrup, rearrange, groom a cat). *(Supersedes the earlier prep-actions idea.)*
+- `[DECIDED]` (2026-10-07) **Pastries are limited by pastry slots**, like the limited space in a real pastry case, instead of by actions. The number of slots can be **upgraded later**.
+- `[DECIDED]` (2026-10-07) **Croissants need no dungeon ingredients**, but may **cost some money** to make. Other pastries that need ingredients are unchanged.
+- `[OPEN]` How slots work in detail: one pastry per slot or a small stack; the starting slot count; what upgrades cost and how far they go; how much a croissant costs; and whether prep still has any time limit at all.
 - `[PROPOSED]` Rare dungeon ingredients, such as moonflour and dream honey.
 
 ## Cat events
