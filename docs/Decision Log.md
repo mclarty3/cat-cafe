@@ -28,6 +28,9 @@ Every `[DECIDED]` and `[REJECTED]` item across the design notes. Add new decisio
 | 2026-10-01 | Regulars are **chatted with at their table** | [[Customers & Regulars]] |
 | 2026-10-01 | Cats are **mostly randomly generated**, each with a **unique description** and a **unique-ish voice** (boss cats hand-authored); see the cat data schema | [[Cats]] |
 | 2026-10-01 | **No cat motifs** on the player character's design | [[Setting & Lore]] |
+| 2026-10-07 | **No finite prep actions**; pastries limited by upgradeable **pastry slots** instead | [[Cafe Gameplay]] |
+| 2026-10-07 | **Croissants need no dungeon ingredients** but may cost money; other pastries unchanged | [[Cafe Gameplay]] |
+| 2026-10-07 | "Fewer prep actions" **rejected** as the night-to-day effect (no actions left to reduce) | [[Day-Night Connection]] |
 
 # From the seed brainstorm
 

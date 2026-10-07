@@ -11,7 +11,7 @@ The big unresolved questions. Each area note also has its own finer-grained **Op
 | 3 | Do bosses respawn? Leaning toward the two-tier model: possessed cats don't respawn, guardians do. | [[Combat, Movement & Bosses]] |
 | 4 | ~~Does exiting a run have any cost?~~ **No cost; sunbeam rooms** (2026-09-30). | [[Dream Dungeon Structure]] |
 | 5 | Is there a time limit or soft time pressure in runs? | [[Dream Dungeon Structure]] |
-| 6 | What does "less prep time" mean concretely? "Fewer prep actions" is the front-runner. | [[Day-Night Connection]] |
+| 6 | What does "less prep time" mean concretely? Prep actions were dropped for pastry slots (2026-10-07), so "fewer prep actions" is out; "smaller pastry stock" or "late opening" remain. | [[Day-Night Connection]] |
 | 7 | What are the full cat trait lists, cafe-side and dungeon-side? The system is decided (one personality, a bond meter, keepsakes in limited slots) and the roster is started. Still open: the four maybe personalities, and exact numbers. | [[Cats]] |
 | 8 | ~~How do cats work in the dungeon (loadout vs. companion)?~~ **Loadout** (2026-09-30). What equipping actually does is still open. | [[Cats]] |
 | 9 | Should there be customer-cat matchmaking? | [[Cafe Gameplay]] |

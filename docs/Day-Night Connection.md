@@ -4,10 +4,10 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 
 - `[DECIDED]` The **outcome of the previous night affects the next cafe day**.
 - `[OPEN]` What "less prep time" actually means in play. Ryan likes the effect but hasn't settled on how it works. Options proposed:
-  - `[PROPOSED]` **Fewer prep actions.** Oversleeping costs one prep action. This is the cleanest option: easy to understand and balance, with a consistent effect. Ryan, 2026-09-30: "maybe" — the front-runner, not yet chosen.
-  - `[PROPOSED]` **Smaller pastry stock.** You open with fewer baked goods and have to bake during service.
+  - `[REJECTED]` (2026-10-07) ~~**Fewer prep actions.**~~ Prep actions no longer exist (see [[Cafe Gameplay]]), so this option is gone.
+  - `[PROPOSED]` **Smaller pastry stock.** You open with fewer baked goods and have to bake during service. With pastry slots, oversleeping could leave some slots unusable that day. *(Claude suggestion)*
   - `[PROPOSED]` **Late opening.** The day starts mid-morning and you miss early customers.
-- `[PROPOSED]` Good nights give bonuses: an extra prep action, or a morale boost after a rescue that customers pick up on.
+- `[PROPOSED]` Good nights give bonuses: a bonus pastry slot for the day, or a morale boost after a rescue that customers pick up on.
 - `[PROPOSED]` The reverse direction: a great cafe day (an adoption, a regular's story milestone) gives a buff for that night's dream.
 
 ## Full list of cross-connections (current)

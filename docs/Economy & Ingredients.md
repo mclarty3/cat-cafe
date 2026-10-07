@@ -6,7 +6,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 
 ## Not yet discussed
 
-- **Economy:** currency, pricing, what money buys, upgrade costs.
+- **Economy:** currency, pricing, what money buys, upgrade costs (including pastry slot upgrades and the money cost of croissants).
 - **Ingredient system:** types, rarity, freshness or spoilage, recipes.
 
 ## Related
