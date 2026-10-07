@@ -26,7 +26,17 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 - `[DECIDED]` (2026-10-07) **No finite prep actions.** Prep is no longer a fixed budget of actions (bake a batch, make a syrup, rearrange, groom a cat). *(Supersedes the earlier prep-actions idea.)*
 - `[DECIDED]` (2026-10-07) **Pastries are limited by pastry slots**, like the limited space in a real pastry case, instead of by actions. The number of slots can be **upgraded later**.
 - `[DECIDED]` (2026-10-07) **Croissants need no dungeon ingredients**, but may **cost some money** to make. Other pastries that need ingredients are unchanged.
-- `[OPEN]` How slots work in detail: one pastry per slot or a small stack; the starting slot count; what upgrades cost and how far they go; how much a croissant costs; and whether prep still has any time limit at all.
+
+### The day's menu
+- `[DECIDED]` (2026-10-07) **The player sets the day's menu during prep**: which drinks and pastries are offered. Customers order only from that menu.
+- `[DECIDED]` (2026-10-07) **Drinks have menu slots** (how many different drinks you can offer). The number of slots can be **expanded over the game**.
+- `[DECIDED]` (2026-10-07) **One pastry slot holds one pastry.** The slots cap how many pastries you bake in total, in any mix: 8 slots could be 8 croissants, or 4 and 4. The player chooses how many of each to bake.
+- `[DECIDED]` (2026-10-07) **Dungeon ingredients go straight into drinks**, one ingredient per drink, with no in-between step (the prototype's dream-honey syrup is gone). The player chooses **how many** of each ingredient drink to put on the menu, so they don't have to use up all their ingredients.
+- `[DECIDED]` (2026-10-07) Drinks that use no dungeon ingredient (espresso, latte) are **unlimited** once on the menu.
+- `[DECIDED]` (2026-10-07) When a menu item runs out, it shows as **sold out** and new customers stop ordering it.
+- `[DECIDED]` (2026-10-07) For now the prototype gives a **starting float** to pay for croissants, since money doesn't carry between days yet.
+- `[OPEN]` Starting slot counts and how far upgrades go; what a croissant costs; whether prep still has any time limit at all.
+- `[OPEN]` Whether customers sometimes don't want what's on the menu (mainly regulars), and leave if nothing suits them. For now everyone orders from the menu.
 - `[PROPOSED]` Rare dungeon ingredients, such as moonflour and dream honey.
 
 ## Cat events
