@@ -6,7 +6,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 
 ## Not yet discussed
 
-- **Economy:** currency, pricing, what money buys, upgrade costs (including pastry slot upgrades and the money cost of croissants).
+- **Economy:** currency, pricing, what money buys, upgrade costs (including pastry and drink slot upgrades). Baking itself costs no money.
 - **Ingredient system:** types, rarity, freshness or spoilage, recipes. (Settled so far: dungeon ingredients go straight into drinks, one per drink; see [[Cafe Gameplay]].)
 
 ## Related
