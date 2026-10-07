@@ -103,6 +103,12 @@ func hold_arms(anim: String, bones: PackedStringArray = ["arm-left", "arm-right"
 	_arm_pose.set_pose(animation, bones)
 
 
+## Lifts an arm held by hold_arms() further up (0 = held, 1 = up to the face).
+func lift_arm(bone: String, amount: float) -> void:
+	if _arm_pose:
+		_arm_pose.set_lift(bone, amount)
+
+
 ## Where the fist at the end of `bone` (an arm) is right now, in world space.
 ## Call it from `posed` to include held arms (see hold_arms()).
 func hand_position(bone: String) -> Vector3:

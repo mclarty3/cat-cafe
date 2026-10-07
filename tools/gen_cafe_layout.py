@@ -210,6 +210,8 @@ prop("Bookcase", "Decor", FURN + "bookcaseOpenLow.glb", (0.2, 0, 3.4), yaw=90, s
 prop("PlantShelf", "Decor", FURN + "plantSmall1.glb", (0.2, 0.56, 3.2), scale=1.6)
 prop("Lamp", "Decor", FURN + "lampRoundFloor.glb", (6.7, 0, 4.3), collision=CYL)
 prop("PlantRight", "Decor", FURN + "pottedPlant.glb", (6.6, 0, 5.6), scale=1.3, collision=CYL)
+# Customers drop their empty cups in here on the way out.
+prop("CupBin", "Decor", FURN + "trashcan.glb", (1.25, 0, 5.75), scale=1.3, collision=CYL)
 
 # Curtains at the right wall's windows (stand-in panels, see curtain.gd). Not part of the
 # navigation bake: they hang flat against the wall. The kitten in the curtain event climbs them.
@@ -221,6 +223,8 @@ for z in (2.5, 4.5):
 # --- Markers ------------------------------------------------------------------
 node("Markers", "Node3D")
 node("Door", "Marker3D", "Markers", [f"transform = {xform((-0.6, 0, 5.5))}"])
+# Where a leaving customer stands to drop their cup in the bin.
+node("CupBin", "Marker3D", "Markers", [f"transform = {xform((1.25, 0, 5.3))}"])
 node("Queue", "Node3D", "Markers")
 for i, z in enumerate([2.15, 2.75, 3.35, 3.95, 4.55]):
     node(f"Spot{i}", "Marker3D", "Markers/Queue", [f"transform = {xform((0.75, 0, z))}"])

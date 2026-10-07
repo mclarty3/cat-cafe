@@ -56,7 +56,7 @@ the running game".
    runs **CafeOS** before opening. The header always shows the time, and a green **Open the
    cafe** button sits in the sidebar, so you can open up from any page (it stays greyed out until
    something is on the menu). The pages are:
-   - **Menu** (the page it opens on): set today's menu. The pantry starts with 2 moonflour and 1
+   - **Menu** (the page it opens on): set today's menu. The pantry starts with 2 moonflour and 5
      dream honey.
      - **Drinks** (3 slots): tick which drinks to offer. Espresso and latte are unlimited once on. The
        dream-honey latte uses **1 dream honey per drink**, so it gets a [-] count [+] stepper to choose
@@ -86,6 +86,15 @@ the running game".
    - Make the drinks at the espresso machine and grab pastries from the case, then carry them to the
      **pass** (they show in the barista's hands: first item right, second left). Once a ticket is complete, its customer collects it, tips, and goes to sit (or leaves with
      it to go if every table is taken).
+   - Customers carry their order from the pass (drink in the right hand). Seated, they rest it on the
+     table and work through it over their stay: 3 sips of the drink and 3 bites of the pastry,
+     alternating and evenly spaced, each a lift of the arm up to the face (Kenney characters have no
+     drinking animation, so it's a held-arm swing; see `ArmPose`). The coffee level drops with each sip
+     until the cup is empty (`ItemModel.set_fill()` finds the coffee faces in the Kenney cup by colour
+     and lowers them). The pastry shrinks with each bite and is gone after the last, with a quiet munch.
+   - On the way out, seated customers drop their empty cup in the **bin by the door** (anything left
+     over if a cat fight sent them off early goes in too). Customers who took it to go, because every
+     table was taken, carry it out full.
    - Customers walk out if they wait too long, either in line or at pickup. They don't get a refund,
      but there's no tip either.
    - The top-right readout lists today's menu with what's left of each counted item ("sold out" at 0).
@@ -104,6 +113,13 @@ the running game".
   - *Pull:* stop the pressure gauge's sweeping needle in the green, while the cup fills under the portafilter.
   - *Steam* (lattes): hold to heat the pitcher (the thermometer climbs and the steam grows), let go in the
     green, and don't hit the end (scalded: the milk reddens and the gauge shakes).
+  - *Drizzle* (drinks with a dream ingredient, so far the dream-honey latte, after pull and steam): a
+    Tony Hawk-style grind balance. Honey pours from a dipper while a marker drifts along a bar; it tips
+    away from the middle (faster the further out it is) and gets random nudges, and Left/Right push it
+    back. After a short "Get ready..." it runs 3.5 seconds. Quality is the share of time in the green
+    (Perfect also needs most of it in the bright middle band); hitting either end spills it (Poor). The
+    marker reddens off the green, the arrows light as you steer, and honey drips down the cup when
+    you're off. Tuning is in the `Drizzle` group on `DrinkMinigame`.
   - Each press punches the gauge, flashes the zone in the result's colour, and pops the result word; the
     click rises in pitch the closer you were. Sparkles scale with quality, and the finished drink is shown
     at the end, with latte art on a Perfect.
@@ -182,7 +198,9 @@ the running game".
 - **Cat events** are the `Cat events` group on the `Cafe` root node: how many a day, the time window and
   spacing, and each event's timers and effects. The mug and curtain costs are under `Money`.
 - **How much you can carry** is `carry_capacity` on the `Barista`.
-- **Minigame speed and zone sizes** are on `DrinkMinigame` (`scripts/cafe/ui/drink_minigame.gd`).
+- **Minigame speed and zone sizes** are on `DrinkMinigame` (`scripts/cafe/ui/drink_minigame.gd`), with the
+  drizzle's balance (how fast it tips, the nudges, steering strength, length, zones) in its `Drizzle` group.
+  Which steps a drink has is its `steps` list in `cafe_data.gd`.
 - **Menu items (prices, ingredients), the starting pantry, and Theo's lines** live in `scripts/cafe/cafe_data.gd`
   as plain dictionaries.
 - **Camera:** the `Camera` node (`CafeCamera`) has pitch, yaw, distance and FOV; how strongly it follows

@@ -834,6 +834,20 @@ func pastry_case_shelf() -> Vector3:
 	return $Stations/PastryCase/Croissant.global_position
 
 
+## Where leaving customers stand to drop their cups in the bin by the door.
+func cup_bin_point() -> Vector3:
+	return $Markers/CupBin.global_position
+
+
+## Height of the table top nearest `point` (each table's mug spot sits on it).
+func table_top_near(point: Vector3) -> float:
+	var best: Node3D = null
+	for spot: Node3D in get_tree().get_nodes_in_group("mug_spots"):
+		if best == null or spot.global_position.distance_to(point) < best.global_position.distance_to(point):
+			best = spot
+	return best.global_position.y if best else point.y
+
+
 func table_positions() -> Array[Vector3]:
 	var positions: Array[Vector3] = []
 	for spot: Node3D in get_tree().get_nodes_in_group("mug_spots"):

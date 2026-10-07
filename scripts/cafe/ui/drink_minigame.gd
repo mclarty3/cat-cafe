@@ -3,6 +3,10 @@ extends Control
 ## The ~5-10 second drink-making minigame. Each drink is a list of steps:
 ##   pull:  a pressure-gauge needle sweeps back and forth; press Interact in the zone.
 ##   steam: hold Interact to heat the milk; release in the zone (don't scald it).
+##   drizzle: a dream ingredient pours in while a marker drifts along a balance
+##            bar (like grinding in Tony Hawk); steer it with Left/Right to keep
+##            it in the green. Scored on time spent in the green; hitting
+##            either end spills it.
 ## The drink's quality is its worst step.
 ##
 ## Drawn by hand in _draw(): the thing you're making on the left (a cup filling
@@ -34,6 +38,29 @@ const CREMA := Color(0.72, 0.48, 0.26)
 ## the grinder runs, and nothing moves (presses are ignored) until it's over.
 @export var lead_in := 1.0
 
+@export_group("Drizzle")
+## How long the drizzle lasts.
+@export var drizzle_time := 3.5
+## A short pause before it starts, since it uses different keys.
+@export var drizzle_lead_in := 0.7
+## How hard the marker falls away from the middle, per unit off-centre (the
+## further out, the faster it tips, like a grind balance).
+@export var drizzle_instability := 2.6
+## Random nudges: strength, and how often they change (seconds, min-max).
+@export var drizzle_nudge := 1.35
+@export var drizzle_nudge_every := Vector2(0.4, 1.0)
+## How hard Left/Right push the marker.
+@export var drizzle_control := 3.5
+## Drag on the marker's speed (higher = steadier, easier).
+@export var drizzle_damping := 1.6
+## Half widths of the green and the perfect band (the bar runs -1 to 1).
+@export var drizzle_zone := 0.35
+@export var drizzle_perfect := 0.12
+## Share of the time in the green for Good; for Perfect, also this share in
+## the perfect band (and nearly all of it in the green).
+@export_range(0.0, 1.0) var drizzle_good_share := 0.7
+@export_range(0.0, 1.0) var drizzle_perfect_share := 0.55
+
 var _title := ""
 var _drink_color := Color.WHITE
 var _step := ""
@@ -56,6 +83,16 @@ var _final := -1
 var _sparkles: Array[Dictionary] = []
 ## Seconds left of the lead-in (see `lead_in`).
 var _ready_left := 0.0
+## Drizzle: the marker (-1..1), its speed, the current nudge, and how long it's
+## spent in the green and in the perfect band.
+var _balance := 0.0
+var _balance_vel := 0.0
+var _nudge := 0.0
+var _nudge_left := 0.0
+var _green_time := 0.0
+var _perfect_time := 0.0
+## Drizzle: which way the player is pushing (-1, 0, 1), for the arrows.
+var _steer := 0.0
 
 
 func _ready() -> void:
@@ -97,6 +134,16 @@ func _run_step(step: String, ready := 0.0) -> int:
 	_zone_center = randf_range(0.55, 0.85) if step == "pull" else randf_range(0.6, 0.8)
 	if step == "pull":
 		Audio.play("grinder")
+	if step == "drizzle":
+		# Start a touch off-centre, already leaning, so it moves straight away.
+		_balance = randf_range(0.04, 0.1) * (1 if randf() < 0.5 else -1)
+		_balance_vel = 0.0
+		_nudge = 0.0
+		_nudge_left = 0.0
+		_green_time = 0.0
+		_perfect_time = 0.0
+		_steer = 0.0
+		ready = maxf(ready, drizzle_lead_in)
 	_ready_left = ready
 	while _ready_left > 0.0:
 		await get_tree().process_frame
@@ -133,7 +180,42 @@ func _process(delta: float) -> void:
 						_finish(CafeData.Quality.POOR, "Scalded!")
 					elif not Input.is_action_pressed("cafe_interact"):
 						_finish(_score(_value))
+			"drizzle":
+				_update_drizzle(delta, can_input)
 	queue_redraw()
+
+
+## The balance: the marker tips away from the middle (harder the further out),
+## random nudges push it about, and Left/Right push back.
+func _update_drizzle(delta: float, can_input: bool) -> void:
+	_nudge_left -= delta
+	if _nudge_left <= 0.0:
+		_nudge = randf_range(-1.0, 1.0) * drizzle_nudge
+		_nudge_left = randf_range(drizzle_nudge_every.x, drizzle_nudge_every.y)
+	_steer = Input.get_axis("move_left", "move_right") if can_input else 0.0
+	var push := _balance * drizzle_instability + _nudge + _steer * drizzle_control
+	_balance_vel += push * delta
+	_balance_vel -= _balance_vel * drizzle_damping * delta
+	_balance += _balance_vel * delta
+	if absf(_balance) <= drizzle_zone:
+		_green_time += delta
+	if absf(_balance) <= drizzle_perfect:
+		_perfect_time += delta
+	if absf(_balance) >= 1.0:
+		_balance = signf(_balance)
+		_finish(CafeData.Quality.POOR, "Spilled!")
+	elif _t >= drizzle_time:
+		_finish(_drizzle_score())
+
+
+func _drizzle_score() -> int:
+	var green := _green_time / maxf(_t, 0.001)
+	var perfect := _perfect_time / maxf(_t, 0.001)
+	if perfect >= drizzle_perfect_share and green >= 0.95:
+		return CafeData.Quality.PERFECT
+	if green >= drizzle_good_share:
+		return CafeData.Quality.GOOD
+	return CafeData.Quality.POOR
 
 
 func _score(value: float) -> int:
@@ -152,11 +234,15 @@ func _finish(quality: int, text := "") -> void:
 	_punch = 1.0
 	_flash_color = QUALITY_COLORS[quality]
 	if not text.is_empty():
-		# Scalded.
+		# Scalded, or spilled.
 		_shake = 0.25
 		_flash_color = Color(1, 0.35, 0.3)
-		Audio.play("scald")
+		Audio.play("scald" if _step == "steam" else "drink_poor")
 		_show_result(text, _flash_color)
+	elif _step == "drizzle":
+		Audio.play("step_stop", 0.0, [0.8, 1.05, 1.35][quality])
+		_show_result(CafeData.QUALITY_NAMES[quality], QUALITY_COLORS[quality])
+		_burst(_marker_point(), quality, false)
 	else:
 		# The click rises in pitch the closer you were to the middle of the zone.
 		var closeness := 1.0 - clampf(absf(_value - _zone_center) / (zone_half_width * 2.0), 0.0, 1.0)
@@ -234,6 +320,8 @@ func _draw() -> void:
 			hint = "Pull the shot: press Interact in the green"
 		"steam":
 			hint = "Steam the milk: hold Interact, let go in the green"
+		"drizzle":
+			hint = "Drizzle it in: keep it in the green with Left / Right"
 	draw_string(font, panel.position + Vector2(12, 30), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1, 1, 1, 0.8))
 
 	match _step:
@@ -241,9 +329,13 @@ func _draw() -> void:
 			_draw_pull()
 		"steam":
 			_draw_steam()
+		"drizzle":
+			_draw_drizzle()
 	if _final >= 0:
 		_draw_finished_cup()
-	if not _step.is_empty():
+	if _step == "drizzle":
+		_draw_balance(font)
+	elif not _step.is_empty():
 		_draw_gauge(font, "PRESSURE" if _step == "pull" else "TEMP")
 
 	for s in _sparkles:
@@ -332,6 +424,91 @@ func _draw_steam() -> void:
 		var rise := fmod(_t * 0.9 + i * 0.37, 1.0)
 		var p := pitcher.position + Vector2(8 + fmod(i * 13.0, pitcher.size.x - 12) + sin(_t * 3 + i) * 3, -4 - rise * 28)
 		draw_circle(p, (2.0 + heat * 3.0) * (1.0 - rise * 0.5), Color(1, 1, 1, 0.35 * (1.0 - rise) * (0.4 + heat)))
+
+
+## The drizzle's balance bar: green in the middle (brightest at perfect), the
+## marker riding along it, arrows that light up as you steer, and a strip
+## underneath counting down the pour.
+func _balance_bar() -> Rect2:
+	return Rect2(_gauge_center() + Vector2(-70, -34), Vector2(140, 10))
+
+
+func _marker_point() -> Vector2:
+	var bar := _balance_bar()
+	return Vector2(bar.get_center().x + _balance * bar.size.x / 2.0, bar.get_center().y)
+
+
+func _draw_balance(font: Font) -> void:
+	var bar := _balance_bar()
+	if _shake > 0.0:
+		bar.position += Vector2(randf_range(-2, 2), randf_range(-1, 1))
+	var grow := 2.0 * _punch
+	bar = bar.grow_individual(0, grow, 0, grow)
+	var half := bar.size.x / 2.0
+	var mid := bar.get_center().x
+	draw_rect(bar.grow(3), Color(0.1, 0.07, 0.06))
+	# The ends are where it spills: tinted red.
+	draw_rect(bar, Color(0.55, 0.25, 0.2, 0.6))
+	draw_rect(Rect2(mid - half * 0.8, bar.position.y, half * 1.6, bar.size.y), Color(1, 1, 1, 0.12))
+	var zone := ZONE_COLOR.lerp(_flash_color, _punch * 0.8)
+	draw_rect(Rect2(mid - half * drizzle_zone, bar.position.y, half * drizzle_zone * 2.0, bar.size.y), zone)
+	draw_rect(Rect2(mid - half * drizzle_perfect, bar.position.y, half * drizzle_perfect * 2.0, bar.size.y), PERFECT_COLOR)
+	# The marker: a post with a cap, leaning the way it's falling.
+	var at := Vector2(mid + _balance * half, bar.get_center().y)
+	var lean := clampf(_balance_vel * 0.25, -0.5, 0.5)
+	# White in the green, reddening outside it.
+	var off := clampf((absf(_balance) - drizzle_zone) / (1.0 - drizzle_zone) * 2.0, 0.0, 1.0)
+	var marker := Color.WHITE.lerp(Color(1, 0.45, 0.4), off).lerp(_flash_color, _punch)
+	var top := at + Vector2(sin(lean), -cos(lean)) * 14.0
+	draw_line(at + Vector2(0, 7), top, marker, 2.0 + _punch)
+	draw_circle(top, 3.5, marker)
+	# Steering arrows at either end.
+	for dir in [-1, 1]:
+		var lit: bool = signf(_steer) == dir
+		var tip := Vector2(mid + dir * (half + 16), bar.get_center().y)
+		draw_colored_polygon(PackedVector2Array([
+			tip, tip + Vector2(-dir * 8, -6), tip + Vector2(-dir * 8, 6)]),
+			ACCENT if lit else Color(1, 1, 1, 0.3))
+	# The pour's progress.
+	var progress := clampf(_t / drizzle_time, 0.0, 1.0) if _ready_left <= 0.0 else 0.0
+	var strip := Rect2(bar.position.x, bar.end.y + 12, bar.size.x, 3)
+	draw_rect(strip, Color(1, 1, 1, 0.12))
+	draw_rect(Rect2(strip.position, Vector2(strip.size.x * progress, strip.size.y)), _drink_color)
+	var label := "BALANCE"
+	var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
+	draw_string(font, Vector2(mid - width / 2.0, strip.end.y + 11), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(1, 1, 1, 0.45))
+
+
+## A dipper over the cup, drizzling a stream that sways with the balance; off
+## the green it splashes over the rim. The swirl on top grows as it pours.
+func _draw_drizzle() -> void:
+	var cup := _cup_rect()
+	var pour := clampf(_t / drizzle_time, 0.0, 1.0) if _ready_left <= 0.0 else 0.0
+	_draw_cup(cup, 0.85, Color(0.78, 0.62, 0.48).darkened(0.2), Color(0.9, 0.8, 0.66))
+	var honey := _drink_color
+	# The dipper, drifting with the balance.
+	var drift := _balance * cup.size.x * 0.55
+	var dipper := Vector2(cup.get_center().x + drift, cup.position.y - 30)
+	draw_line(dipper + Vector2(10, -12), dipper, Color(0.6, 0.45, 0.3), 2.0)
+	draw_circle(dipper, 5.0, honey.darkened(0.15))
+	for i in 3:
+		draw_line(dipper + Vector2(-5, -2 + i * 2.5), dipper + Vector2(5, -2 + i * 2.5), honey.darkened(0.35), 1.0)
+	# The latte's surface (matching _draw_cup at 0.85 full).
+	var surface := cup.position.y + 3 + (cup.size.y - 7) * 0.15
+	if _ready_left <= 0.0 and not _finished:
+		var x := dipper.x + sin(_t * 8.0) * 0.8
+		draw_line(Vector2(x, dipper.y + 4), Vector2(x, surface), honey, 2.0)
+		if absf(_balance) > drizzle_zone:
+			# Missing the cup: drips run down the outside.
+			var side := cup.end.x - 3 if _balance > 0 else cup.position.x + 3
+			for i in 3:
+				var fall := fmod(_t * 1.6 + i * 0.33, 1.0)
+				draw_circle(Vector2(side, surface + fall * cup.size.y * 0.8), 1.6, honey)
+	# The swirl on the latte's surface, seen from the side (squashed flat).
+	if pour > 0.0:
+		draw_set_transform(Vector2(cup.get_center().x, surface + 2), 0.0, Vector2(1, 0.3))
+		draw_arc(Vector2.ZERO, 2.0 + pour * cup.size.x * 0.28, 0.0, PI * 1.6 * pour + 0.3, 16, honey, 2.0)
+		draw_set_transform(Vector2.ZERO)
 
 
 ## The finished drink: the item's colour, with latte art if it's Perfect.

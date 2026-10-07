@@ -26,7 +26,7 @@ const ITEMS := {
 	},
 	"honey_latte": {
 		"name": "Dream-honey Latte", "kind": "drink", "price": 7,
-		"steps": ["pull", "steam"], "ingredient": "dream_honey", "color": Color(0.91, 0.72, 0.29),
+		"steps": ["pull", "steam", "drizzle"], "ingredient": "dream_honey", "color": Color(0.91, 0.72, 0.29),
 		"model": "res://assets/kenney/food/cup-coffee.glb", "model_scale": 0.5,
 	},
 	"croissant": {
@@ -46,7 +46,7 @@ const PANTRY_NAMES := {
 	"moonflour": "Moonflour",
 	"dream_honey": "Dream honey",
 }
-const STARTING_PANTRY := {"moonflour": 2, "dream_honey": 1}
+const STARTING_PANTRY := {"moonflour": 2, "dream_honey": 5}
 
 ## Confirmed personalities and their effects, from the roster in docs/Cats.md.
 ## Each effect is an icon (res://assets/ui/icons/<icon>.png) plus its description,

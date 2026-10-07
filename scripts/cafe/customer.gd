@@ -2,6 +2,11 @@ class_name Customer
 extends Interactable
 ## Counter-service customer: queues at the register, orders, waits at the
 ## pickup spot, collects from the pass, sits for a while, then leaves.
+## They carry their order from the pass (drink in the right hand where there is
+## one), and while seated sip the drink and eat the pastry a bite at a time,
+## spread over their stay. The drink goes down with each sip and the pastry is
+## finished by the end; on the way out they drop the empty cup in the bin by
+## the door. Customers taking it to go (no free table) carry it out full.
 ## Walks out if kept waiting too long. Regulars can be chatted with at their
 ## table (you have to leave the counter for that).
 
@@ -10,6 +15,12 @@ signal left_cafe(customer: Customer)
 enum State { QUEUED, WAITING_PICKUP, SEATED, LEAVING }
 
 const BAR_WIDTH := 20.0
+## Sips of a drink and bites of a pastry over a stay at a table.
+const SIPS := 3
+const BITES := 3
+## Seconds to raise to the mouth, hold there, and lower again.
+const LIFT_TIME := 0.35
+const MOUTH_TIME := 0.45
 
 var cafe: Cafe
 var display_name := "Customer"
@@ -31,6 +42,20 @@ var _patience := 0.0
 var _patience_max := 1.0
 var _linger_timer := 0.0
 
+## What we're holding: {"model": ItemModel, "arm": bone name, "bites": int}
+## ("bites" left for a pastry; a drink just gets sipped).
+var _held: Array[Dictionary] = []
+## Seated: which held item each sip or bite uses (indices into _held), and
+## when the next one starts (seconds of stay left).
+var _snacks: Array[int] = []
+var _next_snack_at := 0.0
+var _snacking := false
+## Seated: the table top's height. Held items never sink below it, so they rest
+## on the table rather than vanishing under it.
+var _table_top := -INF
+## Leaving: heading to the bin first to drop what's left of the order.
+var _to_bin := false
+
 
 func _ready() -> void:
 	super()
@@ -51,6 +76,7 @@ func setup(p_cafe: Cafe, p_regular_id := "") -> void:
 	_model.model_scale = cafe.character_scale
 	add_child(_model)
 	_model.model = load(model_path)
+	_model.posed.connect(_place_held)
 	global_position = cafe.door_outside()
 	_set_patience(cafe.queue_patience)
 	OverlayAnchor.attach(self, cafe.overlay, 1.0)
@@ -90,6 +116,7 @@ func on_ordered(p_ticket: Ticket) -> void:
 ## The order is complete on the pass and we're there to take it.
 ## `p_seat` is null when every table is taken: they leave with it to go.
 func collect(p_seat: Seat) -> void:
+	_take_order()
 	if p_seat == null:
 		_leave()
 		return
@@ -97,6 +124,7 @@ func collect(p_seat: Seat) -> void:
 	seat.customer = self
 	state = State.SEATED
 	_linger_timer = cafe.regular_linger_time if is_regular() else cafe.linger_time
+	_plan_snacks()
 	walk_to(seat.global_position)
 
 
@@ -122,7 +150,9 @@ func _process(delta: float) -> void:
 		State.SEATED:
 			if not is_walking() and not in_conversation:
 				_linger_timer -= delta
-				if _linger_timer <= 0.0:
+				if not _snacking and not _snacks.is_empty() and _linger_timer <= _next_snack_at:
+					_snack()
+				if _linger_timer <= 0.0 and not _snacking:
 					_leave()
 
 
@@ -140,7 +170,11 @@ func _arrive() -> void:
 			global_position = seat.global_position + Vector3.UP * cafe.sit_height
 			_model.face_yaw(seat.facing_yaw(), true)
 			_model.play("sit")
+			_table_top = cafe.table_top_near(seat.global_position)
 		State.LEAVING:
+			if _to_bin:
+				_drop_in_bin()
+				return
 			left_cafe.emit(self)
 			queue_free()
 		_:
@@ -169,11 +203,134 @@ func turn_away() -> void:
 func _leave() -> void:
 	if is_regular() and not chatted:
 		cafe.day.missed_chats.append(CafeData.REGULARS[regular_id]["skipped"])
+	# Sat in: anything still in hand goes in the bin on the way out.
+	_to_bin = seat != null and not _held.is_empty()
 	if seat:
 		global_position = seat.global_position
 		seat.customer = null
+	_table_top = -INF
 	state = State.LEAVING
+	walk_to(cafe.cup_bin_point() if _to_bin else cafe.door_outside())
+
+
+func _drop_in_bin() -> void:
+	_to_bin = false
+	# The bin is just behind the spot, toward the front of the room.
+	_model.face(Vector3.BACK)
+	for h in _held:
+		h["model"].queue_free()
+	_held.clear()
+	_update_arms()
+	Audio.play("trash", -8.0)
 	walk_to(cafe.door_outside())
+
+
+# --- The order in hand ------------------------------------------------------------
+
+## Picks the order up off the pass: the drink in the right hand where there is
+## one, the pastry in the other.
+func _take_order() -> void:
+	var ids := ticket.items.duplicate()
+	ids.sort_custom(func(a: String, b: String) -> bool:
+		return CafeData.item(a)["kind"] == "drink" and CafeData.item(b)["kind"] != "drink")
+	for i in ids.size():
+		var model := ItemModel.create(ids[i], cafe.barista.held_scale)
+		model.top_level = true
+		add_child(model)
+		var pastry: bool = CafeData.item(ids[i])["kind"] == "pastry"
+		_held.append({"model": model, "arm": "arm-right" if i % 2 == 0 else "arm-left",
+			"bites": BITES if pastry else 0, "sips": 0 if pastry else SIPS})
+	_update_arms()
+
+
+## Arms holding something stay out front.
+func _update_arms() -> void:
+	var arms := _held.map(func(h: Dictionary) -> String: return h["arm"])
+	if arms.is_empty():
+		_model.hold_arms("")
+	elif arms.size() == 1:
+		var arm: String = arms[0]
+		_model.hold_arms("holding-right" if arm == "arm-right" else "holding-left", [arm])
+	else:
+		_model.hold_arms("holding-both")
+
+
+## Each held item in its fist, upright and facing where we face (see Barista._place_held()).
+func _place_held() -> void:
+	var facing := Basis(Vector3.UP, _model.global_rotation.y)
+	for h in _held:
+		var fist := _model.hand_position(h["arm"])
+		var size: float = maxf(h.get("size", 1.0), 0.01)
+		var at := fist + facing.z * cafe.barista.grip_forward + Vector3.DOWN * cafe.barista.grip_depth
+		at.y = maxf(at.y, _table_top)
+		(h["model"] as ItemModel).global_transform = Transform3D(facing.scaled(Vector3.ONE * size), at)
+
+
+## Spreads the sips and bites evenly over the stay, alternating between the
+## drink and the pastry, starting a moment after sitting down.
+func _plan_snacks() -> void:
+	_snacks.clear()
+	var per_item: Array[int] = []
+	for h in _held:
+		per_item.append(BITES if h["bites"] > 0 else SIPS)
+	for turn in per_item.max() if not per_item.is_empty() else 0:
+		for i in _held.size():
+			if turn < per_item[i]:
+				_snacks.append(i)
+	_next_snack_at = _linger_timer * (1.0 - 1.0 / (_snacks.size() + 1)) if not _snacks.is_empty() else 0.0
+
+
+## One sip or bite: up to the mouth, a pause, and back down. A pastry gets
+## smaller with each bite and is gone after the last.
+func _snack() -> void:
+	var item: Dictionary = _held[_snacks.pop_front()]
+	var gap := _linger_timer / (_snacks.size() + 1)
+	_next_snack_at = _linger_timer - gap
+	_snacking = true
+	var arm: String = item["arm"]
+	var tween := create_tween()
+	tween.tween_method(func(v: float) -> void: _model.lift_arm(arm, v), 0.0, 1.0, LIFT_TIME) \
+		.set_trans(Tween.TRANS_SINE)
+	tween.tween_interval(MOUTH_TIME)
+	if item["bites"] > 0:
+		tween.tween_callback(_bite.bind(item))
+	else:
+		tween.tween_callback(_sip.bind(item))
+	tween.tween_method(func(v: float) -> void: _model.lift_arm(arm, v), 1.0, 0.0, LIFT_TIME) \
+		.set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(func() -> void:
+		_snacking = false
+		if item.get("eaten", false):
+			_finish_item(item))
+
+
+## A sip: the drink goes down, and the last one empties the cup.
+func _sip(item: Dictionary) -> void:
+	item["sips"] = maxi(item["sips"] - 1, 0)
+	(item["model"] as ItemModel).set_fill(float(item["sips"]) / SIPS)
+
+
+## A bite: the pastry shrinks, and the last one finishes it.
+func _bite(item: Dictionary) -> void:
+	item["bites"] -= 1
+	Audio.play("munch", -6.0, 1.3)
+	item["size"] = float(item["bites"]) / BITES
+	if item["bites"] == 0:
+		item["eaten"] = true
+
+
+## Puts away a finished pastry: its hand comes down, and the sips still to come
+## point at the right item again.
+func _finish_item(item: Dictionary) -> void:
+	var index := _held.find(item)
+	item["model"].queue_free()
+	_held.remove_at(index)
+	var remaining: Array[int] = []
+	for i in _snacks:
+		if i != index:
+			remaining.append(i - 1 if i > index else i)
+	_snacks = remaining
+	_update_arms()
 
 
 # --- Interaction (only regulars, at their table) -----------------------------------
