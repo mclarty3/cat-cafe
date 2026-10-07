@@ -123,6 +123,20 @@ the running game".
   - Each press punches the gauge, flashes the zone in the result's colour, and pops the result word; the
     click rises in pitch the closer you were. Sparkles scale with quality, and the finished drink is shown
     at the end, with latte art on a Perfect.
+  - **Juice** (feedback only, never the score):
+    - The panel pops in over a dimmed screen and shrinks away when done.
+    - Each press freezes for a beat (hit-stop: 0.05 / 0.08 / 0.13 s for Poor / Good / Perfect), lands the
+      result word oversized, sends out a shockwave ring, flashes the panel border, and rumbles a gamepad.
+      Misses shake the panel.
+    - Perfects in a row climb a major scale and say so ("Perfect! x2").
+    - Anticipation: the zone glows as the needle nears it, the needle leaves a short trail and ticks
+      softly entering the zone, and the steam hiss rises with the heat (past the zone the panel trembles
+      and the needle pulses red). The drizzle has a honey-pour sound, chimes that climb while you hold
+      the green (with a breathing halo on the marker and the green warming up), and a soft warning
+      when you slip out.
+    - The finished drink bounces up and earns 1-3 stars (Poor / Good / Perfect), each with a rising
+      chime; a Perfect drink adds a small jingle.
+    - The sounds are reused Kenney clips, kept quiet (the `mg_*` entries in `Audio.SOUNDS`).
   - The drink's quality is its worst step (Poor / Good / Perfect), which sets the tip.
 - **Pastry case:** take a pastry from today's menu. Stock only comes from morning prep.
 - **Pass:** put down what you're carrying. Items waiting for pickup show on the counter as little models.

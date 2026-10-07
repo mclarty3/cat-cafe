@@ -24,6 +24,15 @@ const SOUNDS := {
 	"drink_perfect": {"files": ["pluck_002"], "db": -14.0, "pitch": 0.9, "jitter": 0.0},
 	"drink_good": {"files": ["pluck_001"], "db": -16.0, "pitch": 0.85, "jitter": 0.0},
 	"drink_poor": {"files": ["error_004"], "db": -20.0, "pitch": 0.85, "jitter": 0.0},
+	# Minigame feedback (kept quiet: it plays on every press). Pitches are
+	# raised further in code for a run of Perfects and for each star.
+	"mg_zone_tick": {"files": ["click_002"], "db": -26.0, "pitch": 1.7, "jitter": 0.0},
+	"mg_good": {"files": ["pluck_001"], "db": -18.0, "pitch": 1.2, "jitter": 0.0},
+	"mg_perfect": {"files": ["pluck_002"], "db": -15.0, "pitch": 1.35, "jitter": 0.0},
+	"mg_warn": {"files": ["click_002"], "db": -20.0, "pitch": 0.55, "jitter": 0.0},
+	"mg_star": {"files": ["pluck_002"], "db": -17.0, "pitch": 1.0, "jitter": 0.0},
+	"mg_fanfare": {"files": ["confirmation_002"], "db": -18.0, "jitter": 0.0},
+	"honey_pour": {"files": ["synth/espresso_pour"], "db": -24.0, "pitch": 0.6, "jitter": 0.0},
 	# Customers and money
 	"door_open": {"files": ["doorOpen_1"], "db": -14.0},
 	"door_bell": {"files": ["impactBell_heavy_000"], "db": -16.0, "pitch": 2.2, "jitter": 0.03},
@@ -126,6 +135,13 @@ func stop_loop(sound: String, fade := 0.15) -> void:
 	var tween := create_tween()
 	tween.tween_property(player, "volume_db", SILENT_DB, fade)
 	tween.tween_callback(player.queue_free)
+
+
+## Bends a running loop's pitch (1 = as defined in SOUNDS), e.g. steam rising
+## as the milk heats.
+func set_loop_pitch(sound: String, pitch: float) -> void:
+	if _loops.has(sound):
+		(_loops[sound] as AudioStreamPlayer).pitch_scale = _def(sound).get("pitch", 1.0) * pitch
 
 
 func stop_all_loops() -> void:

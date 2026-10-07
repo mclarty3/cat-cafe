@@ -13,6 +13,18 @@ extends Control
 ## under the portafilter, a steaming pitcher), a gauge on the right, and the
 ## feedback: the gauge punches and the result word pops on each press, sparkles
 ## scale with quality, and a Perfect drink gets latte art.
+##
+## Juice (feedback only; it never changes the score):
+##   - the panel pops in over a dimmed screen, and shrinks away when done
+##   - each press freezes for a beat (hit-stop, longer for better results),
+##     sends out a shockwave ring, flashes the panel border, and rumbles a pad
+##   - Perfects in a row climb in pitch ("Perfect! x2")
+##   - anticipation: the zone glows as the needle nears it, the needle leaves a
+##     trail and ticks entering the zone; steam rises in pitch and the gauge
+##     trembles past the zone; the drizzle pours, chimes while you hold the
+##     green and warns when you slip out
+##   - the finished drink bounces in and earns 1-3 stars, each with a rising
+##     chime (and a little jingle for a Perfect drink)
 
 signal _step_done(quality: int)
 
@@ -24,6 +36,17 @@ const PERFECT_COLOR := Color(0.75, 1, 0.6)
 const QUALITY_COLORS := [Color(0.75, 0.68, 0.62), Color(0.6, 0.95, 0.55), Color(1, 0.82, 0.3)]
 const ESPRESSO := Color(0.3, 0.17, 0.09)
 const CREMA := Color(0.72, 0.48, 0.26)
+const GOLD := Color(1, 0.82, 0.3)
+const WARN_COLOR := Color(1, 0.4, 0.35)
+## Hit-stop per result (poor, good, perfect): seconds the panel freezes on a press.
+const HITSTOP := [0.05, 0.08, 0.13]
+## A run of Perfects climbs a major scale.
+const STREAK_PITCH := [1.0, 1.122, 1.26, 1.335, 1.498]
+## Stars on the finished drink, and the pitch each one chimes at.
+const STAR_PITCH := [1.0, 1.26, 1.498]
+const STAR_GAP := 0.16
+## How long the finished drink shows before the panel closes.
+const REVEAL_TIME := 1.0
 
 ## How fast the pull needle sweeps (dial widths per second).
 @export var pull_speed := 0.6
@@ -94,6 +117,29 @@ var _perfect_time := 0.0
 ## Drizzle: which way the player is pushing (-1, 0, 1), for the arrows.
 var _steer := 0.0
 
+## Juice state (see the header).
+## 0..1: how far the panel has popped in.
+var _open := 0.0
+## Seconds left of the freeze after a press.
+var _hitstop := 0.0
+## Perfects in a row this drink.
+var _streak := 0
+## Expanding rings: {"pos", "age", "life", "color", "radius"}.
+var _rings: Array[Dictionary] = []
+## Recent needle positions, newest last, for its trail.
+var _trail: Array[float] = []
+var _was_in_zone := false
+## Drizzle: seconds held in the green without slipping, the next chime, and a
+## cooldown so slipping out doesn't spam warnings.
+var _green_run := 0.0
+var _next_chime := 0.0
+var _warn_cooldown := 0.0
+## The finished drink: seconds since it appeared, and stars shown so far.
+var _reveal_age := 0.0
+var _stars_shown := 0
+## The whole panel's transform this frame (pop-in scale and shake).
+var _xf := Transform2D.IDENTITY
+
 
 func _ready() -> void:
 	hide()
@@ -107,7 +153,12 @@ func play(item_id: String) -> int:
 	_drink_color = data["color"]
 	_final = -1
 	_sparkles.clear()
+	_rings.clear()
+	_streak = 0
+	_hitstop = 0.0
+	_open = 0.0
 	show()
+	create_tween().tween_property(self, "_open", 1.0, 0.22)
 	var worst := CafeData.Quality.PERFECT
 	var steps: Array = data["steps"]
 	for i in steps.size():
@@ -115,10 +166,16 @@ func play(item_id: String) -> int:
 		worst = mini(worst, quality)
 	_step = ""
 	_final = worst
+	_reveal_age = 0.0
+	_stars_shown = 0
 	_show_result(CafeData.QUALITY_NAMES[worst], QUALITY_COLORS[worst])
 	_burst(_cup_rect().get_center() + Vector2(0, -10), worst, true)
+	_ring(_cup_rect().get_center(), QUALITY_COLORS[worst], 46.0)
 	Audio.play(["drink_poor", "drink_good", "drink_perfect"][worst])
-	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(REVEAL_TIME).timeout
+	var close := create_tween()
+	close.tween_property(self, "_open", 0.0, 0.14)
+	await close.finished
 	hide()
 	return worst
 
@@ -131,6 +188,11 @@ func _run_step(step: String, ready := 0.0) -> int:
 	_holding = false
 	_finished = false
 	_result_text = ""
+	_trail.clear()
+	_was_in_zone = false
+	_green_run = 0.0
+	_next_chime = 0.6
+	_warn_cooldown = 0.0
 	_zone_center = randf_range(0.55, 0.85) if step == "pull" else randf_range(0.6, 0.8)
 	if step == "pull":
 		Audio.play("grinder")
@@ -149,16 +211,26 @@ func _run_step(step: String, ready := 0.0) -> int:
 		await get_tree().process_frame
 	if step == "pull":
 		Audio.start_loop("espresso_pour")
+	elif step == "drizzle":
+		Audio.start_loop("honey_pour")
 	return await _step_done
 
 
 func _process(delta: float) -> void:
 	if not visible:
 		return
+	queue_redraw()
+	# Hit-stop: everything holds still for a beat after a press.
+	if _hitstop > 0.0:
+		_hitstop -= delta
+		return
 	_result_age += delta
 	_punch = move_toward(_punch, 0.0, delta * 4.0)
 	_shake = maxf(_shake - delta, 0.0)
 	_update_sparkles(delta)
+	_update_rings(delta)
+	if _final >= 0:
+		_update_reveal(delta)
 	if _ready_left > 0.0:
 		_ready_left -= delta
 	elif not _step.is_empty() and not _finished:
@@ -167,6 +239,7 @@ func _process(delta: float) -> void:
 		match _step:
 			"pull":
 				_value = pingpong(_t * pull_speed, 1.0)
+				_track_needle()
 				if can_input and Input.is_action_just_pressed("cafe_interact"):
 					_finish(_score(_value))
 			"steam":
@@ -175,6 +248,11 @@ func _process(delta: float) -> void:
 					Audio.start_loop("steam")
 				if _holding:
 					_value += steam_rate * delta
+					_track_needle()
+					# The hiss climbs as it heats; past the zone the gauge trembles.
+					Audio.set_loop_pitch("steam", lerpf(0.85, 1.35, _value))
+					if _value > _zone_center + zone_half_width:
+						_shake = maxf(_shake, 0.06)
 					if _value >= 1.0:
 						_value = 1.0
 						_finish(CafeData.Quality.POOR, "Scalded!")
@@ -182,7 +260,18 @@ func _process(delta: float) -> void:
 						_finish(_score(_value))
 			"drizzle":
 				_update_drizzle(delta, can_input)
-	queue_redraw()
+
+
+## Remembers the needle for its trail, and ticks softly as it enters the zone
+## (a timing cue).
+func _track_needle() -> void:
+	_trail.append(_value)
+	if _trail.size() > 6:
+		_trail.pop_front()
+	var in_zone := absf(_value - _zone_center) <= zone_half_width
+	if in_zone and not _was_in_zone and _t > input_delay:
+		Audio.play("mg_zone_tick")
+	_was_in_zone = in_zone
 
 
 ## The balance: the marker tips away from the middle (harder the further out),
@@ -197,15 +286,40 @@ func _update_drizzle(delta: float, can_input: bool) -> void:
 	_balance_vel += push * delta
 	_balance_vel -= _balance_vel * drizzle_damping * delta
 	_balance += _balance_vel * delta
-	if absf(_balance) <= drizzle_zone:
+	var in_green := absf(_balance) <= drizzle_zone
+	if in_green:
 		_green_time += delta
 	if absf(_balance) <= drizzle_perfect:
 		_perfect_time += delta
+	_drizzle_feedback(delta, in_green)
 	if absf(_balance) >= 1.0:
 		_balance = signf(_balance)
 		_finish(CafeData.Quality.POOR, "Spilled!")
 	elif _t >= drizzle_time:
 		_finish(_drizzle_score())
+
+
+## Holding the green chimes, climbing a little the longer you hold it, with a
+## twinkle at the marker; slipping out gives a soft warning and a red flash.
+## The pour sounds richer while you're on target.
+func _drizzle_feedback(delta: float, in_green: bool) -> void:
+	_warn_cooldown = maxf(_warn_cooldown - delta, 0.0)
+	Audio.set_loop_pitch("honey_pour", 1.0 if in_green else 0.85)
+	if in_green:
+		_green_run += delta
+		if _green_run >= _next_chime:
+			var step := mini(int(_green_run / 0.6) - 1, STREAK_PITCH.size() - 1)
+			Audio.play("mg_good", -4.0, STREAK_PITCH[step])
+			_burst(_marker_point(), CafeData.Quality.GOOD, false)
+			_next_chime += 0.6
+	else:
+		if _green_run > 0.0 and _warn_cooldown <= 0.0:
+			Audio.play("mg_warn")
+			_flash_color = WARN_COLOR
+			_punch = 0.5
+			_warn_cooldown = 0.5
+		_green_run = 0.0
+		_next_chime = 0.6
 
 
 func _drizzle_score() -> int:
@@ -231,25 +345,59 @@ func _finish(quality: int, text := "") -> void:
 	_finished = true
 	Audio.stop_loop("espresso_pour")
 	Audio.stop_loop("steam")
+	Audio.stop_loop("honey_pour")
 	_punch = 1.0
 	_flash_color = QUALITY_COLORS[quality]
+	_hitstop = HITSTOP[quality]
+	var at := _marker_point() if _step == "drizzle" else _gauge_center() + _needle_dir() * GAUGE_RADIUS * 0.8
+	_streak = _streak + 1 if quality == CafeData.Quality.PERFECT and text.is_empty() else 0
 	if not text.is_empty():
 		# Scalded, or spilled.
-		_shake = 0.25
-		_flash_color = Color(1, 0.35, 0.3)
+		_shake = 0.3
+		_hitstop = 0.12
+		_flash_color = WARN_COLOR
 		Audio.play("scald" if _step == "steam" else "drink_poor")
 		_show_result(text, _flash_color)
-	elif _step == "drizzle":
+		_ring(at, WARN_COLOR, 30.0)
+		_rumble(0.2, 0.7, 0.25)
+		_done_after(quality)
+		return
+	if _step == "drizzle":
 		Audio.play("step_stop", 0.0, [0.8, 1.05, 1.35][quality])
-		_show_result(CafeData.QUALITY_NAMES[quality], QUALITY_COLORS[quality])
-		_burst(_marker_point(), quality, false)
 	else:
 		# The click rises in pitch the closer you were to the middle of the zone.
 		var closeness := 1.0 - clampf(absf(_value - _zone_center) / (zone_half_width * 2.0), 0.0, 1.0)
 		Audio.play("step_stop", 0.0, lerpf(0.8, 1.35, closeness))
-		_show_result(CafeData.QUALITY_NAMES[quality], QUALITY_COLORS[quality])
-		_burst(_gauge_center() + _needle_dir() * GAUGE_RADIUS * 0.8, quality, false)
+	match quality:
+		CafeData.Quality.PERFECT:
+			# A run of Perfects climbs in pitch and says so.
+			Audio.play("mg_perfect", 0.0, STREAK_PITCH[mini(_streak - 1, STREAK_PITCH.size() - 1)])
+			var text_streak: String = "Perfect! x%d" % _streak if _streak > 1 else CafeData.QUALITY_NAMES[quality]
+			_show_result(text_streak, QUALITY_COLORS[quality])
+			_ring(at, GOLD, 34.0)
+			_ring(at, Color.WHITE, 22.0, 0.08)
+			_rumble(0.5, 0.3, 0.12)
+		CafeData.Quality.GOOD:
+			Audio.play("mg_good")
+			_show_result(CafeData.QUALITY_NAMES[quality], QUALITY_COLORS[quality])
+			_ring(at, QUALITY_COLORS[quality], 26.0)
+			_rumble(0.35, 0.0, 0.08)
+		_:
+			_shake = 0.15
+			_show_result(CafeData.QUALITY_NAMES[quality], QUALITY_COLORS[quality])
+			_rumble(0.0, 0.3, 0.1)
+	_burst(at, quality, false)
+	_done_after(quality)
+
+
+func _done_after(quality: int) -> void:
 	get_tree().create_timer(0.45).timeout.connect(_step_done.emit.bind(quality))
+
+
+## A gamepad buzz, if one is connected.
+func _rumble(weak: float, strong: float, seconds: float) -> void:
+	for pad in Input.get_connected_joypads():
+		Input.start_joy_vibration(pad, weak, strong, seconds)
 
 
 func _show_result(text: String, color: Color) -> void:
@@ -272,6 +420,33 @@ func _burst(at: Vector2, quality: int, big: bool) -> void:
 			"life": randf_range(0.35, 0.6), "age": 0.0,
 			"color": QUALITY_COLORS[quality].lightened(randf() * 0.3), "size": randf_range(1.5, 3.0),
 		})
+
+
+## A shockwave ring growing out to `radius` (after `delay` seconds).
+func _ring(at: Vector2, color: Color, radius: float, delay := 0.0) -> void:
+	_rings.append({"pos": at, "age": -delay, "life": 0.35, "color": color, "radius": radius})
+
+
+func _update_rings(delta: float) -> void:
+	for r in _rings:
+		r["age"] += delta
+	_rings = _rings.filter(func(r: Dictionary) -> bool: return r["age"] < r["life"])
+
+
+## The finished drink's stars pop in one after another, each chiming a step
+## higher; the last star of a Perfect drink gets a little jingle and a burst.
+func _update_reveal(delta: float) -> void:
+	_reveal_age += delta
+	var earned := _final + 1
+	var due := mini(int((_reveal_age - 0.12) / STAR_GAP) + 1, earned) if _reveal_age >= 0.12 else 0
+	while _stars_shown < due:
+		var at := _star_point(_stars_shown)
+		Audio.play("mg_star", 0.0, STAR_PITCH[_stars_shown])
+		_ring(at, GOLD, 14.0)
+		_stars_shown += 1
+		if _stars_shown == 3:
+			Audio.play("mg_fanfare")
+			_burst(at, CafeData.Quality.PERFECT, false)
 
 
 func _update_sparkles(delta: float) -> void:
@@ -310,8 +485,23 @@ func _cup_rect() -> Rect2:
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var panel := _panel()
+	# Dim the cafe behind, then draw the panel popped in (a little overshoot)
+	# and shaken.
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.28 * _open))
+	var pop := 0.7 + 0.3 * _ease_out_back(_open)
+	var shake := Vector2.ZERO
+	if _shake > 0.0:
+		var amount := minf(_shake / 0.15, 1.0) * 3.0
+		shake = Vector2(randf_range(-amount, amount), randf_range(-amount, amount) * 0.6)
+	var middle := panel.get_center()
+	_xf = Transform2D(0.0, Vector2(pop, pop), 0.0, middle + shake) * Transform2D(0.0, -middle)
+	draw_set_transform_matrix(_xf)
+	modulate.a = clampf(_open * 1.5, 0.0, 1.0)
+
 	draw_rect(panel, Color(0.17, 0.12, 0.1, 0.95))
-	draw_rect(panel, Color(0.85, 0.68, 0.48), false, 1.0)
+	# The border flashes the result's colour on a press.
+	var border := Color(0.85, 0.68, 0.48).lerp(_flash_color, _punch)
+	draw_rect(panel, border, false, 1.0 + 2.0 * _punch)
 	draw_string(font, panel.position + Vector2(12, 16), _title, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, ACCENT)
 
 	var hint := ""
@@ -332,12 +522,24 @@ func _draw() -> void:
 		"drizzle":
 			_draw_drizzle()
 	if _final >= 0:
+		# The finished drink bounces up from its base.
+		var base := Vector2(_cup_rect().get_center().x, _cup_rect().end.y)
+		var k := 0.55 + 0.45 * _ease_out_back(clampf(_reveal_age / 0.28, 0.0, 1.0))
+		draw_set_transform_matrix(_xf * Transform2D(0.0, Vector2(k, k), 0.0, base) * Transform2D(0.0, -base))
 		_draw_finished_cup()
+		draw_set_transform_matrix(_xf)
+		_draw_stars()
 	if _step == "drizzle":
 		_draw_balance(font)
 	elif not _step.is_empty():
 		_draw_gauge(font, "PRESSURE" if _step == "pull" else "TEMP")
 
+	for r in _rings:
+		if r["age"] < 0.0:
+			continue
+		var t: float = r["age"] / r["life"]
+		var eased := 1.0 - pow(1.0 - t, 3.0)
+		draw_arc(r["pos"], 3.0 + eased * r["radius"], 0.0, TAU, 32, Color(r["color"], 1.0 - t), 3.0 * (1.0 - t) + 0.5)
 	for s in _sparkles:
 		var fade: float = 1.0 - s["age"] / s["life"]
 		draw_circle(s["pos"], s["size"] * fade, Color(s["color"], fade))
@@ -350,14 +552,45 @@ func _draw() -> void:
 		var alpha := 0.55 + 0.35 * sin(_ready_left * 9.0)
 		draw_string(font, Vector2(_gauge_center().x - width / 2.0, _panel().end.y - 10), text,
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(ACCENT, alpha))
+	draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+func _ease_out_back(t: float) -> float:
+	var c := 1.70158
+	return 1.0 + (c + 1.0) * pow(t - 1.0, 3.0) + c * pow(t - 1.0, 2.0)
+
+
+## Where the finished drink's stars sit: a row under the cup.
+func _star_point(i: int) -> Vector2:
+	var cup := _cup_rect()
+	return Vector2(cup.get_center().x + (i - 1) * 22, cup.end.y + 13)
+
+
+## Three star slots; earned ones pop in gold (see _update_reveal()).
+func _draw_stars() -> void:
+	for i in 3:
+		var at := _star_point(i)
+		if i < _stars_shown:
+			# Each pops with an overshoot as it lands.
+			var age := _reveal_age - 0.12 - i * STAR_GAP
+			var pop := lerpf(1.6, 1.0, clampf(age / 0.15, 0.0, 1.0))
+			_draw_star(at, 8.0 * pop, GOLD)
+		else:
+			_draw_star(at, 8.0, Color(1, 1, 1, 0.15))
+
+
+func _draw_star(at: Vector2, radius: float, color: Color) -> void:
+	var points := PackedVector2Array()
+	for i in 10:
+		var a := -PI / 2.0 + i * PI / 5.0
+		points.append(at + Vector2(cos(a), sin(a)) * (radius if i % 2 == 0 else radius * 0.45))
+	draw_colored_polygon(points, color)
 
 
 ## The gauge: a dial over the top, the zone in green (brightest at perfect),
 ## and the needle. A press punches it outward and flashes the zone.
 func _draw_gauge(font: Font, label: String) -> void:
 	var center := _gauge_center()
-	if _shake > 0.0:
-		center += Vector2(randf_range(-2, 2), randf_range(-1, 1))
 	var r := GAUGE_RADIUS * (1.0 + 0.08 * _punch)
 	# The dial face: a half disc, so it sits inside the panel.
 	var face := PackedVector2Array()
@@ -370,10 +603,17 @@ func _draw_gauge(font: Font, label: String) -> void:
 	draw_arc(center, r, PI, TAU, 40, Color(1, 1, 1, 0.12), 9.0)
 	var zone_lo := PI + (_zone_center - zone_half_width) * PI
 	var zone_hi := PI + (_zone_center + zone_half_width) * PI
-	var zone := ZONE_COLOR.lerp(_flash_color, _punch * 0.8)
-	draw_arc(center, r, zone_lo, zone_hi, 12, zone, 9.0 + 3.0 * _punch)
+	# The zone glows brighter and thicker as the needle comes near.
+	var near := 0.0
+	if not _finished and _ready_left <= 0.0 and (_step == "pull" or _holding):
+		near = 1.0 - clampf((absf(_value - _zone_center) - zone_half_width) / (zone_half_width * 2.0), 0.0, 1.0)
+	var glow := 2.5 * near + 3.0 * _punch
+	if near > 0.0:
+		draw_arc(center, r, zone_lo, zone_hi, 12, Color(ZONE_COLOR.lightened(0.4), 0.25 * near), 9.0 + glow + 6.0)
+	var zone := ZONE_COLOR.lightened(0.25 * near).lerp(_flash_color, _punch * 0.8)
+	draw_arc(center, r, zone_lo, zone_hi, 12, zone, 9.0 + glow)
 	draw_arc(center, r, PI + (_zone_center - perfect_half_width) * PI,
-		PI + (_zone_center + perfect_half_width) * PI, 6, PERFECT_COLOR, 9.0 + 3.0 * _punch)
+		PI + (_zone_center + perfect_half_width) * PI, 6, PERFECT_COLOR, 9.0 + glow)
 	# Tick marks.
 	for i in 11:
 		var a := PI + i / 10.0 * PI
@@ -382,7 +622,16 @@ func _draw_gauge(font: Font, label: String) -> void:
 	# Steaming fills the dial as the milk heats.
 	if _step == "steam" and _value > 0.0:
 		draw_arc(center, r - 14, PI, PI + _value * PI, 24, Color(1, 0.55, 0.35, 0.45), 4.0)
+	# The needle's trail: faded copies where it just was.
+	if not _finished:
+		for i in _trail.size():
+			var a := PI + _trail[i] * PI
+			var fade := float(i + 1) / (_trail.size() + 1)
+			draw_line(center, center + Vector2(cos(a), sin(a)) * (r - 6), Color(1, 1, 1, 0.12 * fade), 2.0)
 	var needle := Color.WHITE.lerp(_flash_color, _punch)
+	# Steaming past the zone: the needle pulses red, warning of a scald.
+	if _step == "steam" and _holding and not _finished and _value > _zone_center + zone_half_width:
+		needle = needle.lerp(WARN_COLOR, 0.5 + 0.5 * sin(_t * 30.0))
 	draw_line(center, center + _needle_dir() * (r - 6), needle, 2.0 + _punch)
 	draw_circle(center, 4.0, needle)
 	var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
@@ -440,8 +689,6 @@ func _marker_point() -> Vector2:
 
 func _draw_balance(font: Font) -> void:
 	var bar := _balance_bar()
-	if _shake > 0.0:
-		bar.position += Vector2(randf_range(-2, 2), randf_range(-1, 1))
 	var grow := 2.0 * _punch
 	bar = bar.grow_individual(0, grow, 0, grow)
 	var half := bar.size.x / 2.0
@@ -450,7 +697,9 @@ func _draw_balance(font: Font) -> void:
 	# The ends are where it spills: tinted red.
 	draw_rect(bar, Color(0.55, 0.25, 0.2, 0.6))
 	draw_rect(Rect2(mid - half * 0.8, bar.position.y, half * 1.6, bar.size.y), Color(1, 1, 1, 0.12))
-	var zone := ZONE_COLOR.lerp(_flash_color, _punch * 0.8)
+	# The green warms up the longer you hold it.
+	var held := clampf(_green_run / 2.0, 0.0, 1.0) if not _finished else 0.0
+	var zone := ZONE_COLOR.lightened(0.3 * held).lerp(_flash_color, _punch * 0.8)
 	draw_rect(Rect2(mid - half * drizzle_zone, bar.position.y, half * drizzle_zone * 2.0, bar.size.y), zone)
 	draw_rect(Rect2(mid - half * drizzle_perfect, bar.position.y, half * drizzle_perfect * 2.0, bar.size.y), PERFECT_COLOR)
 	# The marker: a post with a cap, leaning the way it's falling.
@@ -460,14 +709,18 @@ func _draw_balance(font: Font) -> void:
 	var off := clampf((absf(_balance) - drizzle_zone) / (1.0 - drizzle_zone) * 2.0, 0.0, 1.0)
 	var marker := Color.WHITE.lerp(Color(1, 0.45, 0.4), off).lerp(_flash_color, _punch)
 	var top := at + Vector2(sin(lean), -cos(lean)) * 14.0
+	# On target: a soft halo that breathes.
+	if off <= 0.0 and not _finished and _ready_left <= 0.0:
+		draw_circle(top, 6.0 + sin(_t * 8.0), Color(PERFECT_COLOR, 0.25 + 0.2 * held))
 	draw_line(at + Vector2(0, 7), top, marker, 2.0 + _punch)
 	draw_circle(top, 3.5, marker)
-	# Steering arrows at either end.
+	# Steering arrows at either end; the one you're pushing swells.
 	for dir in [-1, 1]:
 		var lit: bool = signf(_steer) == dir
+		var k := 1.35 if lit else 1.0
 		var tip := Vector2(mid + dir * (half + 16), bar.get_center().y)
 		draw_colored_polygon(PackedVector2Array([
-			tip, tip + Vector2(-dir * 8, -6), tip + Vector2(-dir * 8, 6)]),
+			tip, tip + Vector2(-dir * 8, -6) * k, tip + Vector2(-dir * 8, 6) * k]),
 			ACCENT if lit else Color(1, 1, 1, 0.3))
 	# The pour's progress.
 	var progress := clampf(_t / drizzle_time, 0.0, 1.0) if _ready_left <= 0.0 else 0.0
@@ -506,9 +759,9 @@ func _draw_drizzle() -> void:
 				draw_circle(Vector2(side, surface + fall * cup.size.y * 0.8), 1.6, honey)
 	# The swirl on the latte's surface, seen from the side (squashed flat).
 	if pour > 0.0:
-		draw_set_transform(Vector2(cup.get_center().x, surface + 2), 0.0, Vector2(1, 0.3))
+		draw_set_transform_matrix(_xf * Transform2D(0.0, Vector2(1, 0.3), 0.0, Vector2(cup.get_center().x, surface + 2)))
 		draw_arc(Vector2.ZERO, 2.0 + pour * cup.size.x * 0.28, 0.0, PI * 1.6 * pour + 0.3, 16, honey, 2.0)
-		draw_set_transform(Vector2.ZERO)
+		draw_set_transform_matrix(_xf)
 
 
 ## The finished drink: the item's colour, with latte art if it's Perfect.
@@ -541,18 +794,21 @@ func _draw_cup(cup: Rect2, fill: float, liquid: Color, top: Color) -> void:
 	draw_rect(Rect2(inner.position.x + 1, level, inner.size.x - 2, minf(3.0, inner.end.y - level)), top)
 
 
-## The result word pops in with a little overshoot (and droops if it's Poor).
+## The result word lands oversized and settles (and droops if it's Poor).
 func _draw_result(font: Font) -> void:
 	var t := _result_age
-	var pop := lerpf(0.4, 1.25, t / 0.08) if t < 0.08 else lerpf(1.25, 1.0, minf((t - 0.08) / 0.14, 1.0))
+	# Lands big (that's what the hit-stop freezes on) and settles.
+	var settle := minf(t / 0.2, 1.0)
+	var pop := lerpf(1.5, 1.0, 1.0 - pow(1.0 - settle, 3.0))
 	var droop := 0.0
 	if _result_color == QUALITY_COLORS[CafeData.Quality.POOR]:
 		droop = minf(t, 0.4) * 10.0
 	var size_px := 15
 	var width := font.get_string_size(_result_text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px).x
-	var x := _panel().get_center().x if _final >= 0 else _gauge_center().x
+	# The finished drink's word lines up with the cup and its stars.
+	var x := _cup_rect().get_center().x if _final >= 0 else _gauge_center().x
 	var at := Vector2(x, _panel().end.y - 8 + droop)
-	draw_set_transform(at, 0.0, Vector2.ONE * pop)
+	draw_set_transform_matrix(_xf * Transform2D(0.0, Vector2.ONE * pop, 0.0, at))
 	draw_string_outline(font, Vector2(-width / 2.0, 0), _result_text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, 4, Color(0.1, 0.07, 0.05))
 	draw_string(font, Vector2(-width / 2.0, 0), _result_text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, _result_color)
-	draw_set_transform(Vector2.ZERO)
+	draw_set_transform_matrix(_xf)
