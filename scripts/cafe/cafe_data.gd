@@ -1,5 +1,5 @@
 class_name CafeData
-## Static content tables for the cafe prototype: menu, prep actions, regulars.
+## Static content tables for the cafe prototype: menu, recipes, regulars.
 ## Kept as plain dictionaries so they're quick to tweak while the design is in flux;
 ## move to Resources once the shape settles.
 
@@ -52,7 +52,8 @@ const PANTRY_NAMES := {
 }
 const STARTING_PANTRY := {"moonflour": 2, "dream_honey": 1}
 
-const PREP_ACTIONS := [
+## What can be made before opening. `costs` come out of the pantry.
+const RECIPES := [
 	{"name": "Bake croissants", "gives": {"croissant": 4}, "costs": {}},
 	{"name": "Bake moonflour muffins", "gives": {"moon_muffin": 3}, "costs": {"moonflour": 1}},
 	{"name": "Make dream-honey syrup", "gives": {"honey_syrup": 3}, "costs": {"dream_honey": 1}},

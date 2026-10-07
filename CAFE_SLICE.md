@@ -53,11 +53,12 @@ the running game".
 1. **Morning prep.** The cafe is closed and you can walk around freely. The light is cooler and
    dimmer, there are no customers, and Mochi is about. The counter stations are off until you open.
    Everything happens at the **register's computer**, the same till you take orders on later, which
-   runs **CafeOS** before opening. The header always shows the time and prep actions left, and a green **Open the
+   runs **CafeOS** before opening. The header always shows the time, and a green **Open the
    cafe** button sits in the sidebar, so you can open up from any page. The pages are:
-   - **Kitchen** (the page it opens on): 3 prep actions: bake croissants (+4), bake moonflour muffins (+3, uses 1 moonflour)
+   - **Kitchen** (the page it opens on): bake croissants (+4), bake moonflour muffins (+3, uses 1 moonflour)
      or make dream-honey syrup (+3 honey lattes, uses 1 dream honey). The pantry starts with 2
-     moonflour and 1 dream honey, so you can't do everything.
+     moonflour and 1 dream honey. There's no limit on prep actions anymore, so for now croissants are
+     unlimited; pastry slots will cap them next.
    - **Cats:** a roster of compact cards, two per row. Each card shows the cat's colour, **name** and
      **personality**, plus a row of icons grouped under **Cafe** and **Dream** (for example, Curious has a
      coin and a wall). Cafe icons are **green** for benefits and **red** for drawbacks (Playful's
@@ -170,7 +171,7 @@ the running game".
   spacing, and each event's timers and effects. The mug and curtain costs are under `Money`.
 - **How much you can carry** is `carry_capacity` on the `Barista`.
 - **Minigame speed and zone sizes** are on `DrinkMinigame` (`scripts/cafe/ui/drink_minigame.gd`).
-- **Menu, prep actions, the starting pantry, and Theo's lines** live in `scripts/cafe/cafe_data.gd`
+- **Menu, recipes, the starting pantry, and Theo's lines** live in `scripts/cafe/cafe_data.gd`
   as plain dictionaries.
 - **Camera:** the `Camera` node (`CafeCamera`) has pitch, yaw, distance and FOV; how strongly it follows
   you side to side and front to back, how far it looks ahead, how smoothly it tracks, and the area it
@@ -206,7 +207,7 @@ the running game".
 | File | What it does |
 |---|---|
 | `scenes/cafe/cafe.tscn`, `scripts/cafe/cafe.gd` | 3D layout; runs the day (phases, arrivals, queue, tickets, the pass, seating, pay, events, pathfinding) |
-| `scripts/cafe/cafe_day.gd` | One day's state: prep actions, pantry, stock, money, stats |
+| `scripts/cafe/cafe_day.gd` | One day's state: pantry, stock, money, stats |
 | `scripts/cafe/cafe_data.gd` | Content tables |
 | `scripts/cafe/ticket.gd` | One order, from the register to the pass |
 | `scripts/cafe/customer.gd` | Queue, pickup, seated and leaving states; patience; bubbles; the regular's chat |
@@ -329,7 +330,7 @@ one) into the matching folder, and drop it onto a `Prop3D`.
    bigger pastry case, more seats) and the Furniture tab (rearranging tables and decor before opening). The
    Cats roster becomes the place to manage cats once there are more of them.
 7. **Connect to the dungeon.** Once the dungeon collects ingredients, feed the real haul into the pantry,
-   and let the night's outcome change prep (the "fewer prep actions" option in *Day-Night Connection*).
+   and let the night's outcome change the next day (still open in *Day-Night Connection*).
 8. **A cozy pass:** lamps that glow, window light, and calm open and close periods. Then dynamic music
    from the design notes: purring layers as cats settle, the tempo lifting during a rush, and rain on the
    windows.
@@ -340,6 +341,7 @@ one) into the matching folder, and drop it onto a `Prop3D`.
   already wait for free hands.)
 - How much should drink quality matter compared with speed?
 - Is 2 items the right carrying limit?
-- Do prep actions create interesting choices, or is the best choice always obvious?
+- Do pastry slots create interesting choices (which pastries to fill them with), or is the best choice
+  always obvious?
 - How often should you *need* to leave the counter? Too rarely, and the front of house is just
   decoration. Too often, and it's Diner Dash again.

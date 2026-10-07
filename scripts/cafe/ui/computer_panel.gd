@@ -144,7 +144,7 @@ func _show_tab(tab: String) -> void:
 	_tab = tab
 	for name in _tab_buttons:
 		_tab_buttons[name].button_pressed = name == tab
-	_status.text = "6:45 AM  -  Closed  -  Prep actions left: %d" % _day.prep_actions_left
+	_status.text = "6:45 AM  -  Closed"
 	_set_info("")
 	for child in _content.get_children():
 		_content.remove_child(child)
@@ -176,19 +176,19 @@ func _kitchen_page() -> void:
 		pantry.append("%s %d" % [CafeData.PANTRY_NAMES[key], _day.pantry[key]])
 	_text("From last night's dream: " + ", ".join(pantry))
 	_text("Stock: " + _stock_summary())
-	for i in CafeData.PREP_ACTIONS.size():
-		var action: Dictionary = CafeData.PREP_ACTIONS[i]
+	for i in CafeData.RECIPES.size():
+		var recipe: Dictionary = CafeData.RECIPES[i]
 		var gives := []
-		for key in action["gives"]:
-			gives.append("+%d %s" % [action["gives"][key], CafeData.STOCK_NAMES[key].to_lower()])
+		for key in recipe["gives"]:
+			gives.append("+%d %s" % [recipe["gives"][key], CafeData.STOCK_NAMES[key].to_lower()])
 		var costs := []
-		for key in action["costs"]:
-			costs.append("%d %s" % [action["costs"][key], CafeData.PANTRY_NAMES[key].to_lower()])
-		var button := _button("%s   (%s%s)" % [action["name"], ", ".join(gives),
+		for key in recipe["costs"]:
+			costs.append("%d %s" % [recipe["costs"][key], CafeData.PANTRY_NAMES[key].to_lower()])
+		var button := _button("%s   (%s%s)" % [recipe["name"], ", ".join(gives),
 			"; uses " + ", ".join(costs) if not costs.is_empty() else ""])
-		button.disabled = not _day.can_do_prep(action)
+		button.disabled = not _day.can_make(recipe)
 		button.pressed.connect(func() -> void:
-			_day.do_prep(action)
+			_day.make(recipe)
 			Audio.play("prep")
 			_refresh(i))
 

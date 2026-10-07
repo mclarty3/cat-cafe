@@ -111,7 +111,7 @@ func _process(_delta: float) -> void:
 		return
 	var day := cafe.day
 	if cafe.phase == Cafe.Phase.PREP:
-		_status.text = "$%d      Closed - morning prep (%d actions left)" % [day.coins(), day.prep_actions_left]
+		_status.text = "$%d      Closed - morning prep" % day.coins()
 	else:
 		_status.text = "$%d      Customers %d / %d" % [day.coins(), cafe.customers_arrived(), cafe.customers_per_day]
 
