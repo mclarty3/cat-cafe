@@ -32,6 +32,10 @@ Every `[DECIDED]` and `[REJECTED]` item across the design notes. Add new decisio
 | 2026-10-07 | **Croissants need no dungeon ingredients** but may cost money; other pastries unchanged | [[Cafe Gameplay]] |
 | 2026-10-07 | "Fewer prep actions" **rejected** as the night-to-day effect (no actions left to reduce) | [[Day-Night Connection]] |
 | 2026-10-07 | **Oversleeping does not lock pastry slots** the next day (rejected) | [[Day-Night Connection]] |
+| 2026-10-07 | The player **sets the day's menu** in prep; drinks have expandable **menu slots**; customers order only from the menu | [[Cafe Gameplay]] |
+| 2026-10-07 | **One pastry slot = one pastry**, any mix; the player chooses how many of each to bake | [[Cafe Gameplay]] |
+| 2026-10-07 | Dungeon ingredients go **straight into drinks** (one per drink, no syrup step); the player sets how many; plain drinks unlimited | [[Cafe Gameplay]] |
+| 2026-10-07 | Sold-out items stop being ordered; a **starting float** pays for croissants until money carries over | [[Cafe Gameplay]] |
 
 # From the seed brainstorm
 

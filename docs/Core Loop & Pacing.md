@@ -4,7 +4,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 
 ## The loop
 
-1. **Morning prep.** Fill your pastry slots (croissants cost a little money; other pastries use dungeon ingredients) and prepare drink components. Adjust the cafe: furniture, upgrades (including more pastry slots), cat management.
+1. **Morning prep.** Set the day's menu: pick the drinks (dungeon-ingredient drinks in the numbers you choose) and fill your pastry slots (croissants cost a little money; other pastries use dungeon ingredients). Adjust the cafe: furniture, upgrades (including more menu and pastry slots), cat management.
 2. **Cafe day.** Serve a small number of customers, handle cat events, and chat with regulars.
 3. **Night.** Enter the dream dungeon for a run: rescue or befriend cats, gather ingredients, and progress.
 4. **Wake up.** Return with what you banked, and the night's outcome affects the next morning.
