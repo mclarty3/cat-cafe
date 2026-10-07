@@ -115,9 +115,14 @@ func _process(_delta: float) -> void:
 	else:
 		_status.text = "$%d      Customers %d / %d" % [day.coins(), cafe.customers_arrived(), cafe.customers_per_day]
 
+	# Today's menu: counted items show what's left.
 	var stock := []
-	for key in CafeData.STOCK_NAMES:
-		stock.append("%s %d" % [CafeData.STOCK_NAMES[key], day.stock[key]])
+	for id in day.menu:
+		var left := day.left(id)
+		if left < 0:
+			stock.append(CafeData.item_name(id))
+		else:
+			stock.append("%s %s" % [CafeData.item_name(id), str(left) if left > 0 else "sold out"])
 	_stock.text = "\n".join(stock)
 
 	# The ticket rail: every open order, with what's already on the pass ticked.

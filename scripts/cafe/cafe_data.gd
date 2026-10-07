@@ -1,5 +1,5 @@
 class_name CafeData
-## Static content tables for the cafe prototype: menu, recipes, regulars.
+## Static content tables for the cafe prototype: menu items, pantry, regulars.
 ## Kept as plain dictionaries so they're quick to tweak while the design is in flux;
 ## move to Resources once the shape settles.
 
@@ -7,9 +7,11 @@ enum Quality { POOR, GOOD, PERFECT }
 
 const QUALITY_NAMES := ["Poor", "Good", "Perfect!"]
 
-## `steps`: drink minigame stages. `uses`: a stock key consumed when the item is
-## made or taken. Items without `uses` are unlimited. `model` is how it looks on
-## the pass and in your hands, optionally standing on a `base` (see ItemModel).
+## `steps`: drink minigame stages. `ingredient`: a pantry item used up, one per
+## item, when it goes on the morning menu (items without one are free to make).
+## Pastries and drinks with an ingredient are counted (they sell out); other
+## drinks are unlimited once on the menu. `model` is how it
+## looks on the pass and in your hands, optionally standing on a `base` (see ItemModel).
 const ITEMS := {
 	"espresso": {
 		"name": "Espresso", "kind": "drink", "price": 3,
@@ -24,25 +26,19 @@ const ITEMS := {
 	},
 	"honey_latte": {
 		"name": "Dream-honey Latte", "kind": "drink", "price": 7,
-		"steps": ["pull", "steam"], "uses": "honey_syrup", "color": Color(0.91, 0.72, 0.29),
+		"steps": ["pull", "steam"], "ingredient": "dream_honey", "color": Color(0.91, 0.72, 0.29),
 		"model": "res://assets/kenney/food/cup-coffee.glb", "model_scale": 0.5,
 	},
 	"croissant": {
 		"name": "Croissant", "kind": "pastry", "price": 3,
-		"uses": "croissant", "color": Color(0.88, 0.64, 0.35),
+		"color": Color(0.88, 0.64, 0.35),
 		"model": "res://assets/kenney/food/croissant.glb", "model_scale": 0.3,
 	},
 	"moon_muffin": {
 		"name": "Moonflour Muffin", "kind": "pastry", "price": 5,
-		"uses": "moon_muffin", "color": Color(0.62, 0.66, 1.0),
+		"ingredient": "moonflour", "color": Color(0.62, 0.66, 1.0),
 		"model": "res://assets/kenney/food/muffin.glb", "model_scale": 0.35,
 	},
-}
-
-const STOCK_NAMES := {
-	"croissant": "Croissants",
-	"moon_muffin": "Moon muffins",
-	"honey_syrup": "Honey syrup",
 }
 
 ## Dungeon ingredients. The prototype starts with a fake haul from "last night".
@@ -51,13 +47,6 @@ const PANTRY_NAMES := {
 	"dream_honey": "Dream honey",
 }
 const STARTING_PANTRY := {"moonflour": 2, "dream_honey": 1}
-
-## What can be made before opening. `costs` come out of the pantry.
-const RECIPES := [
-	{"name": "Bake croissants", "gives": {"croissant": 4}, "costs": {}},
-	{"name": "Bake moonflour muffins", "gives": {"moon_muffin": 3}, "costs": {"moonflour": 1}},
-	{"name": "Make dream-honey syrup", "gives": {"honey_syrup": 3}, "costs": {"dream_honey": 1}},
-]
 
 ## Confirmed personalities and their effects, from the roster in docs/Cats.md.
 ## Each effect is an icon (res://assets/ui/icons/<icon>.png) plus its description,
@@ -177,7 +166,8 @@ const FURNITURE_IDEAS := [
 ]
 const UPGRADE_IDEAS := [
 	{"name": "Second group head", "price": 120, "note": "Pull two shots at once"},
-	{"name": "Bigger pastry case", "price": 80, "note": "Bake larger batches"},
+	{"name": "Bigger pastry case", "price": 80, "note": "More pastry slots"},
+	{"name": "Bigger menu board", "price": 100, "note": "Another drink slot"},
 	{"name": "Extra table", "price": 60, "note": "More seats, fewer customers taking it to go"},
 ]
 
@@ -231,6 +221,11 @@ static func item(id: String) -> Dictionary:
 
 static func item_name(id: String) -> String:
 	return ITEMS[id]["name"]
+
+
+## Counted items sell out; the rest are unlimited once on the menu.
+static func is_counted(id: String) -> bool:
+	return ITEMS[id]["kind"] == "pastry" or ITEMS[id].has("ingredient")
 
 
 static func ids_of_kind(kind: String) -> Array[String]:

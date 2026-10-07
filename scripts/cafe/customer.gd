@@ -160,6 +160,12 @@ func _walk_out() -> void:
 	_leave()
 
 
+## At the register with nothing left on the menu: leave without ordering.
+func turn_away() -> void:
+	cafe.float_text(global_position + Vector3.UP * 1.1, "All sold out...", Color(1, 0.75, 0.5))
+	_leave()
+
+
 func _leave() -> void:
 	if is_regular() and not chatted:
 		cafe.day.missed_chats.append(CafeData.REGULARS[regular_id]["skipped"])

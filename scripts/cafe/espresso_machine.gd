@@ -12,24 +12,21 @@ func interact(barista: Barista) -> void:
 	if not barista.has_room():
 		cafe.toast("Your hands are full. Take it to the pass first.")
 		return
-	var drinks := CafeData.ids_of_kind("drink")
+	# Only what's on today's menu.
+	var drinks := CafeData.ids_of_kind("drink").filter(cafe.day.on_menu)
 	var options: Array[Dictionary] = []
 	for id in drinks:
-		var data := CafeData.item(id)
-		var text: String = data["name"]
-		var disabled := false
-		if data.has("uses"):
-			var left: int = cafe.day.stock[data["uses"]]
+		var text := CafeData.item_name(id)
+		var left := cafe.day.left(id)
+		if left >= 0:
 			text += "  (%d left)" % left
-			disabled = left <= 0
-		options.append({"text": text, "disabled": disabled})
+		options.append({"text": text, "disabled": left == 0})
 	var choice := await cafe.choose("Espresso machine", options)
 	if choice < 0:
 		return
-	var id := drinks[choice]
+	var id: String = drinks[choice]
 	var quality := await cafe.play_drink_minigame(id)
-	var uses: String = CafeData.item(id).get("uses", "")
-	if not uses.is_empty():
-		cafe.day.stock[uses] -= 1
+	if CafeData.is_counted(id):
+		cafe.day.stock[id] -= 1
 	barista.add_item(id, quality)
 	cafe.toast("%s: %s" % [CafeData.item_name(id), CafeData.QUALITY_NAMES[quality]])

@@ -86,6 +86,12 @@ const CAT_EVENTS: Array[GDScript] = [
 @export var morning_ambient_energy := 0.22
 @export var open_light_fade := 2.5
 
+@export_group("Menu")
+## How many different drinks can go on the day's menu.
+@export var drink_slots := 3
+## How many pastries fit in the case, in any mix.
+@export var pastry_slots := 8
+
 @export_group("Money")
 ## Tip per drink by quality: poor, good, perfect.
 @export var tip_per_quality: Array[int] = [0, 1, 3]
@@ -279,6 +285,8 @@ func _map_or_default(map: RID) -> RID:
 
 func _start_morning() -> void:
 	phase = Phase.PREP
+	day.drink_slots = drink_slots
+	day.pastry_slots = pastry_slots
 	_day_sun_energy = _sun.light_energy
 	_day_sun_color = _sun.light_color
 	_day_ambient_energy = _environment.ambient_light_energy
@@ -473,6 +481,12 @@ func take_order(customer: Customer, register_position: Vector3) -> void:
 	_next_ticket += 1
 	ticket.customer = customer
 	ticket.items = _create_order(customer)
+	if ticket.items.is_empty():
+		# Everything on the menu has sold out.
+		day.turned_away += 1
+		_leave_queue(customer)
+		customer.turn_away()
+		return
 	tickets.append(ticket)
 
 	var price := 0
@@ -598,26 +612,23 @@ func _create_order(customer: Customer) -> Array[String]:
 		order.append(drinks.pick_random())
 	if (randf() < pastry_order_chance or order.is_empty()) and not pastries.is_empty():
 		order.append(pastries.pick_random())
-	if order.is_empty():
-		order.append("espresso")
+	if order.is_empty() and not drinks.is_empty():
+		order.append(drinks.pick_random())
 	return order
 
 
-## How many more of an item can be promised to new orders: stock, plus any
-## already in hand or on the pass, minus what open tickets still need.
+## How many more of an item can be promised to new orders: what's left, plus
+## any already in hand, minus what open tickets still need. Only what's on
+## today's menu can be ordered.
 func _available(id: String) -> int:
-	var uses: String = CafeData.item(id).get("uses", "")
-	if uses.is_empty():
+	var left := day.left(id)
+	if left < 0:
 		return 999
-	var count: int = day.stock[uses]
-	for item_id in CafeData.ITEMS:
-		if CafeData.item(item_id).get("uses", "") != uses:
-			continue
-		count += barista.count_item(item_id)
-		for ticket in tickets:
-			# Items already on the pass have left stock; only the rest are owed.
-			var placed := ticket.on_pass.filter(func(it: Dictionary) -> bool: return it["id"] == item_id).size()
-			count -= ticket.items.count(item_id) - placed
+	var count := left + barista.count_item(id)
+	for ticket in tickets:
+		# Items already on the pass have left stock; only the rest are owed.
+		var placed := ticket.on_pass.filter(func(it: Dictionary) -> bool: return it["id"] == id).size()
+		count -= ticket.items.count(id) - placed
 	return count
 
 
@@ -872,16 +883,17 @@ func debug_spawn_customer() -> void:
 func debug_complete_orders() -> void:
 	for ticket in tickets:
 		for id in ticket.remaining():
-			var uses: String = CafeData.item(id).get("uses", "")
-			if not uses.is_empty() and day.stock.get(uses, 0) > 0:
-				day.stock[uses] -= 1
+			if day.stock.get(id, 0) > 0:
+				day.stock[id] -= 1
 			ticket.on_pass.append({"id": id, "quality": CafeData.Quality.GOOD})
 	_pass.refresh(tickets)
 
 
+## Adds to every counted item on the menu (free: no ingredients or money).
 func debug_add_stock(amount: int) -> void:
-	for key in day.stock:
-		day.stock[key] += amount
+	for id in day.menu:
+		if CafeData.is_counted(id):
+			day.stock[id] += amount
 
 
 func debug_end_day() -> void:

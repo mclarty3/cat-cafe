@@ -54,11 +54,19 @@ the running game".
    dimmer, there are no customers, and Mochi is about. The counter stations are off until you open.
    Everything happens at the **register's computer**, the same till you take orders on later, which
    runs **CafeOS** before opening. The header always shows the time, and a green **Open the
-   cafe** button sits in the sidebar, so you can open up from any page. The pages are:
-   - **Kitchen** (the page it opens on): bake croissants (+4), bake moonflour muffins (+3, uses 1 moonflour)
-     or make dream-honey syrup (+3 honey lattes, uses 1 dream honey). The pantry starts with 2
-     moonflour and 1 dream honey. There's no limit on prep actions anymore, so for now croissants are
-     unlimited; pastry slots will cap them next.
+   cafe** button sits in the sidebar, so you can open up from any page (it stays greyed out until
+   something is on the menu). The pages are:
+   - **Menu** (the page it opens on): set today's menu. The pantry starts with 2 moonflour and 1
+     dream honey.
+     - **Drinks** (3 slots): tick which drinks to offer. Espresso and latte are unlimited once on. The
+       dream-honey latte uses **1 dream honey per drink**, so it gets a [-] count [+] stepper to choose
+       how many to offer.
+     - **Pastry case** (8 slots, any mix): a stepper per pastry. Croissants are **free** to bake;
+       moonflour muffins use **1 moonflour each**.
+     - Lowering a count gives the ingredient back, so the menu can be changed freely until
+       opening. Ticking an ingredient drink puts 1 on straight away (greyed out with none of its
+       ingredient left), and lowering anything to 0 takes it off the menu, so everything on the menu
+       can actually be sold.
    - **Cats:** a roster of compact cards, two per row. Each card shows the cat's colour, **name** and
      **personality**, plus a row of icons grouped under **Cafe** and **Dream** (for example, Curious has a
      coin and a wall). Cafe icons are **green** for benefits and **red** for drawbacks (Playful's
@@ -80,13 +88,17 @@ the running game".
      it to go if every table is taken).
    - Customers walk out if they wait too long, either in line or at pickup. They don't get a refund,
      but there's no tip either.
-3. **Closing.** A results screen shows customers served, walkouts, sales, tips, how each cat event went, and chats.
+   - The top-right readout lists today's menu with what's left of each counted item ("sold out" at 0).
+     If everything has sold out, a customer reaching the register leaves without ordering ("All sold
+     out...").
+3. **Closing.** A results screen shows customers served, walkouts (and anyone who left because
+   everything sold out), sales, tips, how each cat event went, and chats.
    From there you can start another day or go back to the title.
 
 ### Pieces
 
 - **Register:** takes the order of whoever is at the front of the line.
-- **Espresso machine:** choose a drink, then play the minigame.
+- **Espresso machine:** choose a drink from today's menu, then play the minigame.
   - Each drink opens with a one-second lead-in (`lead_in`): the gauge shows and the grinder runs, but nothing
     moves yet and presses are ignored.
   - *Pull:* stop the pressure gauge's sweeping needle in the green, while the cup fills under the portafilter.
@@ -96,13 +108,13 @@ the running game".
     click rises in pitch the closer you were. Sparkles scale with quality, and the finished drink is shown
     at the end, with latte art on a Perfect.
   - The drink's quality is its worst step (Poor / Good / Perfect), which sets the tip.
-- **Pastry case:** take a baked pastry. Stock only comes from morning prep.
+- **Pastry case:** take a pastry from today's menu. Stock only comes from morning prep.
 - **Pass:** put down what you're carrying. Items waiting for pickup show on the counter as little models.
 - **Bin:** throw away what you're holding if you made the wrong thing.
-- **Orders only use what you can make.** Customers don't order sold-out items. Stock in your hands or on
+- **Orders only use what you can make.** Customers order only from today's menu, and not sold-out items. Stock in your hands or on
   the pass, and items already owed to open tickets, are all counted.
-- **Theo (a regular):** greets you at the register and orders his favourite (a honey latte if there's
-  syrup, otherwise a latte). Then he sits down and shows a speech bubble. Walk out from behind the counter
+- **Theo (a regular):** greets you at the register and orders his favourite (a honey latte if any
+  are left, otherwise a latte if it's on the menu). Then he sits down and shows a speech bubble. Walk out from behind the counter
   to chat: a short 2-choice conversation, during which he won't leave. If you skip it, the results say
   he'll bring it up next visit ("optional but never missable").
 - **Eight resident cats**, covering all six confirmed personalities (with a second Lazy and a second
@@ -166,12 +178,12 @@ the running game".
   `Morning` group on the `Cafe` root node.
 - **Day, customer and money numbers** are exported on the `Cafe` root node (`scripts/cafe/cafe.gd`):
   customers per day, arrival gaps, queue and pickup patience, how long people sit, and tip amounts.
-  Character scale and sitting height are there too.
+  Character scale and sitting height are there too. The `Menu` group holds the drink and pastry slots.
 - **Cat events** are the `Cat events` group on the `Cafe` root node: how many a day, the time window and
   spacing, and each event's timers and effects. The mug and curtain costs are under `Money`.
 - **How much you can carry** is `carry_capacity` on the `Barista`.
 - **Minigame speed and zone sizes** are on `DrinkMinigame` (`scripts/cafe/ui/drink_minigame.gd`).
-- **Menu, recipes, the starting pantry, and Theo's lines** live in `scripts/cafe/cafe_data.gd`
+- **Menu items (prices, ingredients), the starting pantry, and Theo's lines** live in `scripts/cafe/cafe_data.gd`
   as plain dictionaries.
 - **Camera:** the `Camera` node (`CafeCamera`) has pitch, yaw, distance and FOV; how strongly it follows
   you side to side and front to back, how far it looks ahead, how smoothly it tracks, and the area it
@@ -207,7 +219,7 @@ the running game".
 | File | What it does |
 |---|---|
 | `scenes/cafe/cafe.tscn`, `scripts/cafe/cafe.gd` | 3D layout; runs the day (phases, arrivals, queue, tickets, the pass, seating, pay, events, pathfinding) |
-| `scripts/cafe/cafe_day.gd` | One day's state: pantry, stock, money, stats |
+| `scripts/cafe/cafe_day.gd` | One day's state: the menu and its slots, pantry, stock, money, stats |
 | `scripts/cafe/cafe_data.gd` | Content tables |
 | `scripts/cafe/ticket.gd` | One order, from the register to the pass |
 | `scripts/cafe/customer.gd` | Queue, pickup, seated and leaving states; patience; bubbles; the regular's chat |
@@ -225,7 +237,7 @@ the running game".
 | `scripts/cafe/overlay_anchor.gd` | 2D drawing pinned above a 3D node (bubbles, bars, names) |
 | `scripts/cafe/cafe_camera.gd` | The perspective follow camera, plus focus easing |
 | `scripts/autoload/audio.gd` (`Audio`) | Music playlist and named sound effects (one-shots and loops), on the Music and SFX buses |
-| `scripts/cafe/ui/computer_panel.gd` | CafeOS: the morning hub (Kitchen, Cats, Furniture, Upgrades, and opening up) |
+| `scripts/cafe/ui/computer_panel.gd` | CafeOS: the morning hub (Menu, Cats, Furniture, Upgrades, and opening up) |
 | `scripts/cafe/ui/*` | HUD (status, goal line, ticket rail, what you're carrying), choice menu, minigame, dialogue, and results panels |
 
 ### Verified
@@ -326,8 +338,8 @@ one) into the matching folder, and drop it onto a `Prop3D`.
    cafe effects from the design notes: Lazy calms impatient people in the queue, Curious finds dropped
    coins, Nocturnal draws superstitious customers, Hunter handles a "mouse in the kitchen" event, and so
    on. This also tests the matchmaking idea.
-6. **Fill in CafeOS:** carry money between days, then make the Upgrades tab real (a second group head, a
-   bigger pastry case, more seats) and the Furniture tab (rearranging tables and decor before opening). The
+6. **Fill in CafeOS:** carry money between days, then make the Upgrades
+   tab real (a second group head, more pastry slots, more drink slots, more seats) and the Furniture tab (rearranging tables and decor before opening). The
    Cats roster becomes the place to manage cats once there are more of them.
 7. **Connect to the dungeon.** Once the dungeon collects ingredients, feed the real haul into the pantry,
    and let the night's outcome change the next day (still open in *Day-Night Connection*).

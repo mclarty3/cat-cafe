@@ -37,8 +37,10 @@ func run(day: CafeDay) -> bool:
 	var lines := [
 		"Customers served: %d" % day.served,
 		"Walked out: %d" % day.walked_out,
-		"Sales: $%d    Tips: $%d" % [day.earnings, day.tips],
 	]
+	if day.turned_away > 0:
+		lines.append("Left because everything sold out: %d" % day.turned_away)
+	lines.append("Sales: $%d    Tips: $%d" % [day.earnings, day.tips])
 	lines.append_array(day.cat_events)
 	lines.append("Total: $%d" % day.coins())
 	for chat in day.chats:

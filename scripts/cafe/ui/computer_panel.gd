@@ -9,7 +9,7 @@ extends PanelContainer
 
 signal _closed(open_cafe: bool)
 
-const TABS := ["Kitchen", "Cats", "Furniture", "Upgrades"]
+const TABS := ["Menu", "Cats", "Furniture", "Upgrades"]
 const ACCENT := Color(1, 0.85, 0.6)
 const DIM := Color(1, 1, 1, 0.55)
 const OPEN_COLOR := Color(0.27, 0.45, 0.3)
@@ -22,8 +22,9 @@ const DREAM_ICON_COLOR := Color(0.75, 0.68, 1)
 const ICON_DIR := "res://assets/ui/icons/"
 
 var _day: CafeDay
-var _tab := "Kitchen"
+var _tab := "Menu"
 var _tab_buttons := {}
+var _open_button: Button
 var _content: VBoxContainer
 var _status: Label
 ## Line pinned under the page (outside the scrolling area): details for
@@ -73,12 +74,12 @@ func _ready() -> void:
 	var sidebar_spacer := Control.new()
 	sidebar_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	sidebar.add_child(sidebar_spacer)
-	var open := Button.new()
-	open.text = "Open the cafe"
-	_style_open_button(open)
-	open.pressed.connect(_close.bind(true))
-	open.focus_entered.connect(Audio.play.bind("ui_move"))
-	sidebar.add_child(open)
+	_open_button = Button.new()
+	_open_button.text = "Open the cafe"
+	_style_open_button(_open_button)
+	_open_button.pressed.connect(_close.bind(true))
+	_open_button.focus_entered.connect(Audio.play.bind("ui_move"))
+	sidebar.add_child(_open_button)
 	var close := Button.new()
 	close.text = "Log off"
 	close.pressed.connect(_close.bind(false))
@@ -110,10 +111,10 @@ func _ready() -> void:
 
 func run(day: CafeDay) -> bool:
 	_day = day
-	_show_tab("Kitchen")
+	_show_tab("Menu")
 	Audio.play("ui_open")
 	show()
-	_tab_buttons["Kitchen"].grab_focus.call_deferred()
+	_tab_buttons["Menu"].grab_focus.call_deferred()
 	var open_cafe: bool = await _closed
 	hide()
 	return open_cafe
@@ -145,13 +146,15 @@ func _show_tab(tab: String) -> void:
 	for name in _tab_buttons:
 		_tab_buttons[name].button_pressed = name == tab
 	_status.text = "6:45 AM  -  Closed"
+	# Nothing to sell, nothing to open for.
+	_open_button.disabled = _day.menu.is_empty()
 	_set_info("")
 	for child in _content.get_children():
 		_content.remove_child(child)
 		child.queue_free()
 	match tab:
-		"Kitchen":
-			_kitchen_page()
+		"Menu":
+			_menu_page()
 		"Cats":
 			_cats_page()
 		"Furniture":
@@ -169,28 +172,76 @@ func _refresh(focus_index := -1) -> void:
 			(buttons[focus_index] as Button).grab_focus.call_deferred()
 
 
-func _kitchen_page() -> void:
-	_heading("Kitchen")
+## Today's menu: tick the drinks to offer (up to the drink slots), and set how
+## many of each pastry to bake (up to the pastry slots) and of each
+## dream-ingredient drink to offer. Ingredients come back if you lower a count,
+## so it can be changed freely until opening.
+func _menu_page() -> void:
+	_heading("Today's menu")
 	var pantry := []
 	for key in CafeData.PANTRY_NAMES:
 		pantry.append("%s %d" % [CafeData.PANTRY_NAMES[key], _day.pantry[key]])
 	_text("From last night's dream: " + ", ".join(pantry))
-	_text("Stock: " + _stock_summary())
-	for i in CafeData.RECIPES.size():
-		var recipe: Dictionary = CafeData.RECIPES[i]
-		var gives := []
-		for key in recipe["gives"]:
-			gives.append("+%d %s" % [recipe["gives"][key], CafeData.STOCK_NAMES[key].to_lower()])
-		var costs := []
-		for key in recipe["costs"]:
-			costs.append("%d %s" % [recipe["costs"][key], CafeData.PANTRY_NAMES[key].to_lower()])
-		var button := _button("%s   (%s%s)" % [recipe["name"], ", ".join(gives),
-			"; uses " + ", ".join(costs) if not costs.is_empty() else ""])
-		button.disabled = not _day.can_make(recipe)
-		button.pressed.connect(func() -> void:
-			_day.make(recipe)
-			Audio.play("prep")
-			_refresh(i))
+
+	_subheading("Drinks", "%d / %d slots" % [_day.drinks_on_menu(), _day.drink_slots])
+	for id in CafeData.ids_of_kind("drink"):
+		var row := _row()
+		var check := CheckBox.new()
+		check.text = "%s   $%d" % [CafeData.item_name(id), CafeData.item(id)["price"]]
+		check.button_pressed = _day.on_menu(id)
+		check.disabled = not _day.can_toggle_drink(id)
+		check.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		check.focus_entered.connect(Audio.play.bind("ui_move"))
+		row.add_child(check)
+		_on_press(check, _day.toggle_drink.bind(id))
+		if CafeData.is_counted(id) and _day.on_menu(id):
+			_stepper(row, id)
+		_note(row, _item_note(id))
+
+	_subheading("Pastry case", "%d / %d slots" % [_day.pastries_baked(), _day.pastry_slots])
+	for id in CafeData.ids_of_kind("pastry"):
+		var row := _row()
+		var label := Label.new()
+		label.text = "%s   $%d" % [CafeData.item_name(id), CafeData.item(id)["price"]]
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+		_stepper(row, id)
+		_note(row, _item_note(id))
+
+	if _day.menu.is_empty():
+		_set_info("[color=#ffffff88]Put something on the menu before opening.[/color]")
+
+
+## What it takes to make one: an ingredient, or nothing.
+func _item_note(id: String) -> String:
+	var data := CafeData.item(id)
+	if data.has("ingredient"):
+		return "1 %s each" % CafeData.PANTRY_NAMES[data["ingredient"]].to_lower()
+	return "free to bake" if data["kind"] == "pastry" else "unlimited"
+
+
+## [-] count [+] for a counted item.
+func _stepper(row: HBoxContainer, id: String) -> void:
+	var minus := _small_button(row, "-")
+	minus.disabled = not _day.can_remove_one(id)
+	_on_press(minus, _day.remove_one.bind(id))
+	var count := Label.new()
+	count.text = str(_day.stock[id])
+	count.custom_minimum_size = Vector2(18, 0)
+	count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(count)
+	var plus := _small_button(row, "+")
+	plus.disabled = not _day.can_add_one(id)
+	_on_press(plus, _day.add_one.bind(id))
+
+
+## Pressing runs `change`, then rebuilds the page with this button still focused.
+func _on_press(button: Button, change: Callable) -> void:
+	button.pressed.connect(func() -> void:
+		var index := _content.find_children("*", "Button", true, false).find(button)
+		change.call()
+		Audio.play("prep")
+		_refresh(index))
 
 
 ## The roster of cats living in the cafe, as compact cards: name and
@@ -328,19 +379,51 @@ func _style_open_button(button: Button) -> void:
 		button.add_theme_stylebox_override(state, box)
 
 
-func _stock_summary() -> String:
-	var parts := []
-	for key in CafeData.STOCK_NAMES:
-		parts.append("%s %d" % [CafeData.STOCK_NAMES[key], _day.stock[key]])
-	return ", ".join(parts)
-
-
 func _heading(text: String) -> void:
 	var label := Label.new()
 	label.text = text
 	label.modulate = ACCENT
 	label.add_theme_font_size_override("font_size", 13)
 	_content.add_child(label)
+
+
+## A section title with a dim count on the right.
+func _subheading(text: String, count: String) -> void:
+	var row := _row()
+	var label := Label.new()
+	label.text = text
+	label.modulate = ACCENT
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(label)
+	var right := Label.new()
+	right.text = count
+	right.modulate = DIM
+	row.add_child(right)
+
+
+func _row() -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	_content.add_child(row)
+	return row
+
+
+func _note(row: HBoxContainer, text: String) -> void:
+	var label := Label.new()
+	label.text = text
+	label.modulate = DIM
+	label.custom_minimum_size = Vector2(110, 0)
+	label.add_theme_font_size_override("font_size", 9)
+	row.add_child(label)
+
+
+func _small_button(row: HBoxContainer, text: String) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(20, 0)
+	button.focus_entered.connect(Audio.play.bind("ui_move"))
+	row.add_child(button)
+	return button
 
 
 func _text(text: String, color := Color.WHITE) -> void:
