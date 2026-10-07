@@ -31,6 +31,7 @@ Every `[DECIDED]` and `[REJECTED]` item across the design notes. Add new decisio
 | 2026-10-07 | **No finite prep actions**; pastries limited by upgradeable **pastry slots** instead | [[Cafe Gameplay]] |
 | 2026-10-07 | **Croissants need no dungeon ingredients** but may cost money; other pastries unchanged | [[Cafe Gameplay]] |
 | 2026-10-07 | "Fewer prep actions" **rejected** as the night-to-day effect (no actions left to reduce) | [[Day-Night Connection]] |
+| 2026-10-07 | **Oversleeping does not lock pastry slots** the next day (rejected) | [[Day-Night Connection]] |
 
 # From the seed brainstorm
 
