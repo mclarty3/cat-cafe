@@ -25,7 +25,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 - `[DECIDED]` The prep phase is also when you **modify the cafe**: rearrange furniture, buy upgrades, manage cats.
 - `[DECIDED]` (2026-10-07) **No finite prep actions.** Prep is no longer a fixed budget of actions (bake a batch, make a syrup, rearrange, groom a cat). *(Supersedes the earlier prep-actions idea.)*
 - `[DECIDED]` (2026-10-07) **Pastries are limited by pastry slots**, like the limited space in a real pastry case, instead of by actions. The number of slots can be **upgraded later**.
-- `[DECIDED]` (2026-10-07) **Croissants need no dungeon ingredients**, but may **cost some money** to make. Other pastries that need ingredients are unchanged.
+- `[DECIDED]` (2026-10-07) **Croissants are free to make**: no dungeon ingredients and no money. Pastries that need an ingredient cost only that ingredient, never money. *(Supersedes "croissants may cost some money", same day.)*
 
 ### The day's menu
 - `[DECIDED]` (2026-10-07) **The player sets the day's menu during prep**: which drinks and pastries are offered. Customers order only from that menu.
@@ -34,8 +34,8 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 - `[DECIDED]` (2026-10-07) **Dungeon ingredients go straight into drinks**, one ingredient per drink, with no in-between step (the prototype's dream-honey syrup is gone). The player chooses **how many** of each ingredient drink to put on the menu, so they don't have to use up all their ingredients.
 - `[DECIDED]` (2026-10-07) Drinks that use no dungeon ingredient (espresso, latte) are **unlimited** once on the menu.
 - `[DECIDED]` (2026-10-07) When a menu item runs out, it shows as **sold out** and new customers stop ordering it.
-- `[DECIDED]` (2026-10-07) For now the prototype gives a **starting float** to pay for croissants, since money doesn't carry between days yet.
-- `[OPEN]` Starting slot counts and how far upgrades go; what a croissant costs; whether prep still has any time limit at all.
+- `[REJECTED]` (2026-10-07) ~~A **starting float** to pay for croissants.~~ Not needed now that croissants are free.
+- `[OPEN]` Starting slot counts and how far upgrades go; whether prep still has any time limit at all.
 - `[OPEN]` Whether customers sometimes don't want what's on the menu (mainly regulars), and leave if nothing suits them. For now everyone orders from the menu.
 - `[PROPOSED]` Rare dungeon ingredients, such as moonflour and dream honey.
 
