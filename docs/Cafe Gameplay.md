@@ -7,6 +7,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 - `[DECIDED]` Each customer's **order is prepared by the player**, and an order may or may not include coffee or another drink.
 - `[DECIDED]` **Minigames** for making coffee and drinks, but the game should not be entirely minigames.
 - `[PROPOSED]` Drink minigame ideas: timing the espresso pull; steaming milk by listening for the right sound; latte art tracing (possibly cat faces) as an optional skill challenge. Keep each one to about 10 seconds.
+- `[PROPOSED]` (2026-10-07, Ryan; prototyped) **A drizzle step for drinks with a dream ingredient** (the dream-honey latte), after pull and steam: like grinding in Tony Hawk, the ingredient pours while a marker drifts along a balance bar and the player keeps it in the green with Left/Right. Hitting either end spills it.
 
 ## Service model
 *Settled through the cafe prototype, 2026-10-01.*
@@ -17,6 +18,7 @@ Part of [[- Overview|Cat Cafe Dungeon Crawler]] · status tags: see the legend i
 - `[DECIDED]` (2026-10-01) **The player physically carries drinks and pastries to the pass**, and no further. Customers take their own order from the pass.
 - `[DECIDED]` (2026-10-01) **Taking an order is a single button press** at the register, not a minigame.
 - `[DECIDED]` (2026-10-01) **No bussing for now:** everything is served in to-go cups.
+- `[PROPOSED]` (2026-10-07, Ryan; prototyped) Seated customers **visibly drink and eat** their order over their stay, then **drop the empty cup in a bin by the door** on the way out (so there's still no bussing). Customers taking it to go carry it out.
 - `[PROPOSED]` Cat events wait until the player isn't in a menu, minigame or chat, so they're a choice rather than bad luck. In the prototype, losing a mug while making a drink felt unfair.
 - `[PROPOSED]` Pacing from playtests: about 5 customers, roughly 20 seconds apart, felt right for an early day. 7 customers, 8–14 seconds apart, felt like mid-game: about the limit without staff.
 
